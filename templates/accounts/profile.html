@@ -1,0 +1,891 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}الملف الشخصي - TIVE{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-section {
+        padding-top: 8rem;
+        padding-bottom: 4rem;
+        background-color: var(--off-white);
+        min-height: 100vh;
+    }
+    
+    .profile-container {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 2rem;
+    }
+    
+    /* الشريط الجانبي */
+    .profile-sidebar {
+        background-color: var(--pure-white);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+        height: fit-content;
+        position: sticky;
+        top: 100px;
+    }
+    
+    .profile-info {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--light-gray);
+    }
+    
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        color: white;
+        font-size: 2.5rem;
+        font-weight: 300;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .profile-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .profile-name {
+        font-size: 1.3rem;
+        font-weight: 300;
+        margin-bottom: 0.25rem;
+        color: var(--dark-gray);
+    }
+    
+    .profile-email {
+        font-size: 0.9rem;
+        color: var(--text-light);
+        margin-bottom: 0.5rem;
+    }
+    
+    .profile-type {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        background: rgba(255, 183, 197, 0.1);
+        color: var(--dark-gray);
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 300;
+    }
+    
+    .profile-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .profile-menu-item {
+        margin-bottom: 0.5rem;
+    }
+    
+    .profile-menu-link {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem 1rem;
+        color: var(--text-gray);
+        text-decoration: none;
+        border-radius: var(--radius-md);
+        transition: all 0.2s ease;
+    }
+    
+    .profile-menu-link:hover,
+    .profile-menu-link.active {
+        background-color: rgba(255, 183, 197, 0.05);
+        color: var(--dark-gray);
+    }
+    
+    .profile-menu-link i {
+        width: 20px;
+        text-align: center;
+        color: var(--text-light);
+    }
+    
+    .profile-menu-link.active i {
+        color: var(--primary-pastel);
+    }
+    
+    .menu-badge {
+        margin-right: auto;
+        background: var(--primary-pastel);
+        color: var(--dark-gray);
+        font-size: 0.7rem;
+        padding: 0.1rem 0.5rem;
+        border-radius: 10px;
+    }
+    
+    /* المحتوى الرئيسي */
+    .profile-content {
+        background-color: var(--pure-white);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    }
+    
+    .profile-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--light-gray);
+    }
+    
+    .content-title {
+        font-size: 1.5rem;
+        font-weight: 300;
+        color: var(--dark-gray);
+        margin: 0;
+    }
+    
+    .profile-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background-color: var(--off-white);
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        color: white;
+        font-size: 1.2rem;
+    }
+    
+    .stat-value {
+        font-size: 1.8rem;
+        font-weight: 300;
+        margin-bottom: 0.25rem;
+        color: var(--dark-gray);
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        color: var(--text-light);
+    }
+    
+    /* نماذج التعديل */
+    .profile-form {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .form-section {
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--light-gray);
+    }
+    
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    
+    .section-title {
+        font-size: 1.2rem;
+        font-weight: 300;
+        margin-bottom: 1.5rem;
+        color: var(--dark-gray);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .section-title i {
+        color: var(--primary-pastel);
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+        display: block;
+        font-size: 0.9rem;
+        font-weight: 300;
+        color: var(--text-gray);
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--medium-gray);
+        border-radius: var(--radius-md);
+        background-color: var(--pure-white);
+        font-size: 1rem;
+        font-weight: 300;
+        color: var(--dark-gray);
+        transition: all 0.2s ease;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-pastel);
+        box-shadow: 0 0 0 3px rgba(255, 183, 197, 0.1);
+    }
+    
+    /* الطلبات */
+    .orders-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .order-card {
+        background-color: var(--off-white);
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+    }
+    
+    .order-card:hover {
+        border-color: var(--primary-pastel);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--light-gray);
+    }
+    
+    .order-number {
+        font-weight: 300;
+        color: var(--primary-pastel);
+        text-decoration: none;
+    }
+    
+    .order-number:hover {
+        text-decoration: underline;
+    }
+    
+    .order-date {
+        font-size: 0.9rem;
+        color: var(--text-light);
+    }
+    
+    .order-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 300;
+    }
+    
+    .status-pending {
+        background: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+    }
+    
+    .status-confirmed {
+        background: rgba(0, 123, 255, 0.1);
+        color: #007bff;
+    }
+    
+    .status-shipped {
+        background: rgba(23, 162, 184, 0.1);
+        color: #17a2b8;
+    }
+    
+    .status-delivered {
+        background: rgba(40, 167, 69, 0.1);
+        color: #28a745;
+    }
+    
+    .order-items {
+        margin-bottom: 1rem;
+    }
+    
+    .order-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .order-item:last-child {
+        border-bottom: none;
+    }
+    
+    .order-item-image {
+        width: 60px;
+        height: 60px;
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+    
+    .order-item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .order-item-info {
+        flex: 1;
+    }
+    
+    .order-item-name {
+        font-weight: 300;
+        margin-bottom: 0.25rem;
+        color: var(--dark-gray);
+    }
+    
+    .order-item-meta {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.9rem;
+        color: var(--text-light);
+    }
+    
+    .order-total {
+        text-align: left;
+        font-weight: 300;
+        color: var(--primary-pastel);
+        font-size: 1.2rem;
+    }
+    
+    .order-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    /* المفضلة */
+    .wishlist-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .wishlist-card {
+        background-color: var(--off-white);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+    }
+    
+    .wishlist-card:hover {
+        border-color: var(--primary-pastel);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    
+    .wishlist-image {
+        height: 200px;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .wishlist-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.6s ease;
+    }
+    
+    .wishlist-card:hover .wishlist-image img {
+        transform: scale(1.05);
+    }
+    
+    .wishlist-info {
+        padding: 1.5rem;
+    }
+    
+    .wishlist-name {
+        font-weight: 300;
+        margin-bottom: 0.5rem;
+        color: var(--dark-gray);
+    }
+    
+    .wishlist-price {
+        font-weight: 300;
+        color: var(--primary-pastel);
+        margin-bottom: 1rem;
+    }
+    
+    /* الحالة الفارغة */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+    
+    .empty-icon {
+        width: 80px;
+        height: 80px;
+        background: rgba(255, 183, 197, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        color: var(--primary-pastel);
+        font-size: 2rem;
+    }
+    
+    .empty-title {
+        font-size: 1.5rem;
+        font-weight: 300;
+        margin-bottom: 1rem;
+        color: var(--dark-gray);
+    }
+    
+    .empty-description {
+        color: var(--text-gray);
+        margin-bottom: 2rem;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    /* الإشعارات */
+    .notifications-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .notification-card {
+        background-color: var(--off-white);
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        border-right: 3px solid transparent;
+    }
+    
+    .notification-card.unread {
+        border-right-color: var(--primary-pastel);
+        background-color: rgba(255, 183, 197, 0.05);
+    }
+    
+    .notification-card:hover {
+        transform: translateX(-5px);
+    }
+    
+    .notification-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .notification-title {
+        font-weight: 300;
+        color: var(--dark-gray);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .notification-title i {
+        color: var(--primary-pastel);
+    }
+    
+    .notification-time {
+        font-size: 0.8rem;
+        color: var(--text-light);
+    }
+    
+    .notification-message {
+        color: var(--text-gray);
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+    
+    /* تحسينات للاستجابة */
+    @media (max-width: 1024px) {
+        .profile-container {
+            grid-template-columns: 250px 1fr;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .profile-container {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        .profile-sidebar {
+            position: static;
+        }
+        
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .wishlist-grid {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .profile-stats {
+            grid-template-columns: 1fr;
+        }
+        
+        .order-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+        
+        .order-actions {
+            width: 100%;
+            justify-content: flex-end;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="profile-section">
+    <div class="container">
+        <div class="profile-container">
+            <!-- الشريط الجانبي -->
+            <div class="profile-sidebar">
+                <div class="profile-info">
+                    <div class="profile-avatar">
+                        {% if user.profile.avatar %}
+                            <img src="{{ user.profile.avatar.url }}" alt="{{ user.get_full_name }}">
+                        {% else %}
+                            {{ user.first_name|first|default:user.username|first }}
+                        {% endif %}
+                    </div>
+                    <h3 class="profile-name">{{ user.get_full_name|default:user.username }}</h3>
+                    <div class="profile-email">{{ user.email }}</div>
+                    <div class="profile-type">
+                        <i class="fas fa-crown me-1"></i>
+                        {{ user.profile.get_user_type_display }}
+                    </div>
+                </div>
+                
+                <ul class="profile-menu">
+                    <li class="profile-menu-item">
+                        <a href="#overview" class="profile-menu-link active" data-tab="overview">
+                            <i class="fas fa-chart-line"></i>
+                            <span>نظرة عامة</span>
+                        </a>
+                    </li>
+                    <li class="profile-menu-item">
+                        <a href="#edit" class="profile-menu-link" data-tab="edit">
+                            <i class="fas fa-user-edit"></i>
+                            <span>تعديل الملف</span>
+                        </a>
+                    </li>
+                    <li class="profile-menu-item">
+                        <a href="{% url 'order_list' %}" class="profile-menu-link">
+                            <i class="fas fa-box"></i>
+                            <span>طلباتي</span>
+                            {% if orders_count > 0 %}
+                            <span class="menu-badge">{{ orders_count }}</span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    <li class="profile-menu-item">
+                        <a href="{% url 'wishlist' %}" class="profile-menu-link">
+                            <i class="fas fa-heart"></i>
+                            <span>المفضلة</span>
+                            {% if wishlist_count > 0 %}
+                            <span class="menu-badge">{{ wishlist_count }}</span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    <li class="profile-menu-item">
+                        <a href="{% url 'addresses' %}" class="profile-menu-link">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>عناويني</span>
+                        </a>
+                    </li>
+                    <li class="profile-menu-item">
+                        <a href="{% url 'notifications' %}" class="profile-menu-link">
+                            <i class="fas fa-bell"></i>
+                            <span>الإشعارات</span>
+                            {% if notifications_count > 0 %}
+                            <span class="menu-badge">{{ notifications_count }}</span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    {% if user.profile.user_type == 'admin' or user.is_staff %}
+                    <li class="profile-menu-item">
+                        <a href="{% url 'dashboard' %}" class="profile-menu-link">
+                            <i class="fas fa-chart-pie"></i>
+                            <span>لوحة التحكم</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                    <li class="profile-menu-item">
+                        <a href="{% url 'logout' %}" class="profile-menu-link text-danger">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>تسجيل خروج</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- المحتوى الرئيسي -->
+            <div class="profile-content">
+                <div class="profile-header">
+                    <h2 class="content-title" id="contentTitle">نظرة عامة</h2>
+                </div>
+
+                <!-- نظرة عامة -->
+                <div class="tab-content active" id="overviewTab">
+                    <div class="profile-stats">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-shopping-bag"></i>
+                            </div>
+                            <div class="stat-value">{{ orders_count|default:"0" }}</div>
+                            <div class="stat-label">الطلبات</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-heart"></i>
+                            </div>
+                            <div class="stat-value">{{ wishlist_count|default:"0" }}</div>
+                            <div class="stat-label">في المفضلة</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <div class="stat-value">{{ user.date_joined|date:"Y/m/d" }}</div>
+                            <div class="stat-label">تاريخ الانضمام</div>
+                        </div>
+                    </div>
+
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <h4 class="section-title">
+                                <i class="fas fa-info-circle"></i>
+                                معلومات الحساب
+                            </h4>
+                            <ul class="info-list">
+                                <li class="info-item">
+                                    <span class="info-label">اسم المستخدم:</span>
+                                    <span class="info-value">{{ user.username }}</span>
+                                </li>
+                                <li class="info-item">
+                                    <span class="info-label">البريد الإلكتروني:</span>
+                                    <span class="info-value">{{ user.email }}</span>
+                                </li>
+                                <li class="info-item">
+                                    <span class="info-label">رقم الهاتف:</span>
+                                    <span class="info-value">{{ user.profile.phone|default:"غير محدد" }}</span>
+                                </li>
+                                <li class="info-item">
+                                    <span class="info-label">المدينة:</span>
+                                    <span class="info-value">{{ user.profile.city|default:"غير محدد" }}</span>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="info-card">
+                            <h4 class="section-title">
+                                <i class="fas fa-shipping-fast"></i>
+                                آخر الطلبات
+                            </h4>
+                            {% if recent_orders %}
+                                {% for order in recent_orders|slice:":3" %}
+                                <div class="order-item-small">
+                                    <div class="d-flex justify-content-between">
+                                        <a href="{% url 'order_detail' order.id %}" class="text-decoration-none">
+                                            #{{ order.order_number }}
+                                        </a>
+                                        <span class="badge status-{{ order.status }}">
+                                            {{ order.get_status_display }}
+                                        </span>
+                                    </div>
+                                    <small class="text-muted">{{ order.created_at|date:"Y/m/d" }}</small>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-muted">لا توجد طلبات سابقة</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- تعديل الملف -->
+                <div class="tab-content" id="editTab">
+                    <form method="post" class="profile-form" id="profileForm">
+                        {% csrf_token %}
+                        
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-user"></i>
+                                المعلومات الشخصية
+                            </h3>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">الاسم الأول</label>
+                                    {{ u_form.first_name }}
+                                    {% if u_form.first_name.errors %}
+                                    <div class="error-message">{{ u_form.first_name.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">اسم العائلة</label>
+                                    {{ u_form.last_name }}
+                                    {% if u_form.last_name.errors %}
+                                    <div class="error-message">{{ u_form.last_name.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">البريد الإلكتروني</label>
+                                {{ u_form.email }}
+                                {% if u_form.email.errors %}
+                                <div class="error-message">{{ u_form.email.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-phone"></i>
+                                معلومات الاتصال
+                            </h3>
+                            
+                            <div class="form-group">
+                                <label class="form-label">رقم الهاتف</label>
+                                {{ p_form.phone }}
+                                {% if p_form.phone.errors %}
+                                <div class="error-message">{{ p_form.phone.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">العنوان</label>
+                                {{ p_form.address }}
+                                {% if p_form.address.errors %}
+                                <div class="error-message">{{ p_form.address.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">المدينة</label>
+                                {{ p_form.city }}
+                                {% if p_form.city.errors %}
+                                <div class="error-message">{{ p_form.city.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save me-2"></i> حفظ التغييرات
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // تفعيل التبويبات
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabLinks = document.querySelectorAll('.profile-menu-link[data-tab]');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const contentTitle = document.getElementById('contentTitle');
+        
+        tabLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const tabId = this.getAttribute('data-tab');
+                
+                // إزالة النشاط من جميع الروابط
+                tabLinks.forEach(l => l.classList.remove('active'));
+                // إخفاء جميع المحتويات
+                tabContents.forEach(c => c.classList.remove('active'));
+                
+                // تفعيل الرابط الحالي
+                this.classList.add('active');
+                
+                // إظهار المحتوى المناسب
+                const tabContent = document.getElementById(tabId + 'Tab');
+                if (tabContent) {
+                    tabContent.classList.add('active');
+                    
+                    // تحديث العنوان
+                    const tabText = this.querySelector('span').textContent;
+                    contentTitle.textContent = tabText;
+                }
+            });
+        });
+        
+        // حفظ آخر تبويب تم فتحه
+        tabLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                const tabId = this.getAttribute('data-tab');
+                localStorage.setItem('lastProfileTab', tabId);
+            });
+        });
+        
+        // استعادة آخر تبويب عند تحميل الصفحة
+        const lastTab = localStorage.getItem('lastProfileTab');
+        if (lastTab) {
+            const tabLink = document.querySelector(`[data-tab="${lastTab}"]`);
+            if (tabLink) {
+                tabLink.click();
+            }
+        }
+    });
+</script>
+{% endblock %}

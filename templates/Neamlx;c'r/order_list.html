@@ -1,0 +1,488 @@
+<!-- orders/order_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}طلباتي - TIVE{% endblock %}
+
+{% block extra_css %}
+<style>
+    .orders-section {
+        padding-top: 8rem;
+        padding-bottom: 6rem;
+        background-color: var(--off-white);
+        min-height: 80vh;
+    }
+    
+    .orders-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .orders-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+    
+    .orders-title {
+        font-size: 2rem;
+        font-weight: 200;
+        color: var(--dark-gray);
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.02em;
+    }
+    
+    .orders-filters {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .filter-btn {
+        padding: 0.5rem 1.5rem;
+        background: transparent;
+        border: 1px solid rgba(224, 224, 224, 0.5);
+        border-radius: var(--radius-round);
+        color: var(--text-gray);
+        font-weight: 300;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .filter-btn:hover,
+    .filter-btn.active {
+        background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel));
+        border-color: transparent;
+        color: var(--dark-gray);
+    }
+    
+    .orders-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .order-card {
+        background: var(--pure-white);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        border: 1px solid rgba(240, 240, 240, 0.8);
+        transition: all 0.3s ease;
+    }
+    
+    .order-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+    }
+    
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(240, 240, 240, 0.8);
+    }
+    
+    .order-info h3 {
+        font-weight: 300;
+        margin-bottom: 0.25rem;
+    }
+    
+    .order-date {
+        color: var(--text-light);
+        font-size: 0.9rem;
+    }
+    
+    .order-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-round);
+        font-size: 0.85rem;
+        font-weight: 300;
+    }
+    
+    .status-pending {
+        background: rgba(255, 193, 7, 0.1);
+        color: #ff9800;
+    }
+    
+    .status-processing {
+        background: rgba(33, 150, 243, 0.1);
+        color: #2196f3;
+    }
+    
+    .status-shipped {
+        background: rgba(76, 175, 80, 0.1);
+        color: #4caf50;
+    }
+    
+    .status-delivered {
+        background: rgba(76, 175, 80, 0.2);
+        color: #2e7d32;
+    }
+    
+    .status-cancelled {
+        background: rgba(244, 67, 54, 0.1);
+        color: #f44336;
+    }
+    
+    .order-items {
+        margin-bottom: 1.5rem;
+    }
+    
+    .order-item {
+        display: flex;
+        gap: 1rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid rgba(240, 240, 240, 0.8);
+    }
+    
+    .order-item:last-child {
+        border-bottom: none;
+    }
+    
+    .item-image {
+        width: 80px;
+        height: 80px;
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        background: var(--off-white);
+        flex-shrink: 0;
+    }
+    
+    .item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        padding: 0.5rem;
+    }
+    
+    .item-details {
+        flex: 1;
+    }
+    
+    .item-name {
+        font-weight: 300;
+        margin-bottom: 0.25rem;
+    }
+    
+    .item-info {
+        display: flex;
+        gap: 1rem;
+        color: var(--text-light);
+        font-size: 0.9rem;
+    }
+    
+    .order-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(240, 240, 240, 0.8);
+    }
+    
+    .order-total {
+        font-size: 1.2rem;
+        font-weight: 300;
+    }
+    
+    .order-actions {
+        display: flex;
+        gap: 0.75rem;
+    }
+    
+    .action-btn {
+        padding: 0.5rem 1rem;
+        border: 1px solid rgba(224, 224, 224, 0.5);
+        border-radius: var(--radius-md);
+        background: transparent;
+        color: var(--text-gray);
+        font-weight: 300;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.9rem;
+    }
+    
+    .action-btn:hover {
+        border-color: var(--primary-pastel);
+        color: var(--dark-gray);
+    }
+    
+    .empty-orders {
+        text-align: center;
+        padding: 4rem 0;
+    }
+    
+    .empty-icon {
+        width: 120px;
+        height: 120px;
+        background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 2rem;
+        color: var(--pure-white);
+        font-size: 3rem;
+    }
+    
+    .empty-title {
+        font-size: 1.8rem;
+        font-weight: 200;
+        color: var(--dark-gray);
+        margin-bottom: 1rem;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 3rem;
+    }
+    
+    .page-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: var(--radius-round);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(224, 224, 224, 0.5);
+        background: transparent;
+        color: var(--text-gray);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .page-btn:hover,
+    .page-btn.active {
+        background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel));
+        border-color: transparent;
+        color: var(--dark-gray);
+    }
+    
+    @media (max-width: 768px) {
+        .orders-section {
+            padding-top: 7rem;
+        }
+        
+        .order-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+        
+        .order-footer {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: stretch;
+        }
+        
+        .order-actions {
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="orders-section fade-in">
+    <div class="container">
+        <div class="orders-container">
+            <div class="orders-header">
+                <h1 class="orders-title">طلباتي</h1>
+                <p class="orders-subtitle">عرض ومتابعة جميع طلباتك</p>
+            </div>
+            
+            <!-- الفلاتر -->
+            <div class="orders-filters">
+                <button class="filter-btn active" data-filter="all">الكل</button>
+                <button class="filter-btn" data-filter="pending">قيد الانتظار</button>
+                <button class="filter-btn" data-filter="processing">قيد المعالجة</button>
+                <button class="filter-btn" data-filter="shipped">تم الشحن</button>
+                <button class="filter-btn" data-filter="delivered">تم التسليم</button>
+                <button class="filter-btn" data-filter="cancelled">ملغاة</button>
+            </div>
+            
+            {% if orders %}
+            <!-- قائمة الطلبات -->
+            <div class="orders-list">
+                {% for order in orders %}
+                <div class="order-card fade-in" data-status="{{ order.status }}" 
+                     
+                    
+                    <!-- رأس الطلب -->
+                    <div class="order-header">
+                        <div class="order-info">
+                            <h3>طلب #{{ order.id|stringformat:"06d" }}</h3>
+                            <div class="order-date">{{ order.created_at|date:"Y/m/d - h:i A" }}</div>
+                        </div>
+                        <div class="order-status status-{{ order.status }}">
+                            {{ order.get_status_display }}
+                        </div>
+                    </div>
+                    
+                    <!-- عناصر الطلب -->
+                    <div class="order-items">
+                        {% for item in order.items.all %}
+                        <div class="order-item">
+                            <div class="item-image">
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                            </div>
+                            <div class="item-details">
+                                <h4 class="item-name">{{ item.product.name }}</h4>
+                                <div class="item-info">
+                                    <span>الكمية: {{ item.quantity }}</span>
+                                    <span>السعر: {{ item.price }} ر.س</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- تذييل الطلب -->
+                    <div class="order-footer">
+                        <div class="order-total">
+                            المجموع: {{ order.total_price }} ر.س
+                        </div>
+                        <div class="order-actions">
+                            <a href="{% url 'order_detail' order.id %}" class="action-btn">
+                                <i class="fas fa-eye me-1"></i> التفاصيل
+                            </a>
+                            
+                            {% if order.status == 'pending' %}
+                            <button class="action-btn" onclick="cancelOrder({{ order.id }})">
+                                <i class="fas fa-times me-1"></i> إلغاء
+                            </button>
+                            {% endif %}
+                            
+                            {% if order.status == 'delivered' %}
+                            <a href="{% url 'product_list' %}?reorder={{ order.id }}" class="action-btn">
+                                <i class="fas fa-redo me-1"></i> إعادة طلب
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- الترقيم الصفحي -->
+            {% if page_obj.has_other_pages %}
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                <button class="page-btn" onclick="window.location.href='?page={{ page_obj.previous_page_number }}'">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <button class="page-btn active">{{ num }}</button>
+                    {% elif num > page_obj.number|add:-3 and num < page_obj.number|add:3 %}
+                    <button class="page-btn" onclick="window.location.href='?page={{ num }}'">{{ num }}</button>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                <button class="page-btn" onclick="window.location.href='?page={{ page_obj.next_page_number }}'">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            {% else %}
+            <!-- حالة عدم وجود طلبات -->
+            <div class="empty-orders">
+                <div class="empty-icon">
+                    <i class="fas fa-shopping-bag"></i>
+                </div>
+                <h2 class="empty-title">لا توجد طلبات سابقة</h2>
+                <p class="empty-message">
+                    لم تقم بإجراء أي طلبات حتى الآن. ابدأ بالتسوق الآن واكتشف مجموعتنا الفاخرة.
+                </p>
+                <div class="order-actions" style="justify-content: center; margin-top: 2rem;">
+                    <a href="{% url 'product_list' %}" class="action-btn" style="padding: 0.75rem 2rem;">
+                        <i class="fas fa-gem me-2"></i>
+                        تصفح المنتجات
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // فلترة الطلبات
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const filter = this.dataset.filter;
+            
+            // تحديث الأزرار النشطة
+            document.querySelectorAll('.filter-btn').forEach(b => {
+                b.classList.remove('active');
+            });
+            this.classList.add('active');
+            
+            // فلترة الطلبات
+            document.querySelectorAll('.order-card').forEach(card => {
+                if (filter === 'all' || card.dataset.status === filter) {
+                    card.style.display = 'block';
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, 10);
+                } else {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(10px)';
+                    setTimeout(() => {
+                        card.style.display = 'none';
+                    }, 300);
+                }
+            });
+        });
+    });
+    
+    // إلغاء الطلب
+    function cancelOrder(orderId) {
+        if (!confirm('هل أنت متأكد من إلغاء هذا الطلب؟')) return;
+        
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+        
+        fetch(`/orders/${orderId}/cancel/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                TIVE.showMessage('تم إلغاء الطلب بنجاح', 'success');
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+            } else {
+                TIVE.showMessage(data.message || 'حدث خطأ أثناء الإلغاء', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            TIVE.showMessage('حدث خطأ أثناء الإلغاء', 'error');
+        });
+    }
+    
+    // متابعة حالة الشحن
+    function trackShipment(orderId) {
+        window.open(`/orders/${orderId}/tracking/`, '_blank');
+    }
+</script>
+{% endblock %}

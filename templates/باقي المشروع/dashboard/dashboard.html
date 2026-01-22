@@ -1,0 +1,890 @@
+
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}لوحة التحكم - TIVE{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-section {
+        padding-top: 8rem;
+        padding-bottom: 4rem;
+        background-color: var(--off-white);
+        min-height: 100vh;
+    }
+    
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 2rem;
+    }
+    
+    .dashboard-sidebar {
+        background-color: var(--pure-white);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        height: fit-content;
+        position: sticky;
+        top: 100px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    }
+    
+    .sidebar-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--light-gray);
+    }
+    
+    .admin-avatar {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        color: white;
+        font-size: 2rem;
+        font-weight: 300;
+    }
+    
+    .admin-name {
+        font-size: 1.1rem;
+        font-weight: 300;
+        margin-bottom: 0.25rem;
+        color: var(--dark-gray);
+    }
+    
+    .admin-role {
+        font-size: 0.9rem;
+        color: var(--text-light);
+        font-weight: 300;
+    }
+    
+    .sidebar-menu {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .menu-item {
+        margin-bottom: 0.5rem;
+    }
+    
+    .menu-link {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem 1rem;
+        color: var(--text-gray);
+        text-decoration: none;
+        border-radius: var(--radius-md);
+        transition: all 0.3s ease;
+        font-weight: 300;
+    }
+    
+    .menu-link:hover {
+        background-color: rgba(255, 183, 197, 0.05);
+        color: var(--dark-gray);
+    }
+    
+    .menu-link.active {
+        background-color: rgba(255, 183, 197, 0.1);
+        color: var(--dark-gray);
+        border-right: 3px solid var(--primary-pastel);
+    }
+    
+    .menu-icon {
+        width: 20px;
+        text-align: center;
+        color: var(--text-light);
+    }
+    
+    .menu-link.active .menu-icon {
+        color: var(--primary-pastel);
+    }
+    
+    .menu-badge {
+        margin-right: auto;
+        background-color: var(--primary-pastel);
+        color: var(--dark-gray);
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 10px;
+    }
+    
+    .dashboard-content {
+        background-color: var(--pure-white);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    }
+    
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--light-gray);
+    }
+    
+    .dashboard-title {
+        font-size: 1.8rem;
+        font-weight: 200;
+        color: var(--dark-gray);
+        margin: 0;
+    }
+    
+    .dashboard-date {
+        color: var(--text-light);
+        font-size: 0.9rem;
+        font-weight: 300;
+    }
+    
+    .notifications-btn {
+        position: relative;
+        background: none;
+        border: none;
+        color: var(--text-gray);
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+    
+    .notifications-btn:hover {
+        background-color: rgba(255, 183, 197, 0.1);
+        color: var(--dark-gray);
+    }
+    
+    .notification-dot {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        width: 8px;
+        height: 8px;
+        background: linear-gradient(135deg, var(--primary-pastel), #ff6b8b);
+        border-radius: 50%;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background-color: var(--off-white);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(to bottom, var(--primary-pastel), var(--secondary-pastel));
+    }
+    
+    .stat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+    
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+    }
+    
+    .stat-change {
+        font-size: 0.8rem;
+        font-weight: 300;
+        padding: 0.25rem 0.5rem;
+        border-radius: 10px;
+    }
+    
+    .stat-change.positive {
+        background-color: rgba(181, 234, 215, 0.2);
+        color: #2e7d32;
+    }
+    
+    .stat-change.negative {
+        background-color: rgba(255, 183, 197, 0.2);
+        color: #c62828;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 200;
+        margin-bottom: 0.5rem;
+        color: var(--dark-gray);
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        color: var(--text-light);
+        font-weight: 300;
+    }
+    
+    .charts-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .chart-container {
+        background-color: var(--off-white);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+    }
+    
+    .chart-title {
+        font-size: 1.1rem;
+        font-weight: 300;
+        margin-bottom: 1.5rem;
+        color: var(--dark-gray);
+    }
+    
+    .chart {
+        height: 300px;
+        position: relative;
+    }
+    
+    .recent-orders {
+        background-color: var(--off-white);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+    }
+    
+    .orders-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+    
+    .orders-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .orders-table th {
+        text-align: right;
+        padding: 1rem;
+        background-color: rgba(255, 255, 255, 0.5);
+        font-weight: 300;
+        color: var(--text-gray);
+        border-bottom: 1px solid var(--light-gray);
+    }
+    
+    .orders-table td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--light-gray);
+    }
+    
+    .orders-table tr:hover {
+        background-color: rgba(255, 255, 255, 0.3);
+    }
+    
+    .order-id {
+        color: var(--primary-pastel);
+        text-decoration: none;
+        font-weight: 300;
+    }
+    
+    .order-id:hover {
+        text-decoration: underline;
+    }
+    
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 300;
+        display: inline-block;
+    }
+    
+    .status-pending {
+        background-color: rgba(255, 193, 7, 0.1);
+        color: #ff8f00;
+    }
+    
+    .status-confirmed {
+        background-color: rgba(33, 150, 243, 0.1);
+        color: #1976d2;
+    }
+    
+    .status-shipped {
+        background-color: rgba(0, 150, 136, 0.1);
+        color: #00796b;
+    }
+    
+    .status-delivered {
+        background-color: rgba(76, 175, 80, 0.1);
+        color: #388e3c;
+    }
+    
+    .status-cancelled {
+        background-color: rgba(244, 67, 54, 0.1);
+        color: #d32f2f;
+    }
+    
+    .actions-cell {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 1px solid var(--light-gray);
+        background: white;
+        color: var(--text-gray);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .action-btn:hover {
+        border-color: var(--primary-pastel);
+        color: var(--primary-pastel);
+        transform: translateY(-1px);
+    }
+    
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .quick-action {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background-color: var(--off-white);
+        border: 1px solid var(--light-gray);
+        border-radius: var(--radius-md);
+        color: var(--text-gray);
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-weight: 300;
+    }
+    
+    .quick-action:hover {
+        background-color: rgba(255, 183, 197, 0.05);
+        border-color: var(--primary-pastel);
+        color: var(--dark-gray);
+        transform: translateY(-2px);
+    }
+    
+    .quick-action-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1rem;
+    }
+    
+    /* تحسينات للاستجابة */
+    @media (max-width: 1024px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .dashboard-sidebar {
+            position: static;
+        }
+        
+        .charts-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .orders-table {
+            display: block;
+            overflow-x: auto;
+        }
+        
+        .quick-actions {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="dashboard-section">
+    <div class="container">
+        <div class="dashboard-grid">
+            <!-- الشريط الجانبي -->
+            <div class="dashboard-sidebar">
+                <div class="sidebar-header">
+                    <div class="admin-avatar">
+                        {{ user.first_name|first|default:user.username|first }}
+                    </div>
+                    <div class="admin-name">{{ user.get_full_name|default:user.username }}</div>
+                    <div class="admin-role">
+                        <i class="fas fa-crown me-1"></i>
+                        {{ user.profile.get_user_type_display }}
+                    </div>
+                </div>
+                
+                <ul class="sidebar-menu">
+                    <li class="menu-item">
+                        <a href="{% url 'admin_dashboard' %}" class="menu-link active">
+                            <span class="menu-icon"><i class="fas fa-tachometer-alt"></i></span>
+                            <span>لوحة التحكم</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{% url 'product_management' %}" class="menu-link">
+                            <span class="menu-icon"><i class="fas fa-gem"></i></span>
+                            <span>المنتجات</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{% url 'order_management' %}" class="menu-link">
+                            <span class="menu-icon"><i class="fas fa-box"></i></span>
+                            <span>الطلبات</span>
+                            {% if stats.pending_orders > 0 %}
+                            <span class="menu-badge">{{ stats.pending_orders }}</span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{% url 'user_management' %}" class="menu-link">
+                            <span class="menu-icon"><i class="fas fa-users"></i></span>
+                            <span>المستخدمين</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{% url 'reports' %}" class="menu-link">
+                            <span class="menu-icon"><i class="fas fa-chart-bar"></i></span>
+                            <span>التقارير</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{% url 'home' %}" class="menu-link">
+                            <span class="menu-icon"><i class="fas fa-store"></i></span>
+                            <span>المتجر</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{% url 'logout' %}" class="menu-link">
+                            <span class="menu-icon"><i class="fas fa-sign-out-alt"></i></span>
+                            <span>تسجيل خروج</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- المحتوى الرئيسي -->
+            <div class="dashboard-content">
+                <!-- الرأس -->
+                <div class="dashboard-header">
+                    <div>
+                        <h1 class="dashboard-title">لوحة التحكم</h1>
+                        <div class="dashboard-date">
+                            <i class="fas fa-calendar-alt me-2"></i>
+                            {{ today|date:"Y/m/d" }}
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-actions">
+                        <button class="notifications-btn">
+                            <i class="fas fa-bell"></i>
+                            {% if notifications.count > 0 %}
+                            <span class="notification-dot"></span>
+                            {% endif %}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- الإحصائيات -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #FFB7C5, #D8BFD8);">
+                                <i class="fas fa-shopping-bag"></i>
+                            </div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-arrow-up me-1"></i>12%
+                            </div>
+                        </div>
+                        <div class="stat-value">{{ stats.total_orders }}</div>
+                        <div class="stat-label">إجمالي الطلبات</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #B5EAD7, #C7CEEA);">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-arrow-up me-1"></i>18%
+                            </div>
+                        </div>
+                        <div class="stat-value">{{ stats.total_revenue|floatformat:0 }} ر.س</div>
+                        <div class="stat-label">إجمالي الإيرادات</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #FFDAC1, #FFB7C5);">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="stat-change negative">
+                                <i class="fas fa-arrow-down me-1"></i>5%
+                            </div>
+                        </div>
+                        <div class="stat-value">{{ stats.pending_orders }}</div>
+                        <div class="stat-label">طلبات قيد الانتظار</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #D8BFD8, #B5EAD7);">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-arrow-up me-1"></i>8%
+                            </div>
+                        </div>
+                        <div class="stat-value">{{ stats.total_customers }}</div>
+                        <div class="stat-label">إجمالي العملاء</div>
+                    </div>
+                </div>
+
+                <!-- المخططات -->
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <h3 class="chart-title">الإيرادات خلال آخر 7 أيام</h3>
+                        <div class="chart">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h3 class="chart-title">المنتجات الأكثر مبيعاً</h3>
+                        <div class="chart">
+                            <canvas id="topProductsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- أحدث الطلبات -->
+                <div class="recent-orders">
+                    <div class="orders-header">
+                        <h3 class="chart-title mb-0">أحدث الطلبات</h3>
+                        <a href="{% url 'order_management' %}" class="btn btn-outline btn-sm">
+                            عرض الكل <i class="fas fa-arrow-left ms-1"></i>
+                        </a>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="orders-table">
+                            <thead>
+                                <tr>
+                                    <th>رقم الطلب</th>
+                                    <th>العميل</th>
+                                    <th>المبلغ</th>
+                                    <th>الحالة</th>
+                                    <th>التاريخ</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in recent_orders %}
+                                <tr>
+                                    <td>
+                                        <a href="#" class="order-id">#{{ order.order_number }}</a>
+                                    </td>
+                                    <td>{{ order.user.get_full_name|default:order.user.username }}</td>
+                                    <td>{{ order.total }} ر.س</td>
+                                    <td>
+                                        <span class="status-badge status-{{ order.status }}">
+                                            {{ order.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ order.created_at|date:"Y/m/d" }}</td>
+                                    <td class="actions-cell">
+                                        <button class="action-btn" title="تعديل">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="action-btn" title="عرض">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="action-btn" title="حذف">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-4 text-muted">
+                                        لا توجد طلبات حالياً
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- إجراءات سريعة -->
+                <div class="quick-actions">
+                    <a href="{% url 'admin:store_product_add' %}" class="quick-action">
+                        <div class="quick-action-icon">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 300; margin-bottom: 0.25rem;">إضافة منتج جديد</div>
+                            <div style="font-size: 0.8rem; color: var(--text-light);">أضف منتجاً جديداً للمتجر</div>
+                        </div>
+                    </a>
+                    
+                    <a href="{% url 'product_management' %}" class="quick-action">
+                        <div class="quick-action-icon">
+                            <i class="fas fa-boxes"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 300; margin-bottom: 0.25rem;">إدارة المنتجات</div>
+                            <div style="font-size: 0.8rem; color: var(--text-light);">عرض وتعديل جميع المنتجات</div>
+                        </div>
+                    </a>
+                    
+                    <a href="{% url 'order_management' %}" class="quick-action">
+                        <div class="quick-action-icon">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 300; margin-bottom: 0.25rem;">إدارة الطلبات</div>
+                            <div style="font-size: 0.8rem; color: var(--text-light);">متابعة وتحديث الطلبات</div>
+                        </div>
+                    </a>
+                    
+                    <a href="{% url 'reports' %}" class="quick-action">
+                        <div class="quick-action-icon">
+                            <i class="fas fa-chart-pie"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 300; margin-bottom: 0.25rem;">التقارير والإحصائيات</div>
+                            <div style="font-size: 0.8rem; color: var(--text-light);">عرض تقارير المبيعات والأداء</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // مخطط الإيرادات
+    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    const revenueChart = new Chart(revenueCtx, {
+        type: 'line',
+        data: {
+            labels: [
+                {% for data in revenue_data %}
+                    '{{ data.date }}'{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ],
+            datasets: [{
+                label: 'الإيرادات',
+                data: [
+                    {% for data in revenue_data %}
+                        {{ data.revenue }}{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ],
+                backgroundColor: 'rgba(255, 183, 197, 0.1)',
+                borderColor: 'rgba(255, 183, 197, 1)',
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value + ' ر.س';
+                        },
+                        font: {
+                            family: 'Cairo',
+                            size: 11
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    ticks: {
+                        font: {
+                            family: 'Cairo',
+                            size: 11
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                }
+            }
+        }
+    });
+    
+    // مخطط المنتجات الأكثر مبيعاً
+    const topProductsCtx = document.getElementById('topProductsChart').getContext('2d');
+    const topProductsChart = new Chart(topProductsCtx, {
+        type: 'doughnut',
+        data: {
+            labels: [
+                {% for product in top_products %}
+                    '{{ product.name }}'{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ],
+            datasets: [{
+                data: [
+                    {% for product in top_products %}
+                        {{ product.total_sold|default:0 }}{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ],
+                backgroundColor: [
+                    'rgba(255, 183, 197, 0.8)',
+                    'rgba(216, 191, 216, 0.8)',
+                    'rgba(181, 234, 215, 0.8)',
+                    'rgba(255, 218, 193, 0.8)',
+                    'rgba(199, 206, 234, 0.8)'
+                ],
+                borderColor: 'white',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        font: {
+                            family: 'Cairo',
+                            size: 11
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // تفعيل القائمة الجانبية
+    document.querySelectorAll('.menu-link').forEach(link => {
+        if (link.href === window.location.href) {
+            link.classList.add('active');
+        }
+    });
+    
+    // تفعيل زر الإشعارات
+    const notificationsBtn = document.querySelector('.notifications-btn');
+    if (notificationsBtn) {
+        notificationsBtn.addEventListener('click', function() {
+            showNotifications();
+        });
+    }
+    
+    function showNotifications() {
+        // يمكنك استبدال هذا بالنافذة المنبثقة للإشعارات
+        alert('قائمة الإشعارات قريباً...');
+    }
+    
+    // تحديث البيانات تلقائياً كل دقيقة
+    function refreshDashboardData() {
+        fetch('/dashboard/data/', {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            // تحديث الإحصائيات
+            document.querySelectorAll('.stat-value')[0].textContent = data.total_orders;
+            document.querySelectorAll('.stat-value')[1].textContent = data.total_revenue + ' ر.س';
+            document.querySelectorAll('.stat-value')[2].textContent = data.pending_orders;
+            document.querySelectorAll('.stat-value')[3].textContent = data.total_customers;
+            
+            // تحديث المخططات
+            if (data.revenue_data) {
+                revenueChart.data.labels = data.revenue_data.map(d => d.date);
+                revenueChart.data.datasets[0].data = data.revenue_data.map(d => d.revenue);
+                revenueChart.update();
+            }
+        })
+        .catch(error => console.log('Error refreshing dashboard:', error));
+    }
+    
+    // تحديث البيانات كل دقيقة
+    setInterval(refreshDashboardData, 60000);
+    
+    // تأثيرات التحميل
+    document.querySelectorAll('.stat-card').forEach((card, index) => {
+        card.style.animationDelay = `${index * 100}ms`;
+    });
+</script>
+{% endblock %}
+
+
+
+
+

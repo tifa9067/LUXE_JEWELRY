@@ -1,0 +1,96 @@
+ 
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <div class="container">
+        <!-- الشعار -->
+        <a class="navbar-brand" href="{% url 'home' %}">
+            <div class="logo">
+                <i class="fas fa-gem text-primary"></i>
+                <span class="brand-name">LUXE</span>
+            </div>
+        </a>
+
+        <!-- زر القائمة المنسدلة للأجهزة الصغيرة -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- محتويات الشريط -->
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <!-- روابط التنقل -->
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'home' %}">
+                        <i class="fas fa-home"></i> الرئيسية
+                    </a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-list"></i> الفئات
+                    </a>
+                    <ul class="dropdown-menu">
+                        {% for category in categories %}
+                        <li><a class="dropdown-item" href="{% url 'category_detail' category.slug %}">{{ category.name }}</a></li>
+                        {% endfor %}
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'category_list' %}">جميع الفئات</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'product_list' %}">
+                        <i class="fas fa-store"></i> جميع المنتجات
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <i class="fas fa-crown"></i> المجموعة الفاخرة
+                    </a>
+                </li>
+            </ul>
+
+            <!-- البحث -->
+            <form class="d-flex mx-3" action="{% url 'product_list' %}" method="get">
+                <div class="input-group search-box">
+                    <input type="text" class="form-control" placeholder="ابحث عن مجوهرات..." name="q" value="{{ request.GET.q }}">
+                    <button class="btn btn-search" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </form>
+
+            <!-- أيقونات المستخدم والسلة -->
+            <div class="navbar-icons">
+                <a href="{% url 'cart_detail' %}" class="nav-icon position-relative">
+                    <i class="fas fa-shopping-bag"></i>
+                    {% if cart.total_items > 0 %}
+                    <span class="badge bg-primary rounded-pill cart-count">{{ cart.total_items }}</span>
+                    {% endif %}
+                </a>
+                
+                {% if user.is_authenticated %}
+                <div class="nav-item dropdown user-dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle"></i>
+                        {{ user.first_name|default:user.username }}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="fas fa-user"></i> الملف الشخصي</a></li>
+                        <li><a class="dropdown-item" href="{% url 'order_list' %}"><i class="fas fa-box"></i> طلباتي</a></li>
+                        <li><a class="dropdown-item" href="{% url 'address_list' %}"><i class="fas fa-map-marker-alt"></i> عناويني</a></li>
+                        {% if user.is_staff or user.profile.user_type == 'admin' %}
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'admin_dashboard' %}"><i class="fas fa-tachometer-alt"></i> لوحة التحكم</a></li>
+                        {% endif %}
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> تسجيل خروج</a></li>
+                    </ul>
+                </div>
+                {% else %}
+                <div class="auth-buttons">
+                    <a href="{% url 'login' %}" class="btn btn-outline-primary btn-sm">تسجيل الدخول</a>
+                    <a href="{% url 'register' %}" class="btn btn-primary btn-sm">إنشاء حساب</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>

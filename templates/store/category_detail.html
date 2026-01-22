@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ category.name }} - متجر المجوهرات الفاخرة{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- رأس الفئة -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">الرئيسية</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'category_list' %}">الفئات</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ category.name }}</li>
+                </ol>
+            </nav>
+            <h1 class="display-5 fw-bold text-gold">{{ category.name }}</h1>
+            {% if category.description %}
+                <p class="lead text-muted">{{ category.description }}</p>
+            {% endif %}
+        </div>
+        
+        {% if category.image %}
+        <div class="col-md-4">
+            <img src="{{ category.image.url }}" alt="{{ category.name }}" class="img-fluid rounded shadow">
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- الفلتر والترتيب -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-gold">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label for="materialFilter" class="form-label text-dark">المادة:</label>
+                            <select id="materialFilter" class="form-select" onchange="updateFilter()">
+                                <option value="">الكل</option>
+                                {% for m in materials %}
+                                    <option value="{{ m }}" {% if current_material == m %}selected{% endif %}>
+                                        {{ m }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3 mb-3">
+                            <label for="genderFilter" class="form-label text-dark">النوع:</label>
+                            <select id="genderFilter" class="form-select" onchange="updateFilter()">
+                                <option value="">الكل</option>
+                                {% for g in genders %}
+                                    <option value="{{ g }}" {% if current_gender == g %}selected{% endif %}>
+                                        {{ g }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3 mb-3">
+                            <label for="sortFilter" class="form-label text-dark">ترتيب حسب:</label>
+                            <select id="sortFilter" class="form-select" onchange="updateFilter()">
+                                <option value="">الافتراضي</option>
+                                <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>الأحدث</option>
+                                <option value="price_low" {% if sort_by == 'price_low' %}selected{% endif %}>السعر: من الأقل للأعلى</option>
+                                <option value="price_high" {% if sort_by == 'price_high' %}selected{% endif %}>السعر: من الأعلى للأقل</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3 d-flex align-items-end mb-3">
+                            <a href="{% url 'category_detail' category.slug %}" class="btn btn-outline-dark w-100">
+                                إعادة التعيين
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- المنتجات -->
+    <div class="row">
+        {% if products %}
+            {% for product in products %}
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <div class="card h-100 product-card border-gold">
+                        <a href="{% url 'product_detail' product.slug %}">
+                            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+                        </a>
+                        <div class="card-body">
+                            <h5 class="card-title text-dark">
+                                <a href="{% url 'product_detail' product.slug %}" class="text-decoration-none text-dark">
+                                    {{ product.name }}
+                                </a>
+                            </h5>
+                            <p class="card-text text-muted small">
+                                <i class="fas fa-gem me-1"></i> {{ product.get_material_display }}
+                                <br>
+                                <i class="fas fa-user me-1"></i> {{ product.get_gender_display }}
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="text-gold mb-0">{{ product.price }} ريال</h5>
+                                {% if product.stock > 0 %}
+                                    <span class="badge bg-success">متوفر</span>
+                                {% else %}
+                                    <span class="badge bg-danger">غير متوفر</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white border-top-0">
+                            <a href="{% url 'product_detail' product.slug %}" class="btn btn-gold w-100">
+                                <i class="fas fa-eye me-1"></i> عرض المنتج
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center py-5">
+                <div class="empty-state">
+                    <i class="fas fa-gem fa-3x text-muted mb-3"></i>
+                    <h4 class="text-dark">لا توجد منتجات في هذه الفئة</h4>
+                    <p class="text-muted">لم يتم العثور على منتجات تطابق معايير البحث.</p>
+                    <a href="{% url 'category_list' %}" class="btn btn-gold mt-3">
+                        <i class="fas fa-arrow-left me-1"></i> العودة للفئات
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function updateFilter() {
+    const material = document.getElementById('materialFilter').value;
+    const gender = document.getElementById('genderFilter').value;
+    const sort = document.getElementById('sortFilter').value;
+    
+    let url = "{% url 'category_detail' category.slug %}?";
+    const params = [];
+    
+    if (material) params.push(`material=${material}`);
+    if (gender) params.push(`gender=${gender}`);
+    if (sort) params.push(`sort=${sort}`);
+    
+    window.location.href = url + params.join('&');
+}
+</script>
+
+<style>
+.border-gold {
+    border: 1px solid #D4AF37 !important;
+}
+
+.btn-gold {
+    background-color: #D4AF37;
+    border-color: #D4AF37;
+    color: white;
+}
+
+.btn-gold:hover {
+    background-color: #B8960F;
+    border-color: #B8960F;
+    color: white;
+}
+
+.text-gold {
+    color: #D4AF37 !important;
+}
+
+.product-card {
+    transition: transform 0.3s, box-shadow 0.3s;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(212, 175, 55, 0.1);
+}
+
+.empty-state {
+    padding: 3rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 2px dashed #dee2e6;
+}
+</style>
+{% endblock %}

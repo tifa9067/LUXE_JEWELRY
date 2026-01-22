@@ -1,0 +1,1074 @@
+<!-- accounts/profile.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}الملف الشخصي - TIVE{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* تصميم صفحة الملف الشخصي */
+    .profile-section {
+        padding-top: 8rem;
+        padding-bottom: 6rem;
+        background-color: var(--pure-white);
+        min-height: 80vh;
+    }
+    
+    .profile-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .profile-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+    
+    .profile-title {
+        font-size: 2rem;
+        font-weight: 200;
+        color: var(--dark-gray);
+        margin-bottom: 1rem;
+        letter-spacing: -0.01em;
+    }
+    
+    .profile-subtitle {
+        color: var(--text-light);
+        font-weight: 300;
+        font-size: 1rem;
+        max-width: 600px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+    
+    .profile-grid {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 3rem;
+    }
+    
+    /* القائمة الجانبية */
+    .profile-sidebar {
+        background: linear-gradient(135deg, var(--off-white), var(--pure-white));
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        height: fit-content;
+        position: sticky;
+        top: 100px;
+    }
+    
+    .user-card {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid rgba(224, 224, 224, 0.5);
+    }
+    
+    .user-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel));
+        margin: 0 auto 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2.5rem;
+        font-weight: 300;
+    }
+    
+    .user-name {
+        font-size: 1.3rem;
+        font-weight: 300;
+        color: var(--dark-gray);
+        margin-bottom: 0.5rem;
+    }
+    
+    .user-email {
+        color: var(--text-light);
+        font-size: 0.9rem;
+        font-weight: 300;
+    }
+    
+    .profile-menu {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .menu-item {
+        margin-bottom: 0.5rem;
+    }
+    
+    .menu-link {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem 1.25rem;
+        color: var(--text-gray);
+        text-decoration: none;
+        border-radius: 12px;
+        transition: all 0.2s ease;
+        font-weight: 300;
+    }
+    
+    .menu-link:hover,
+    .menu-link.active {
+        background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel));
+        color: var(--dark-gray);
+    }
+    
+    .menu-link i {
+        font-size: 1.1rem;
+        width: 20px;
+        text-align: center;
+    }
+    
+    /* المحتوى الرئيسي */
+    .profile-content {
+        background: linear-gradient(135deg, var(--off-white), var(--pure-white));
+        border-radius: 16px;
+        padding: 2.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    }
+    
+    .tab-content {
+        display: none;
+    }
+    
+    .tab-content.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .tab-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(224, 224, 224, 0.5);
+    }
+    
+    .tab-title {
+        font-size: 1.5rem;
+        font-weight: 200;
+        color: var(--dark-gray);
+        margin-bottom: 0.5rem;
+    }
+    
+    .tab-subtitle {
+        color: var(--text-light);
+        font-weight: 300;
+        font-size: 0.95rem;
+    }
+    
+    /* النماذج */
+    .profile-form {
+        max-width: 600px;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--text-gray);
+        font-weight: 300;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid rgba(224, 224, 224, 0.5);
+        border-radius: 8px;
+        background: var(--pure-white);
+        color: var(--dark-gray);
+        font-size: 0.95rem;
+        font-weight: 300;
+        transition: all 0.2s ease;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-pastel);
+        box-shadow: 0 0 0 3px rgba(255, 183, 197, 0.1);
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel));
+        border: none;
+        color: var(--dark-gray);
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-weight: 300;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* قائمة الطلبات */
+    .orders-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .order-card {
+        background: var(--pure-white);
+        border: 1px solid rgba(224, 224, 224, 0.5);
+        border-radius: 12px;
+        padding: 1.5rem;
+        transition: all 0.2s ease;
+    }
+    
+    .order-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(240, 240, 240, 0.8);
+    }
+    
+    .order-id {
+        font-weight: 300;
+        color: var(--dark-gray);
+    }
+    
+    .order-date {
+        color: var(--text-light);
+        font-size: 0.85rem;
+        font-weight: 300;
+    }
+    
+    .order-status {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 300;
+    }
+    
+    .status-pending {
+        background: rgba(255, 193, 7, 0.1);
+        color: #ff9800;
+    }
+    
+    .status-processing {
+        background: rgba(33, 150, 243, 0.1);
+        color: #2196f3;
+    }
+    
+    .status-completed {
+        background: rgba(76, 175, 80, 0.1);
+        color: #4caf50;
+    }
+    
+    .status-cancelled {
+        background: rgba(244, 67, 54, 0.1);
+        color: #f44336;
+    }
+    
+    .order-items {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .order-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex: 1;
+        min-width: 200px;
+    }
+    
+    .item-image {
+        width: 60px;
+        height: 60px;
+        border-radius: 8px;
+        overflow: hidden;
+        background: var(--off-white);
+    }
+    
+    .item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        padding: 0.25rem;
+    }
+    
+    .item-info {
+        flex: 1;
+    }
+    
+    .item-name {
+        font-size: 0.9rem;
+        font-weight: 300;
+        color: var(--dark-gray);
+        margin-bottom: 0.25rem;
+    }
+    
+    .item-quantity {
+        color: var(--text-light);
+        font-size: 0.8rem;
+    }
+    
+    .order-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(240, 240, 240, 0.8);
+    }
+    
+    .order-total {
+        font-size: 1.1rem;
+        font-weight: 300;
+        color: var(--dark-gray);
+    }
+    
+    .order-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .btn-outline {
+        padding: 0.5rem 1rem;
+        border: 1px solid rgba(224, 224, 224, 0.5);
+        border-radius: 8px;
+        background: transparent;
+        color: var(--text-gray);
+        font-size: 0.85rem;
+        font-weight: 300;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-outline:hover {
+        border-color: var(--primary-pastel);
+        color: var(--dark-gray);
+    }
+    
+    /* المفضلة */
+    .wishlist-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .wishlist-item {
+        background: var(--pure-white);
+        border: 1px solid rgba(224, 224, 224, 0.5);
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.2s ease;
+    }
+    
+    .wishlist-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .wishlist-image {
+        height: 200px;
+        overflow: hidden;
+        background: var(--off-white);
+    }
+    
+    .wishlist-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        padding: 1rem;
+        transition: transform 0.3s ease;
+    }
+    
+    .wishlist-item:hover .wishlist-image img {
+        transform: scale(1.05);
+    }
+    
+    .wishlist-info {
+        padding: 1.5rem;
+    }
+    
+    .wishlist-name {
+        font-size: 1rem;
+        font-weight: 300;
+        color: var(--dark-gray);
+        margin-bottom: 0.5rem;
+    }
+    
+    .wishlist-price {
+        font-size: 1.1rem;
+        font-weight: 300;
+        color: var(--dark-gray);
+        margin-bottom: 1rem;
+    }
+    
+    .wishlist-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    /* العناوين */
+    .addresses-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .address-card {
+        background: var(--pure-white);
+        border: 1px solid rgba(224, 224, 224, 0.5);
+        border-radius: 12px;
+        padding: 1.5rem;
+        position: relative;
+        transition: all 0.2s ease;
+    }
+    
+    .address-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .address-card.default {
+        border-color: var(--primary-pastel);
+        border-width: 2px;
+    }
+    
+    .default-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel));
+        color: var(--dark-gray);
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.75rem;
+        font-weight: 300;
+    }
+    
+    .address-name {
+        font-size: 1.1rem;
+        font-weight: 300;
+        color: var(--dark-gray);
+        margin-bottom: 0.5rem;
+    }
+    
+    .address-details {
+        color: var(--text-gray);
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin-bottom: 1rem;
+        font-weight: 300;
+    }
+    
+    .address-phone {
+        color: var(--text-light);
+        font-size: 0.85rem;
+        margin-bottom: 1rem;
+    }
+    
+    .address-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+    
+    .add-address-btn {
+        width: 100%;
+        height: 200px;
+        border: 2px dashed rgba(224, 224, 224, 0.5);
+        border-radius: 12px;
+        background: transparent;
+        color: var(--text-light);
+        font-size: 1rem;
+        font-weight: 300;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+    
+    .add-address-btn:hover {
+        border-color: var(--primary-pastel);
+        color: var(--dark-gray);
+    }
+    
+    /* تحسينات للاستجابة */
+    @media (max-width: 992px) {
+        .profile-grid {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        
+        .profile-sidebar {
+            position: static;
+        }
+        
+        .profile-content {
+            padding: 2rem;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .profile-section {
+            padding-top: 7rem;
+        }
+        
+        .profile-title {
+            font-size: 1.7rem;
+        }
+        
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .order-item {
+            min-width: 100%;
+        }
+        
+        .order-footer {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: stretch;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .profile-content {
+            padding: 1.5rem;
+        }
+        
+        .wishlist-grid,
+        .addresses-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .order-actions,
+        .wishlist-actions,
+        .address-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="profile-section">
+    <div class="container">
+        <div class="profile-header">
+            <h1 class="profile-title">الملف الشخصي</h1>
+            <p class="profile-subtitle">
+                يمكنك هنا إدارة معلومات حسابك، متابعة طلباتك، وعرض قائمة المفضلة
+            </p>
+        </div>
+        
+        <div class="profile-container">
+            <div class="profile-grid">
+                <!-- القائمة الجانبية -->
+                <div class="profile-sidebar">
+                    <!-- بطاقة المستخدم -->
+                    <div class="user-card">
+                        <div class="user-avatar">
+                            {{ user.get_full_name|default:user.username|slice:":1"|upper }}
+                        </div>
+                        <h3 class="user-name">{{ user.get_full_name|default:user.username }}</h3>
+                        <p class="user-email">{{ user.email }}</p>
+                    </div>
+                    
+                    <!-- قائمة التنقل -->
+                    <ul class="profile-menu">
+                        <li class="menu-item">
+                            <a href="#" class="menu-link active" onclick="switchTab('overview')">
+                                <i class="fas fa-user-circle"></i>
+                                <span>نظرة عامة</span>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="#" class="menu-link" onclick="switchTab('orders')">
+                                <i class="fas fa-shopping-bag"></i>
+                                <span>طلباتي ({{ orders.count }})</span>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="#" class="menu-link" onclick="switchTab('wishlist')">
+                                <i class="fas fa-heart"></i>
+                                <span>المفضلة ({{ wishlist.count }})</span>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="#" class="menu-link" onclick="switchTab('addresses')">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>عناويني</span>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="#" class="menu-link" onclick="switchTab('settings')">
+                                <i class="fas fa-cog"></i>
+                                <span>الإعدادات</span>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{% url 'logout' %}" class="menu-link">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>تسجيل الخروج</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- المحتوى الرئيسي -->
+                <div class="profile-content">
+                    <!-- نظرة عامة -->
+                    <div id="overview-tab" class="tab-content active">
+                        <div class="tab-header">
+                            <h2 class="tab-title">مرحباً بك، {{ user.first_name|default:user.username }}</h2>
+                            <p class="tab-subtitle">إحصائيات ومعلومات سريعة عن حسابك</p>
+                        </div>
+                        
+                        <div class="overview-stats">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                                <div style="background: var(--pure-white); padding: 1.5rem; border-radius: 12px; text-align: center; border: 1px solid rgba(224, 224, 224, 0.5);">
+                                    <div style="font-size: 2rem; font-weight: 300; color: var(--dark-gray); margin-bottom: 0.5rem;">{{ orders.count }}</div>
+                                    <div style="color: var(--text-light); font-weight: 300;">الطلبات</div>
+                                </div>
+                                <div style="background: var(--pure-white); padding: 1.5rem; border-radius: 12px; text-align: center; border: 1px solid rgba(224, 224, 224, 0.5);">
+                                    <div style="font-size: 2rem; font-weight: 300; color: var(--dark-gray); margin-bottom: 0.5rem;">{{ wishlist.count }}</div>
+                                    <div style="color: var(--text-light); font-weight: 300;">المفضلة</div>
+                                </div>
+                                <div style="background: var(--pure-white); padding: 1.5rem; border-radius: 12px; text-align: center; border: 1px solid rgba(224, 224, 224, 0.5);">
+                                    <div style="font-size: 2rem; font-weight: 300; color: var(--dark-gray); margin-bottom: 0.5rem;">{{ addresses.count }}</div>
+                                    <div style="color: var(--text-light); font-weight: 300;">العناوين</div>
+                                </div>
+                                <div style="background: var(--pure-white); padding: 1.5rem; border-radius: 12px; text-align: center; border: 1px solid rgba(224, 224, 224, 0.5);">
+                                    <div style="font-size: 2rem; font-weight: 300; color: var(--dark-gray); margin-bottom: 0.5rem;">{{ user.date_joined|date:"Y" }}</div>
+                                    <div style="color: var(--text-light); font-weight: 300;">سنة الانضمام</div>
+                                </div>
+                            </div>
+                            
+                            <!-- آخر الطلبات -->
+                            <div style="margin-top: 3rem;">
+                                <h3 style="font-weight: 300; margin-bottom: 1.5rem; color: var(--dark-gray);">آخر الطلبات</h3>
+                                {% if recent_orders %}
+                                <div class="orders-list">
+                                    {% for order in recent_orders|slice:":3" %}
+                                    <div class="order-card">
+                                        <div class="order-header">
+                                            <div>
+                                                <span class="order-id">طلب #{{ order.id|stringformat:"06d" }}</span>
+                                                <span class="order-date" style="margin-left: 1rem;">{{ order.created_at|date:"Y/m/d" }}</span>
+                                            </div>
+                                            <span class="order-status status-{{ order.status }}">
+                                                {{ order.get_status_display }}
+                                            </span>
+                                        </div>
+                                        
+                                        <div class="order-items">
+                                            {% for item in order.items.all|slice:":2" %}
+                                            <div class="order-item">
+                                                <div class="item-image">
+                                                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                                                </div>
+                                                <div class="item-info">
+                                                    <div class="item-name">{{ item.product.name|truncatechars:30 }}</div>
+                                                    <div class="item-quantity">الكمية: {{ item.quantity }}</div>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                        
+                                        <div class="order-footer">
+                                            <div class="order-total">{{ order.total_price }} ر.س</div>
+                                            <div class="order-actions">
+                                                <a href="{% url 'order_detail' order.id %}" class="btn-outline">عرض التفاصيل</a>
+                                                {% if order.status == 'pending' %}
+                                                <button class="btn-outline" onclick="cancelOrder({{ order.id }})">إلغاء الطلب</button>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% else %}
+                                <div style="text-align: center; padding: 3rem; color: var(--text-light);">
+                                    <i class="fas fa-shopping-bag fa-2x mb-3"></i>
+                                    <p>لا توجد طلبات سابقة</p>
+                                    <a href="{% url 'product_list' %}" class="btn-primary" style="display: inline-block; margin-top: 1rem;">تصفح المنتجات</a>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- الطلبات -->
+                    <div id="orders-tab" class="tab-content">
+                        <div class="tab-header">
+                            <h2 class="tab-title">طلباتي</h2>
+                            <p class="tab-subtitle">عرض ومتابعة جميع طلباتك السابقة</p>
+                        </div>
+                        
+                        {% if orders %}
+                        <div class="orders-list">
+                            {% for order in orders %}
+                            <div class="order-card">
+                                <div class="order-header">
+                                    <div>
+                                        <span class="order-id">طلب #{{ order.id|stringformat:"06d" }}</span>
+                                        <span class="order-date" style="margin-left: 1rem;">{{ order.created_at|date:"Y/m/d" }}</span>
+                                    </div>
+                                    <span class="order-status status-{{ order.status }}">
+                                        {{ order.get_status_display }}
+                                    </span>
+                                </div>
+                                
+                                <div class="order-items">
+                                    {% for item in order.items.all %}
+                                    <div class="order-item">
+                                        <div class="item-image">
+                                            <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                                        </div>
+                                        <div class="item-info">
+                                            <div class="item-name">{{ item.product.name }}</div>
+                                            <div class="item-quantity">الكمية: {{ item.quantity }}</div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                
+                                <div class="order-footer">
+                                    <div class="order-total">{{ order.total_price }} ر.س</div>
+                                    <div class="order-actions">
+                                        <a href="{% url 'order_detail' order.id %}" class="btn-outline">عرض التفاصيل</a>
+                                        {% if order.status == 'pending' %}
+                                        <button class="btn-outline" onclick="cancelOrder({{ order.id }})">إلغاء الطلب</button>
+                                        {% endif %}
+                                        {% if order.status == 'completed' %}
+                                        <button class="btn-outline" onclick="reorder({{ order.id }})">إعادة الطلب</button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div style="text-align: center; padding: 3rem; color: var(--text-light);">
+                            <i class="fas fa-shopping-bag fa-2x mb-3"></i>
+                            <p>لا توجد طلبات سابقة</p>
+                            <a href="{% url 'product_list' %}" class="btn-primary" style="display: inline-block; margin-top: 1rem;">تصفح المنتجات</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- المفضلة -->
+                    <div id="wishlist-tab" class="tab-content">
+                        <div class="tab-header">
+                            <h2 class="tab-title">قائمة المفضلة</h2>
+                            <p class="tab-subtitle">المنتجات التي أضفتها إلى المفضلة</p>
+                        </div>
+                        
+                        {% if wishlist %}
+                        <div class="wishlist-grid">
+                            {% for item in wishlist %}
+                            <div class="wishlist-item">
+                                <a href="{{ item.get_absolute_url }}">
+                                    <div class="wishlist-image">
+                                        <img src="{{ item.image.url }}" alt="{{ item.name }}">
+                                    </div>
+                                </a>
+                                <div class="wishlist-info">
+                                    <a href="{{ item.get_absolute_url }}" style="text-decoration: none;">
+                                        <h3 class="wishlist-name">{{ item.name|truncatechars:40 }}</h3>
+                                    </a>
+                                    <div class="wishlist-price">{{ item.price }} ر.س</div>
+                                    <div class="wishlist-actions">
+                                        <form action="{% url 'cart_add' item.id %}" method="post" style="flex: 1;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="quantity" value="1">
+                                            <button type="submit" class="btn-primary" style="width: 100%;">إضافة للسلة</button>
+                                        </form>
+                                        <button type="button" class="btn-outline" onclick="removeFromWishlist({{ item.id }})">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div style="text-align: center; padding: 3rem; color: var(--text-light);">
+                            <i class="fas fa-heart fa-2x mb-3"></i>
+                            <p>قائمة المفضلة فارغة</p>
+                            <a href="{% url 'product_list' %}" class="btn-primary" style="display: inline-block; margin-top: 1rem;">تصفح المنتجات</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- العناوين -->
+                    <div id="addresses-tab" class="tab-content">
+                        <div class="tab-header">
+                            <h2 class="tab-title">عناويني</h2>
+                            <p class="tab-subtitle">إدارة عناوين الشحن الخاصة بك</p>
+                        </div>
+                        
+                        <div class="addresses-grid">
+                            {% for address in addresses %}
+                            <div class="address-card {% if address.is_default %}default{% endif %}">
+                                {% if address.is_default %}
+                                <span class="default-badge">العنوان الافتراضي</span>
+                                {% endif %}
+                                
+                                <h3 class="address-name">{{ address.name }}</h3>
+                                <div class="address-details">
+                                    {{ address.street }}<br>
+                                    {{ address.city }}، {{ address.region }}<br>
+                                    {{ address.postal_code }}
+                                </div>
+                                <div class="address-phone">
+                                    <i class="fas fa-phone me-1"></i>
+                                    {{ address.phone }}
+                                </div>
+                                <div class="address-actions">
+                                    <button class="btn-outline" onclick="editAddress({{ address.id }})">تعديل</button>
+                                    {% if not address.is_default %}
+                                    <button class="btn-outline" onclick="setDefaultAddress({{ address.id }})">تعيين افتراضي</button>
+                                    {% endif %}
+                                    <button class="btn-outline" onclick="deleteAddress({{ address.id }})" style="color: #ff6b6b;">حذف</button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            
+                            <button class="add-address-btn" onclick="showAddAddressForm()">
+                                <i class="fas fa-plus fa-2x"></i>
+                                <span>إضافة عنوان جديد</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- الإعدادات -->
+                    <div id="settings-tab" class="tab-content">
+                        <div class="tab-header">
+                            <h2 class="tab-title">إعدادات الحساب</h2>
+                            <p class="tab-subtitle">إدارة معلومات حسابك الشخصية</p>
+                        </div>
+                        
+                        <form method="post" action="{% url 'profile_update' %}" class="profile-form">
+                            {% csrf_token %}
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">الاسم الأول</label>
+                                    <input type="text" name="first_name" class="form-control" 
+                                           value="{{ user.first_name }}" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">اسم العائلة</label>
+                                    <input type="text" name="last_name" class="form-control" 
+                                           value="{{ user.last_name }}" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">البريد الإلكتروني</label>
+                                <input type="email" name="email" class="form-control" 
+                                       value="{{ user.email }}" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">رقم الهاتف</label>
+                                <input type="tel" name="phone" class="form-control" 
+                                       value="{{ user.phone }}" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">تغيير كلمة المرور (اختياري)</label>
+                                <input type="password" name="new_password" class="form-control" 
+                                       placeholder="اتركه فارغاً إذا لم ترد التغيير">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">تأكيد كلمة المرور</label>
+                                <input type="password" name="confirm_password" class="form-control">
+                            </div>
+                            
+                            <button type="submit" class="btn-primary">حفظ التغييرات</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // تبديل التبويبات
+    function switchTab(tabName) {
+        // إخفاء جميع المحتويات
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        
+        // إزالة النشاط من جميع روابط القائمة
+        document.querySelectorAll('.menu-link').forEach(link => {
+            link.classList.remove('active');
+        });
+        
+        // إظهار المحتوى المطلوب
+        document.getElementById(`${tabName}-tab`).classList.add('active');
+        
+        // تفعيل رابط القائمة
+        event.target.classList.add('active');
+    }
+    
+    // إزالة من المفضلة
+    function removeFromWishlist(productId) {
+        if (confirm('هل أنت متأكد من إزالة هذا المنتج من المفضلة؟')) {
+            fetch(`/wishlist/remove/${productId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload(); // إعادة تحميل الصفحة
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('حدث خطأ أثناء إزالة المنتج من المفضلة');
+            });
+        }
+    }
+    
+    // إلغاء الطلب
+    function cancelOrder(orderId) {
+        if (confirm('هل أنت متأكد من إلغاء هذا الطلب؟')) {
+            fetch(`/orders/${orderId}/cancel/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload(); // إعادة تحميل الصفحة
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('حدث خطأ أثناء إلغاء الطلب');
+            });
+        }
+    }
+    
+    // إعادة الطلب
+    function reorder(orderId) {
+        if (confirm('هل تريد إعادة طلب هذه المنتجات؟')) {
+            fetch(`/orders/${orderId}/reorder/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/cart/';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('حدث خطأ أثناء إعادة الطلب');
+            });
+        }
+    }
+    
+    // إظهار نموذج إضافة عنوان
+    function showAddAddressForm() {
+        // يمكنك استخدام modal هنا
+        window.location.href = "{% url 'add_address' %}";
+    }
+    
+    // تعديل العنوان
+    function editAddress(addressId) {
+        window.location.href = `/addresses/${addressId}/edit/`;
+    }
+    
+    // تعيين العنوان الافتراضي
+    function setDefaultAddress(addressId) {
+        fetch(`/addresses/${addressId}/set-default/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('حدث خطأ أثناء تعيين العنوان الافتراضي');
+        });
+    }
+    
+    // حذف العنوان
+    function deleteAddress(addressId) {
+        if (confirm('هل أنت متأكد من حذف هذا العنوان؟')) {
+            fetch(`/addresses/${addressId}/delete/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('حدث خطأ أثناء حذف العنوان');
+            });
+        }
+    }
+</script>
+{% endblock %}

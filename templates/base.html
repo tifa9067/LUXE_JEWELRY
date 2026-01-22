@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TIVE - مجوهرات فاخرة{% endblock %}</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    {% block extra_css %}{% endblock %}
+    
+    <style>
+        /* أنماط النافبار المخفي */
+        .navbar-hidden {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        /* زر التفعيل الصغير */
+        .navbar-toggle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6C63FF, #FF3E9D);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+            position: relative;
+            z-index: 1001;
+        }
+
+        .navbar-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(108, 99, 255, 0.4);
+        }
+
+        .navbar-toggle i {
+            font-size: 1.3rem;
+            transition: transform 0.3s ease;
+        }
+
+        .navbar-toggle.active i {
+            transform: rotate(45deg);
+        }
+
+        /* النافبار المخفي */
+        .navbar-content {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 350px;
+            height: 100vh;
+            background: rgba(15, 11, 36, 0.98);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            z-index: 1000;
+            transition: right 0.4s ease;
+            overflow-y: auto;
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .navbar-content.active {
+            right: 0;
+        }
+
+        /* رأس النافبار */
+        .navbar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .navbar-logo-compact {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+
+        .logo-circle-compact {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6C63FF, #FF3E9D);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-icon-compact {
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        .logo-text-compact {
+            font-size: 1.3rem;
+            font-weight: 600;
+            background: linear-gradient(90deg, #6C63FF, #A855F7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .close-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            transform: rotate(90deg);
+        }
+
+        /* محتوى النافبار */
+        .navbar-menu-compact {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            margin-bottom: 2rem;
+        }
+
+        .nav-item-compact {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link-compact {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            padding: 0.8rem 1rem;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link-compact:hover {
+            background: rgba(108, 99, 255, 0.15);
+            color: white;
+            padding-left: 1.2rem;
+        }
+
+        .nav-link-compact.active {
+            background: rgba(108, 99, 255, 0.2);
+            color: #6C63FF;
+        }
+
+        .nav-link-compact i {
+            width: 20px;
+            font-size: 1rem;
+        }
+
+        /* قسم المستخدم */
+        .user-section-compact {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .user-info-compact {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .user-avatar-compact {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6C63FF, #A855F7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .user-details-compact h4 {
+            color: white;
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .user-details-compact p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.8rem;
+        }
+
+        /* الأيقونات السريعة */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .action-btn-compact {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .action-btn-compact:hover {
+            background: rgba(108, 99, 255, 0.15);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .action-btn-compact i {
+            font-size: 1.2rem;
+        }
+
+        .action-btn-compact span {
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-compact {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #FF3E9D;
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* البحث */
+        .search-box-compact {
+            margin-top: 1.5rem;
+            position: relative;
+        }
+
+        .search-input-compact {
+            width: 100%;
+            padding: 0.8rem 1rem 0.8rem 2.5rem;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 25px;
+            color: white;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .search-input-compact:focus {
+            outline: none;
+            border-color: #6C63FF;
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .search-icon-compact {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* خلفية التعتيم */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* استجابة */
+        @media (max-width: 768px) {
+            .navbar-hidden {
+                top: 15px;
+                right: 15px;
+            }
+            
+            .navbar-toggle {
+                width: 45px;
+                height: 45px;
+            }
+            
+            .navbar-content {
+                width: 300px;
+                right: -320px;
+            }
+            
+            .navbar-content.active {
+                right: 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar-content {
+                width: 280px;
+                padding: 1.5rem;
+            }
+            
+            .logo-text-compact {
+                font-size: 1.1rem;
+            }
+        }
+
+        /* إخفاء النافبار القديم */
+        nav.navbar {
+            display: none !important;
+        }
+
+        body {
+            padding-top: 20px !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- النافبار المخفي الذي يظهر عند الضغط -->
+    <div class="navbar-hidden">
+        <!-- زر فتح النافبار -->
+        <button class="navbar-toggle" id="navbarToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        
+        <!-- خلفية التعتيم -->
+        <div class="overlay" id="overlay"></div>
+        
+        <!-- محتوى النافبار -->
+        <div class="navbar-content" id="navbarContent">
+            <!-- رأس النافبار -->
+            <div class="navbar-header">
+                <a href="{% url 'home' %}" class="navbar-logo-compact">
+                    <div class="logo-circle-compact">
+                        <i class="fas fa-gem logo-icon-compact"></i>
+                    </div>
+                    <div class="logo-text-compact">TIVE</div>
+                </a>
+                <button class="close-btn" id="closeNavbar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- البحث -->
+            <div class="search-box-compact">
+                <input type="text" class="search-input-compact" placeholder="ابحث عن مجوهرات...">
+                <i class="fas fa-search search-icon-compact"></i>
+            </div>
+            
+            <!-- القائمة الرئيسية -->
+            <ul class="navbar-menu-compact">
+                <li class="nav-item-compact">
+                    <a href="{% url 'home' %}" class="nav-link-compact {% if request.path == '/' %}active{% endif %}">
+                        <i class="fas fa-home"></i>
+                        الرئيسية
+                    </a>
+                </li>
+                
+                <li class="nav-item-compact">
+                    <a href="{% url 'product_list' %}" class="nav-link-compact {% if 'products' in request.path %}active{% endif %}">
+                        <i class="fas fa-gem"></i>
+                        المجوهرات
+                    </a>
+                </li>
+                
+                <li class="nav-item-compact">
+                    <a href="#" class="nav-link-compact">
+                        <i class="fas fa-star"></i>
+                        المفضلة
+                    </a>
+                </li>
+                
+                <li class="nav-item-compact">
+                    <a href="#" class="nav-link-compact">
+                        <i class="fas fa-info-circle"></i>
+                        عن TIVE
+                    </a>
+                </li>
+                
+                {% if user.is_staff or user.profile.user_type == 'admin' %}
+                <li class="nav-item-compact">
+                    <a href="{% url 'dashboard' %}" class="nav-link-compact {% if 'dashboard' in request.path %}active{% endif %}">
+                        <i class="fas fa-chart-line"></i>
+                        لوحة التحكم
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+            
+            <!-- قسم المستخدم -->
+            <div class="user-section-compact">
+                {% if user.is_authenticated %}
+                <div class="user-info-compact">
+                    <div class="user-avatar-compact">
+                        {{ user.first_name|first|default:user.username|first }}
+                    </div>
+                    <div class="user-details-compact">
+                        <h4>{{ user.get_full_name|default:user.username }}</h4>
+                        <p>{{ user.email }}</p>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- الأيقونات السريعة -->
+                <div class="quick-actions">
+                    <a href="{% url 'cart_detail' %}" class="action-btn-compact">
+                        <i class="fas fa-shopping-bag"></i>
+                        <span>السلة</span>
+                        {% if cart.total_items > 0 %}
+                        <span class="badge-compact">{{ cart.total_items }}</span>
+                        {% endif %}
+                    </a>
+                    
+                    <a href="#" class="action-btn-compact">
+                        <i class="fas fa-heart"></i>
+                        <span>المفضلة</span>
+                    </a>
+                    
+                    <a href="{% url 'order_list' %}" class="action-btn-compact">
+                        <i class="fas fa-box"></i>
+                        <span>طلباتي</span>
+                    </a>
+                    
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'profile' %}" class="action-btn-compact">
+                        <i class="fas fa-user"></i>
+                        <span>حسابي</span>
+                    </a>
+                    {% else %}
+                    <a href="{% url 'login' %}" class="action-btn-compact">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>تسجيل الدخول</span>
+                    </a>
+                    {% endif %}
+                </div>
+                
+                {% if user.is_authenticated %}
+                <!-- روابط إضافية -->
+                <ul class="navbar-menu-compact" style="margin-top: 1rem;">
+                    <li class="nav-item-compact">
+                        <a href="{% url 'address_list' %}" class="nav-link-compact">
+                            <i class="fas fa-map-marker-alt"></i>
+                            عناويني
+                        </a>
+                    </li>
+                    <li class="nav-item-compact">
+                        <a href="{% url 'logout' %}" class="nav-link-compact text-danger">
+                            <i class="fas fa-sign-out-alt"></i>
+                            تسجيل خروج
+                        </a>
+                    </li>
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- الرسائل -->
+    {% if messages %}
+    <div class="container">
+        {% for message in messages %}
+        <div class="alert glass-card fade-in">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- المحتوى الرئيسي -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- الفوتر -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <!-- معلومات المتجر -->
+                <div class="footer-column">
+                    <a href="{% url 'home' %}" class="logo" style="justify-content: flex-start; margin-bottom: 1.5rem;">
+                        <div class="logo-icon">
+                            <i class="fas fa-gem"></i>
+                        </div>
+                        <span class="logo-text">TIVE</span>
+                    </a>
+                    <p style="font-size: 0.9rem; color: var(--text-light);">
+                        وجهتك الفاخرة للمجوهرات الراقية. نقدم لكم أجمل تصاميم المجوهرات بتصميم عصري وأنيق.
+                    </p>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-pinterest"></i></a>
+                    </div>
+                </div>
+
+                <!-- روابط سريعة -->
+                <div class="footer-column">
+                    <h4>روابط سريعة</h4>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'home' %}">الرئيسية</a></li>
+                        <li><a href="{% url 'product_list' %}">جميع المنتجات</a></li>
+                        <li><a href="{% url 'category_list' %}">الفئات</a></li>
+                        <li><a href="#">المقاسات</a></li>
+                        <li><a href="#">اتصل بنا</a></li>
+                    </ul>
+                </div>
+
+                <!-- خدمات العملاء -->
+                <div class="footer-column">
+                    <h4>خدمات العملاء</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">سياسة الشحن</a></li>
+                        <li><a href="#">سياسة الإرجاع</a></li>
+                        <li><a href="#">الأسئلة الشائعة</a></li>
+                        <li><a href="#">دليل المقاسات</a></li>
+                        <li><a href="#">تتبع الطلب</a></li>
+                    </ul>
+                </div>
+
+                <!-- معلومات الاتصال -->
+                <div class="footer-column">
+                    <h4>تواصل معنا</h4>
+                    <ul class="footer-links">
+                        <li style="margin-bottom: 0.5rem;">
+                            <i class="fas fa-map-marker-alt" style="color: var(--text-light); margin-left: 0.5rem;"></i>
+                            الرياض، المملكة العربية السعودية
+                        </li>
+                        <li style="margin-bottom: 0.5rem;">
+                            <i class="fas fa-phone" style="color: var(--text-light); margin-left: 0.5rem;"></i>
+                            +966 11 234 5678
+                        </li>
+                        <li style="margin-bottom: 0.5rem;">
+                            <i class="fas fa-envelope" style="color: var(--text-light); margin-left: 0.5rem;"></i>
+                            info@tive-jewelry.com
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- حقوق النشر -->
+            <div class="footer-bottom">
+                <p>&copy; 2024 TIVE Jewelry. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="/static/js/main.js"></script>
+    
+    <!-- JavaScript للنافبار المخفي -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navbarToggle = document.getElementById('navbarToggle');
+            const navbarContent = document.getElementById('navbarContent');
+            const closeNavbar = document.getElementById('closeNavbar');
+            const overlay = document.getElementById('overlay');
+            
+            // التحقق من العناصر
+            if (!navbarToggle || !navbarContent || !closeNavbar || !overlay) {
+                console.log('⚠️ عناصر النافبار غير موجودة');
+                return;
+            }
+            
+            // حالة النافبار
+            let isOpen = false;
+            
+            // فتح النافبار
+            navbarToggle.addEventListener('click', function() {
+                if (!isOpen) {
+                    openNav();
+                } else {
+                    closeNav();
+                }
+            });
+            
+            // إغلاق النافبار
+            closeNavbar.addEventListener('click', closeNav);
+            
+            // إغلاق عند النقر على الخلفية
+            overlay.addEventListener('click', closeNav);
+            
+            // إغلاق بالزر Escape
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && isOpen) {
+                    closeNav();
+                }
+            });
+            
+            // وظيفة فتح النافبار
+            function openNav() {
+                navbarContent.classList.add('active');
+                overlay.classList.add('active');
+                navbarToggle.classList.add('active');
+                isOpen = true;
+                
+                // إخفاء التمرير عند فتح النافبار
+                document.body.style.overflow = 'hidden';
+            }
+            
+            // وظيفة إغلاق النافبار
+            function closeNav() {
+                navbarContent.classList.remove('active');
+                overlay.classList.remove('active');
+                navbarToggle.classList.remove('active');
+                isOpen = false;
+                
+                // إعادة التمرير
+                document.body.style.overflow = '';
+            }
+            
+            // إغلاق عند النقر على روابط
+            const navLinks = document.querySelectorAll('.nav-link-compact');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    setTimeout(closeNav, 300);
+                });
+            });
+            
+            // إغلاق عند النقر على أيقونات سريعة
+            const actionButtons = document.querySelectorAll('.action-btn-compact');
+            actionButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    setTimeout(closeNav, 300);
+                });
+            });
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

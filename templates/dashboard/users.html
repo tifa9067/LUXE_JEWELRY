@@ -1,0 +1,1468 @@
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}إدارة المستخدمين - TIVE Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-section {
+        padding-top: 8rem;
+        padding-bottom: 4rem;
+        background-color: var(--off-white);
+        min-height: 100vh;
+    }
+    
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    
+    .dashboard-title {
+        font-size: 1.8rem;
+        font-weight: 200;
+        color: var(--dark-gray);
+        margin: 0;
+    }
+    
+    .dashboard-actions {
+        display: flex;
+        gap: 1rem;
+    }
+    
+    .stats-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background-color: var(--pure-white);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+    }
+    
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: var(--radius-round);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 1.2rem;
+    }
+    
+    .stat-icon.users {
+        background-color: rgba(255, 183, 197, 0.1);
+        color: var(--primary-pastel);
+    }
+    
+    .stat-icon.admins {
+        background-color: rgba(216, 191, 216, 0.1);
+        color: var(--secondary-pastel);
+    }
+    
+    .stat-icon.active {
+        background-color: rgba(181, 234, 215, 0.1);
+        color: var(--accent-pastel);
+    }
+    
+    .stat-icon.inactive {
+        background-color: rgba(240, 240, 240, 0.5);
+        color: var(--text-light);
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 200;
+        margin-bottom: 0.25rem;
+        color: var(--dark-gray);
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        color: var(--text-light);
+        font-weight: 300;
+    }
+    
+    .filters-card {
+        background-color: var(--pure-white);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+    }
+    
+    .filters-form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        align-items: end;
+    }
+    
+    .form-group {
+        margin-bottom: 0;
+    }
+    
+    .form-label {
+        display: block;
+        font-size: 0.9rem;
+        font-weight: 300;
+        color: var(--text-gray);
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--medium-gray);
+        border-radius: var(--radius-md);
+        background-color: var(--pure-white);
+        font-size: 0.9rem;
+        font-weight: 300;
+        color: var(--dark-gray);
+        transition: all 0.2s ease;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-pastel);
+        box-shadow: 0 0 0 3px rgba(255, 183, 197, 0.1);
+    }
+    
+    .users-table-container {
+        background-color: var(--pure-white);
+        border-radius: var(--radius-lg);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        overflow: hidden;
+    }
+    
+    .table-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--light-gray);
+    }
+    
+    .table-title {
+        font-size: 1.1rem;
+        font-weight: 300;
+        color: var(--dark-gray);
+        margin: 0;
+    }
+    
+    .table-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .users-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .users-table thead {
+        background-color: var(--off-white);
+    }
+    
+    .users-table th {
+        padding: 1rem 1.5rem;
+        text-align: right;
+        font-weight: 300;
+        color: var(--text-gray);
+        font-size: 0.9rem;
+        border-bottom: 1px solid var(--light-gray);
+    }
+    
+    .users-table tbody tr {
+        border-bottom: 1px solid var(--light-gray);
+        transition: all 0.2s ease;
+    }
+    
+    .users-table tbody tr:hover {
+        background-color: rgba(255, 183, 197, 0.03);
+    }
+    
+    .users-table td {
+        padding: 1rem 1.5rem;
+        font-weight: 300;
+        color: var(--dark-gray);
+    }
+    
+    .user-avatar {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: var(--radius-round);
+        background-color: var(--primary-pastel);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 400;
+        font-size: 0.9rem;
+    }
+    
+    .user-info {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .user-name {
+        font-weight: 300;
+        margin-bottom: 0.25rem;
+    }
+    
+    .user-email {
+        font-size: 0.8rem;
+        color: var(--text-light);
+    }
+    
+    .user-role {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--radius-round);
+        font-size: 0.8rem;
+        font-weight: 300;
+    }
+    
+    .role-customer {
+        background-color: rgba(255, 183, 197, 0.1);
+        color: var(--primary-pastel);
+    }
+    
+    .role-admin {
+        background-color: rgba(216, 191, 216, 0.1);
+        color: var(--secondary-pastel);
+    }
+    
+    .user-status {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--radius-round);
+        font-size: 0.8rem;
+        font-weight: 300;
+    }
+    
+    .status-active {
+        background-color: rgba(181, 234, 215, 0.1);
+        color: var(--accent-pastel);
+    }
+    
+    .status-inactive {
+        background-color: rgba(240, 240, 240, 0.5);
+        color: var(--text-light);
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .btn-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: var(--radius-round);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--light-gray);
+        background-color: var(--pure-white);
+        color: var(--text-gray);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-icon:hover {
+        border-color: var(--primary-pastel);
+        color: var(--primary-pastel);
+    }
+    
+    .btn-icon.delete:hover {
+        border-color: #ff6b6b;
+        color: #ff6b6b;
+    }
+    
+    .table-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem;
+        border-top: 1px solid var(--light-gray);
+    }
+    
+    .pagination {
+        display: flex;
+        gap: 0.5rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .page-item {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .page-link {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--radius-round);
+        color: var(--text-gray);
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 300;
+        transition: all 0.2s ease;
+    }
+    
+    .page-link:hover {
+        background-color: var(--off-white);
+        color: var(--dark-gray);
+    }
+    
+    .page-item.active .page-link {
+        background-color: var(--primary-pastel);
+        color: var(--dark-gray);
+    }
+    
+    .page-item.disabled .page-link {
+        color: var(--text-light);
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
+    
+    /* مودال إضافة مستخدم */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .modal-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .modal {
+        background-color: var(--pure-white);
+        border-radius: var(--radius-lg);
+        width: 90%;
+        max-width: 500px;
+        max-height: 90vh;
+        overflow-y: auto;
+        transform: translateY(-20px);
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+    
+    .modal-overlay.show .modal {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--light-gray);
+    }
+    
+    .modal-title {
+        font-size: 1.2rem;
+        font-weight: 300;
+        color: var(--dark-gray);
+        margin: 0;
+    }
+    
+    .modal-close {
+        width: 32px;
+        height: 32px;
+        border-radius: var(--radius-round);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        background-color: var(--off-white);
+        color: var(--text-gray);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .modal-close:hover {
+        background-color: var(--light-gray);
+        color: var(--dark-gray);
+    }
+    
+    .modal-body {
+        padding: 1.5rem;
+    }
+    
+    .modal-form .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        padding: 1.5rem;
+        border-top: 1px solid var(--light-gray);
+    }
+    
+    /* تحسينات للاستجابة */
+    @media (max-width: 1024px) {
+        .users-table {
+            display: block;
+            overflow-x: auto;
+        }
+        
+        .filters-form {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .dashboard-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .dashboard-actions {
+            width: 100%;
+        }
+        
+        .table-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .table-footer {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+        
+        .pagination {
+            flex-wrap: wrap;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .stats-cards {
+            grid-template-columns: 1fr;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+        
+        .btn-icon {
+            width: 28px;
+            height: 28px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="dashboard-section">
+    <div class="container">
+        <!-- رأس الصفحة -->
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">إدارة المستخدمين</h1>
+            <div class="dashboard-actions">
+                <button class="btn btn-primary" onclick="openAddUserModal()">
+                    <i class="fas fa-plus me-2"></i>إضافة مستخدم
+                </button>
+                <button class="btn btn-outline">
+                    <i class="fas fa-download me-2"></i>تصدير
+                </button>
+            </div>
+        </div>
+
+        <!-- إحصائيات سريعة -->
+        <div class="stats-cards">
+            <div class="stat-card">
+                <div class="stat-icon users">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-value">{{ total_users }}</div>
+                <div class="stat-label">إجمالي المستخدمين</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon admins">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <div class="stat-value">{{ admin_users }}</div>
+                <div class="stat-label">المديرين</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon active">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <div class="stat-value">{{ active_users }}</div>
+                <div class="stat-label">نشطين</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon inactive">
+                    <i class="fas fa-user-clock"></i>
+                </div>
+                <div class="stat-value">{{ inactive_users }}</div>
+                <div class="stat-label">غير نشطين</div>
+            </div>
+        </div>
+
+        <!-- فلترة البحث -->
+        <div class="filters-card">
+            <form method="get" class="filters-form">
+                <div class="form-group">
+                    <label class="form-label">بحث</label>
+                    <input type="text" name="search" class="form-control" 
+                           placeholder="ابحث بالاسم أو البريد..." 
+                           value="{{ request.GET.search }}">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">نوع المستخدم</label>
+                    <select name="user_type" class="form-control">
+                        <option value="">كل الأنواع</option>
+                        <option value="customer" {% if request.GET.user_type == 'customer' %}selected{% endif %}>عميل</option>
+                        <option value="admin" {% if request.GET.user_type == 'admin' %}selected{% endif %}>مدير</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">الحالة</label>
+                    <select name="is_active" class="form-control">
+                        <option value="">كل الحالات</option>
+                        <option value="active" {% if request.GET.is_active == 'active' %}selected{% endif %}>نشط</option>
+                        <option value="inactive" {% if request.GET.is_active == 'inactive' %}selected{% endif %}>غير نشط</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        <i class="fas fa-filter me-2"></i>تصفية
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- جدول المستخدمين -->
+        <div class="users-table-container">
+            <div class="table-header">
+                <h2 class="table-title">قائمة المستخدمين</h2>
+                <div class="table-actions">
+                    <button class="btn btn-outline btn-sm">
+                        <i class="fas fa-sync-alt me-2"></i>تحديث
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>المستخدم</th>
+                            <th>النوع</th>
+                            <th>الحالة</th>
+                            <th>تاريخ التسجيل</th>
+                            <th>آخر دخول</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>
+                                <div class="user-avatar">
+                                    <div class="avatar-circle">
+                                        {{ user.user.first_name|first|default:user.user.username|first }}
+                                    </div>
+                                    <div class="user-info">
+                                        <div class="user-name">
+                                            {{ user.user.get_full_name|default:user.user.username }}
+                                        </div>
+                                        <div class="user-email">
+                                            {{ user.user.email }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="user-role role-{{ user.user_type }}">
+                                    {{ user.get_user_type_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="user-status status-{% if user.user.is_active %}active{% else %}inactive{% endif %}">
+                                    {% if user.user.is_active %}نشط{% else %}غير نشط{% endif %}
+                                </span>
+                            </td>
+                            <td>{{ user.user.date_joined|date:"Y/m/d" }}</td>
+                            <td>{{ user.user.last_login|date:"Y/m/d"|default:"-" }}</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn-icon" title="عرض" onclick="viewUser({{ user.user.id }})">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn-icon" title="تعديل" onclick="editUser({{ user.user.id }})">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn-icon delete" title="حذف" onclick="deleteUser({{ user.user.id }}, '{{ user.user.username }}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 3rem;">
+                                <i class="fas fa-users fa-2x mb-3" style="color: var(--text-light);"></i>
+                                <p style="color: var(--text-light); margin: 0;">لا توجد مستخدمين</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- تذييل الجدول -->
+            <div class="table-footer">
+                <div class="table-info">
+                    <span style="font-size: 0.9rem; color: var(--text-light);">
+                        عرض {{ users.start_index }} - {{ users.end_index }} من {{ users.paginator.count }} مستخدم
+                    </span>
+                </div>
+                
+                {% if users.has_other_pages %}
+                <nav>
+                    <ul class="pagination">
+                        {% if users.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ users.previous_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">
+                                <i class="fas fa-chevron-right"></i>
+                            </span>
+                        </li>
+                        {% endif %}
+                        
+                        {% for i in users.paginator.page_range %}
+                            {% if users.number == i %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ i }}</span>
+                            </li>
+                            {% elif i > users.number|add:'-3' and i < users.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ i }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    {{ i }}
+                                </a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if users.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ users.next_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">
+                                <i class="fas fa-chevron-left"></i>
+                            </span>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- مودال إضافة مستخدم -->
+<div class="modal-overlay" id="addUserModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title">إضافة مستخدم جديد</h3>
+            <button class="modal-close" onclick="closeAddUserModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form method="post" action="{% url 'user_management' %}" class="modal-form" id="addUserForm">
+            {% csrf_token %}
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">اسم المستخدم</label>
+                    <input type="text" name="username" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">البريد الإلكتروني</label>
+                    <input type="email" name="email" class="form-control" required>
+                </div>
+                
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">الاسم الأول</label>
+                        <input type="text" name="first_name" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">اسم العائلة</label>
+                        <input type="text" name="last_name" class="form-control">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">كلمة المرور</label>
+                    <input type="password" name="password" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">تأكيد كلمة المرور</label>
+                    <input type="password" name="confirm_password" class="form-control" required>
+                </div>
+                
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">رقم الهاتف</label>
+                        <input type="tel" name="phone" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">نوع المستخدم</label>
+                        <select name="user_type" class="form-control">
+                            <option value="customer">عميل</option>
+                            <option value="admin">مدير</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">المدينة</label>
+                    <input type="text" name="city" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">العنوان</label>
+                    <textarea name="address" class="form-control" rows="2"></textarea>
+                </div>
+                
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" name="is_active" id="isActive" checked>
+                    <label class="form-check-label" for="isActive" style="font-size: 0.9rem;">
+                        حساب نشط
+                    </label>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeAddUserModal()">إلغاء</button>
+                <button type="submit" class="btn btn-primary">إضافة المستخدم</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- مودال عرض المستخدم -->
+<div class="modal-overlay" id="viewUserModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title">تفاصيل المستخدم</h3>
+            <button class="modal-close" onclick="closeViewUserModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-body" id="userDetailsContent">
+            <!-- سيتم تعبئته بالجافاسكريبت -->
+        </div>
+        
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeViewUserModal()">إغلاق</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // فتح مودال إضافة مستخدم
+    function openAddUserModal() {
+        const modal = document.getElementById('addUserModal');
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    // إغلاق مودال إضافة مستخدم
+    function closeAddUserModal() {
+        const modal = document.getElementById('addUserModal');
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+        document.getElementById('addUserForm').reset();
+    }
+    
+    // فتح مودال عرض المستخدم
+    function viewUser(userId) {
+        // جلب بيانات المستخدم عبر AJAX
+        fetch(`/dashboard/users/${userId}/details/`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const content = document.getElementById('userDetailsContent');
+            content.innerHTML = `
+                <div class="user-details">
+                    <div class="text-center mb-4">
+                        <div class="avatar-circle" style="width: 80px; height: 80px; margin: 0 auto 1rem; font-size: 1.5rem;">
+                            ${data.first_name ? data.first_name[0] : data.username[0]}
+                        </div>
+                        <h4 style="font-weight: 300; margin-bottom: 0.5rem;">${data.full_name || data.username}</h4>
+                        <p style="color: var(--text-light); margin-bottom: 2rem;">${data.email}</p>
+                    </div>
+                    
+                    <div class="details-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="detail-item">
+                            <div class="detail-label" style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.25rem;">نوع المستخدم</div>
+                            <div class="detail-value" style="font-weight: 300;">${data.user_type_display}</div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <div class="detail-label" style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.25rem;">الحالة</div>
+                            <div class="detail-value">
+                                <span class="user-status status-${data.is_active ? 'active' : 'inactive'}" style="font-size: 0.8rem;">
+                                    ${data.is_active ? 'نشط' : 'غير نشط'}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <div class="detail-label" style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.25rem;">رقم الهاتف</div>
+                            <div class="detail-value" style="font-weight: 300;">${data.phone || '-'}</div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <div class="detail-label" style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.25rem;">المدينة</div>
+                            <div class="detail-value" style="font-weight: 300;">${data.city || '-'}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-item mt-3">
+                        <div class="detail-label" style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.25rem;">العنوان</div>
+                        <div class="detail-value" style="font-weight: 300;">${data.address || '-'}</div>
+                    </div>
+                    
+                    <div class="details-grid mt-3">
+                        <div class="detail-item">
+                            <div class="detail-label" style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.25rem;">تاريخ التسجيل</div>
+                            <div class="detail-value" style="font-weight: 300;">${data.date_joined}</div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <div class="detail-label" style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.25rem;">آخر دخول</div>
+                            <div class="detail-value" style="font-weight: 300;">${data.last_login || '-'}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <div class="detail-label" style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.25rem;">الطلبات</div>
+                        <div class="detail-value" style="font-weight: 300;">${data.total_orders || 0} طلب</div>
+                    </div>
+                </div>
+            `;
+            
+            const modal = document.getElementById('viewUserModal');
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showMessage('حدث خطأ في جلب بيانات المستخدم', 'error');
+        });
+    }
+    
+    // إغلاق مودال عرض المستخدم
+    function closeViewUserModal() {
+        const modal = document.getElementById('viewUserModal');
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+    }
+    
+    // تعديل المستخدم
+    function editUser(userId) {
+        // توجيه إلى صفحة التعديل أو فتح مودال التعديل
+        window.location.href = `/dashboard/users/${userId}/edit/`;
+    }
+    
+    // حذف المستخدم
+    function deleteUser(userId, username) {
+        if (confirm(`هل أنت متأكد من حذف المستخدم "${username}"؟`)) {
+            fetch(`/dashboard/user/toggle-status/${userId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage(`تم ${data.status} المستخدم ${username}`, 'success');
+                    
+                    // تحديث الصفحة بعد ثانيتين
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                } else {
+                    showMessage('حدث خطأ أثناء حذف المستخدم', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('حدث خطأ في الاتصال', 'error');
+            });
+        }
+    }
+    
+    // التحقق من نموذج إضافة مستخدم
+    document.getElementById('addUserForm').addEventListener('submit', function(e) {
+        const password = this.querySelector('[name="password"]').value;
+        const confirmPassword = this.querySelector('[name="confirm_password"]').value;
+        
+        if (password !== confirmPassword) {
+            e.preventDefault();
+            showMessage('كلمات المرور غير متطابقة', 'error');
+            return false;
+        }
+        
+        if (password.length < 8) {
+            e.preventDefault();
+            showMessage('كلمة المرور يجب أن تكون 8 أحرف على الأقل', 'error');
+            return false;
+        }
+        
+        // إظهار رسالة التحميل
+        const submitBtn = this.querySelector('[type="submit"]');
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>جاري الإضافة...';
+        submitBtn.disabled = true;
+    });
+    
+    // فلترة البحث الفورية
+    const searchInput = document.querySelector('[name="search"]');
+    let searchTimeout;
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                this.form.submit();
+            }, 800);
+        });
+    }
+    
+    // إغلاق المودال عند النقر خارجها
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('modal-overlay')) {
+            closeAddUserModal();
+            closeViewUserModal();
+        }
+    });
+    
+    // إغلاق المودال عند الضغط على Esc
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeAddUserModal();
+            closeViewUserModal();
+        }
+    });
+    
+    // عرض الرسائل
+    function showMessage(message, type = 'info') {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message';
+        messageDiv.style.cssText = `
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: ${type === 'error' ? '#ffebee' : type === 'success' ? '#e8f5e9' : '#e3f2fd'};
+            color: ${type === 'error' ? '#c62828' : type === 'success' ? '#2e7d32' : '#1565c0'};
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-md);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 3000;
+            min-width: 300px;
+            max-width: 400px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideIn 0.3s ease;
+            border-right: 4px solid ${type === 'error' ? '#ef5350' : type === 'success' ? '#66bb6a' : '#42a5f5'};
+        `;
+        
+        const icon = document.createElement('i');
+        icon.className = `fas fa-${type === 'error' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle'}`;
+        
+        const text = document.createElement('span');
+        text.textContent = message;
+        text.style.cssText = 'font-size: 0.9rem; font-weight: 300;';
+        
+        const closeBtn = document.createElement('button');
+        closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+        closeBtn.style.cssText = `
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            margin-right: auto;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            padding: 0.25rem;
+            border-radius: var(--radius-round);
+            transition: all 0.2s ease;
+        `;
+        closeBtn.onmouseover = () => closeBtn.style.opacity = '1';
+        closeBtn.onmouseout = () => closeBtn.style.opacity = '0.7';
+        closeBtn.onclick = () => messageDiv.remove();
+        
+        messageDiv.appendChild(icon);
+        messageDiv.appendChild(text);
+        messageDiv.appendChild(closeBtn);
+        
+        document.body.appendChild(messageDiv);
+        
+        // إزالة الرسالة بعد 5 ثواني
+        setTimeout(() => {
+            if (messageDiv.parentNode) {
+                messageDiv.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => messageDiv.remove(), 300);
+            }
+        }, 5000);
+    }
+
+    // إضافة الأنيميشن للرسائل
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // تفعيل/تعطيل المستخدم
+    function toggleUserStatus(userId, username, currentStatus) {
+        const action = currentStatus ? 'تعطيل' : 'تفعيل';
+        
+        if (confirm(`هل أنت متأكد من ${action} المستخدم "${username}"؟`)) {
+            fetch(`/dashboard/users/${userId}/toggle-status/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ action: currentStatus ? 'deactivate' : 'activate' })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage(`تم ${action} المستخدم ${username} بنجاح`, 'success');
+                    
+                    // تحديث الحالة في الجدول دون تحديث الصفحة
+                    const statusSpan = document.querySelector(`tr[data-user-id="${userId}"] .user-status`);
+                    if (statusSpan) {
+                        const newStatus = !currentStatus;
+                        statusSpan.className = `user-status status-${newStatus ? 'active' : 'inactive'}`;
+                        statusSpan.textContent = newStatus ? 'نشط' : 'غير نشط';
+                        
+                        // تحديث الإحصائيات
+                        updateStats(newStatus ? 'activate' : 'deactivate');
+                    }
+                } else {
+                    showMessage(data.message || `حدث خطأ أثناء ${action} المستخدم`, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('حدث خطأ في الاتصال بالخادم', 'error');
+            });
+        }
+    }
+    
+    // تحديث الإحصائيات
+    function updateStats(action) {
+        const totalElement = document.querySelector('.stat-card:nth-child(1) .stat-value');
+        const activeElement = document.querySelector('.stat-card:nth-child(3) .stat-value');
+        const inactiveElement = document.querySelector('.stat-card:nth-child(4) .stat-value');
+        
+        if (totalElement && activeElement && inactiveElement) {
+            let total = parseInt(totalElement.textContent) || 0;
+            let active = parseInt(activeElement.textContent) || 0;
+            let inactive = parseInt(inactiveElement.textContent) || 0;
+            
+            if (action === 'activate') {
+                active++;
+                inactive--;
+            } else if (action === 'deactivate') {
+                active--;
+                inactive++;
+            }
+            
+            // تحديث القيم
+            activeElement.textContent = active;
+            inactiveElement.textContent = inactive;
+            
+            // إضافة أنيميشن بسيط
+            [activeElement, inactiveElement].forEach(el => {
+                el.style.transform = 'scale(1.2)';
+                setTimeout(() => {
+                    el.style.transform = 'scale(1)';
+                }, 300);
+            });
+        }
+    }
+    
+    // تصدير البيانات
+    function exportData(format = 'csv') {
+        const params = new URLSearchParams(window.location.search);
+        params.set('export', format);
+        
+        showMessage('جاري تحضير الملف للتحميل...', 'info');
+        
+        fetch(`/dashboard/users/export/?${params.toString()}`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.blob();
+            }
+            throw new Error('Network response was not ok.');
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `users_export_${new Date().toISOString().split('T')[0]}.${format}`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
+            showMessage(`تم تصدير البيانات بنجاح إلى ملف ${format.toUpperCase()}`, 'success');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showMessage('حدث خطأ أثناء تصدير البيانات', 'error');
+        });
+    }
+    
+    // الفرز في الجدول
+    function sortTable(columnIndex) {
+        const table = document.querySelector('.users-table');
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const header = table.querySelectorAll('th')[columnIndex];
+        const isAscending = !header.classList.contains('asc');
+        
+        // إزالة علامات الفرز من جميع العناوين
+        table.querySelectorAll('th').forEach(th => {
+            th.classList.remove('asc', 'desc');
+            th.querySelector('.sort-icon')?.remove();
+        });
+        
+        // إضافة علامة الفرز للعنوان الحالي
+        header.classList.add(isAscending ? 'asc' : 'desc');
+        
+        const sortIcon = document.createElement('i');
+        sortIcon.className = `fas fa-chevron-${isAscending ? 'up' : 'down'} sort-icon`;
+        sortIcon.style.cssText = 'margin-right: 0.5rem; font-size: 0.8rem;';
+        header.insertBefore(sortIcon, header.firstChild);
+        
+        // فرز الصفوف
+        rows.sort((a, b) => {
+            const aValue = a.cells[columnIndex].textContent.trim();
+            const bValue = b.cells[columnIndex].textContent.trim();
+            
+            // محاولة تحويل إلى تاريخ إذا كان العمود يحتوي على تاريخ
+            if (columnIndex === 3 || columnIndex === 4) {
+                const aDate = new Date(aValue.replace(/\//g, '-'));
+                const bDate = new Date(bValue.replace(/\//g, '-'));
+                
+                if (!isNaN(aDate) && !isNaN(bDate)) {
+                    return isAscending ? aDate - bDate : bDate - aDate;
+                }
+            }
+            
+            // محاولة تحويل إلى رقم إذا كان ممكنًا
+            if (!isNaN(aValue) && !isNaN(bValue) && aValue !== '' && bValue !== '') {
+                return isAscending ? parseFloat(aValue) - parseFloat(bValue) : parseFloat(bValue) - parseFloat(aValue);
+            }
+            
+            // فرز نصي
+            return isAscending ? 
+                aValue.localeCompare(bValue, 'ar') : 
+                bValue.localeCompare(aValue, 'ar');
+        });
+        
+        // إعادة ترتيب الصفوف في الجدول
+        rows.forEach(row => tbody.appendChild(row));
+    }
+    
+    // إضافة إمكانية الفرز عند النقر على العناوين
+    document.querySelectorAll('.users-table th').forEach((th, index) => {
+        if (index < 5) { // استبعاد عمود الإجراءات
+            th.style.cursor = 'pointer';
+            th.addEventListener('click', () => sortTable(index));
+            
+            // إضافة تأثير hover
+            th.addEventListener('mouseenter', () => {
+                th.style.backgroundColor = 'var(--light-gray)';
+            });
+            
+            th.addEventListener('mouseleave', () => {
+                th.style.backgroundColor = '';
+            });
+        }
+    });
+    
+    // بحث متقدم
+    function advancedSearch() {
+        const modal = document.getElementById('advancedSearchModal');
+        if (!modal) {
+            createAdvancedSearchModal();
+        } else {
+            modal.classList.add('show');
+        }
+        document.body.style.overflow = 'hidden';
+    }
+    
+    // إنشاء مودال البحث المتقدم
+    function createAdvancedSearchModal() {
+        const modalHTML = `
+            <div class="modal-overlay show" id="advancedSearchModal">
+                <div class="modal" style="max-width: 600px;">
+                    <div class="modal-header">
+                        <h3 class="modal-title">بحث متقدم</h3>
+                        <button class="modal-close" onclick="closeAdvancedSearchModal()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="advancedSearchForm">
+                            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                                <div class="form-group">
+                                    <label class="form-label">تاريخ التسجيل من</label>
+                                    <input type="date" name="date_from" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">تاريخ التسجيل إلى</label>
+                                    <input type="date" name="date_to" class="form-control">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">المدينة</label>
+                                <input type="text" name="city" class="form-control" placeholder="اكتب المدينة...">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">نطاق الطلبات</label>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                    <input type="number" name="min_orders" class="form-control" placeholder="الحد الأدنى">
+                                    <input type="number" name="max_orders" class="form-control" placeholder="الحد الأعلى">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">ترتيب النتائج حسب</label>
+                                <select name="order_by" class="form-control">
+                                    <option value="">الترتيب الافتراضي</option>
+                                    <option value="date_joined">تاريخ التسجيل</option>
+                                    <option value="last_login">آخر دخول</option>
+                                    <option value="username">اسم المستخدم</option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline" onclick="closeAdvancedSearchModal()">إلغاء</button>
+                        <button type="button" class="btn btn-primary" onclick="applyAdvancedSearch()">تطبيق البحث</button>
+                        <button type="button" class="btn btn-secondary" onclick="resetAdvancedSearch()">إعادة تعيين</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+    }
+    
+    function closeAdvancedSearchModal() {
+        const modal = document.getElementById('advancedSearchModal');
+        if (modal) {
+            modal.classList.remove('show');
+            setTimeout(() => modal.remove(), 300);
+        }
+        document.body.style.overflow = 'auto';
+    }
+    
+    function applyAdvancedSearch() {
+        const form = document.getElementById('advancedSearchForm');
+        const formData = new FormData(form);
+        const params = new URLSearchParams();
+        
+        for (let [key, value] of formData) {
+            if (value) {
+                params.append(key, value);
+            }
+        }
+        
+        // إضافة معلمات البحث الحالية
+        const currentParams = new URLSearchParams(window.location.search);
+        for (let [key, value] of currentParams) {
+            if (key !== 'page' && !params.has(key)) {
+                params.append(key, value);
+            }
+        }
+        
+        window.location.href = `?${params.toString()}`;
+    }
+    
+    function resetAdvancedSearch() {
+        const form = document.getElementById('advancedSearchForm');
+        form.reset();
+    }
+    
+    // تحديث تلقائي للجدول كل 30 ثانية (اختياري)
+    function autoRefreshTable() {
+        setTimeout(() => {
+            if (document.visibilityState === 'visible') {
+                const refreshBtn = document.querySelector('.table-actions .btn-outline');
+                if (refreshBtn) {
+                    refreshBtn.click();
+                }
+            }
+        }, 30000); // 30 ثانية
+    }
+    
+    // بدء التحديث التلقائي
+    autoRefreshTable();
+    
+    // تحسين تجربة المستخدم عند التحميل
+    document.addEventListener('DOMContentLoaded', function() {
+        // إضافة تأثير تحميل للجدول
+        const table = document.querySelector('.users-table tbody');
+        if (table) {
+            table.style.opacity = '0';
+            setTimeout(() => {
+                table.style.transition = 'opacity 0.3s ease';
+                table.style.opacity = '1';
+            }, 100);
+        }
+        
+        // إضافة tooltip للأزرار
+        document.querySelectorAll('[title]').forEach(el => {
+            el.addEventListener('mouseenter', function(e) {
+                const tooltip = document.createElement('div');
+                tooltip.className = 'tooltip';
+                tooltip.textContent = this.title;
+                tooltip.style.cssText = `
+                    position: absolute;
+                    background: var(--dark-gray);
+                    color: white;
+                    padding: 0.5rem 0.75rem;
+                    border-radius: var(--radius-sm);
+                    font-size: 0.8rem;
+                    font-weight: 300;
+                    z-index: 1000;
+                    white-space: nowrap;
+                    pointer-events: none;
+                    transform: translateY(-100%) translateX(-50%);
+                    left: 50%;
+                    margin-top: -5px;
+                `;
+                
+                document.body.appendChild(tooltip);
+                
+                this.dataset.tooltipId = 'tooltip-' + Date.now();
+                this.addEventListener('mouseleave', function() {
+                    if (tooltip.parentNode) {
+                        tooltip.remove();
+                    }
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}

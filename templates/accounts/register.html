@@ -1,0 +1,1531 @@
+
+
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}انضمام إلى TIVE - مجوهرات فاخرة{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* =========================================== */
+    /* صفحة التسجيل الفاخرة */
+    /* =========================================== */
+    
+    .register-section {
+        min-height: 100vh;
+        padding: 8rem 0 4rem;
+        background: linear-gradient(135deg, 
+            rgba(219, 76, 76, 0.98) 0%,
+            rgb(199, 44, 44) 100%);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .register-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: 
+            radial-gradient(circle at 10% 20%, rgba(255, 183, 197, 0.03) 0%, transparent 40%),
+            radial-gradient(circle at 90% 80%, rgba(216, 191, 216, 0.03) 0%, transparent 40%),
+            radial-gradient(circle at 50% 50%, rgba(181, 234, 215, 0.02) 0%, transparent 60%);
+        z-index: 0;
+    }
+    
+    .register-container {
+        position: relative;
+        z-index: 1;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+    
+    .register-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4rem;
+        align-items: center;
+    }
+    
+    /* الجانب الأيسر - التصميم الفني */
+    .register-art {
+        position: relative;
+        height: 600px;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 
+            0 30px 60px rgba(0, 0, 0, 0.08),
+            0 15px 30px rgba(0, 0, 0, 0.04),
+            inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+    
+    .art-background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, 
+            rgba(255, 183, 197, 0.1) 0%,
+            rgba(216, 191, 216, 0.1) 50%,
+            rgba(181, 234, 215, 0.1) 100%);
+        z-index: 1;
+    }
+    
+    .art-content {
+        position: relative;
+        z-index: 2;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 3rem;
+        color: var(--dark-gray);
+    }
+    
+    .art-header {
+        text-align: center;
+    }
+    
+    .art-logo {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 2rem;
+    }
+    
+    .art-logo-circle {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgb(26, 7, 7);
+        font-size: 1.2rem;
+        box-shadow: 0 8px 20px rgba(255, 183, 197, 0.3);
+    }
+    
+    .art-logo-text {
+        font-size: 1.8rem;
+        font-weight: 200;
+        letter-spacing: 0.1em;
+    }
+    
+    .art-title {
+        font-size: 2.5rem;
+        font-weight: 200;
+        margin-bottom: 1rem;
+        line-height: 1.2;
+    }
+    
+    .art-subtitle {
+        font-size: 1.1rem;
+        font-weight: 300;
+        color: var(--text-gray);
+        line-height: 1.6;
+        margin-bottom: 2rem;
+    }
+    
+    .art-features {
+        margin-top: 2rem;
+    }
+    
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        transition: all 0.3s ease;
+    }
+    
+    .feature-item:hover {
+        transform: translateX(10px);
+        background: rgba(255, 255, 255, 0.4);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.03);
+    }
+    
+    .feature-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+    
+    .feature-text {
+        flex: 1;
+    }
+    
+    .feature-title {
+        font-weight: 300;
+        margin-bottom: 0.25rem;
+        color: var(--dark-gray);
+    }
+    
+    .feature-desc {
+        font-size: 0.85rem;
+        color: var(--text-gray);
+        font-weight: 300;
+    }
+    
+    .art-footer {
+        text-align: center;
+        margin-top: 2rem;
+    }
+    
+    .member-count {
+        font-size: 0.9rem;
+        color: var(--text-light);
+        font-weight: 300;
+    }
+    
+    .count-number {
+        font-weight: 400;
+        color: var(--primary-pastel);
+    }
+    
+    /* الجانب الأيمن - نموذج التسجيل */
+    .register-form-container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(240, 240, 240, 0.8);
+        border-radius: 24px;
+        padding: 3rem;
+        box-shadow: 
+            0 20px 60px rgba(0, 0, 0, 0.05),
+            0 10px 30px rgba(0, 0, 0, 0.02),
+            inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+    
+    .form-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+    
+    .form-title {
+        font-size: 2rem;
+        font-weight: 200;
+        margin-bottom: 0.5rem;
+        color: var(--dark-gray);
+    }
+    
+    .form-subtitle {
+        font-size: 1rem;
+        color: var(--text-gray);
+        font-weight: 300;
+    }
+    
+    /* تحسينات النموذج */
+    .form-group {
+        margin-bottom: 1.75rem;
+        position: relative;
+    }
+    
+    .form-label {
+        display: block;
+        font-size: 0.9rem;
+        font-weight: 300;
+        color: var(--dark-gray);
+        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-label.required::after {
+        content: ' *';
+        color: var(--primary-pastel);
+    }
+    
+    .input-group {
+        position: relative;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 1rem 1.25rem;
+        padding-right: 3rem;
+        background: rgba(250, 250, 250, 0.8);
+        border: 1px solid rgba(224, 224, 224, 0.5);
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 300;
+        color: var(--dark-gray);
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-pastel);
+        background: rgb(87, 48, 48);
+        box-shadow: 
+            0 0 0 3px rgba(255, 183, 197, 0.1),
+            0 5px 15px rgba(0, 0, 0, 0.02);
+    }
+    
+    .input-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-light);
+        pointer-events: none;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus + .input-icon {
+        color: var(--primary-pastel);
+    }
+    
+    .toggle-password {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--text-light);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        padding: 0.5rem;
+        border-radius: 6px;
+    }
+    
+    .toggle-password:hover {
+        color: var(--primary-pastel);
+        background: rgba(255, 183, 197, 0.1);
+    }
+    
+    /* أزرار الاختيار */
+    .radio-group {
+        display: flex;
+        gap: 2rem;
+        margin-top: 1rem;
+    }
+    
+    .radio-label {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        cursor: pointer;
+        font-weight: 300;
+        color: var(--text-gray);
+        transition: all 0.3s ease;
+    }
+    
+    .radio-custom {
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(224, 224, 224, 0.8);
+        border-radius: 50%;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+    
+    .radio-input:checked + .radio-custom {
+        border-color: var(--primary-pastel);
+        background: var(--primary-pastel);
+    }
+    
+    .radio-input:checked + .radio-custom::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 8px;
+        height: 8px;
+        background: white;
+        border-radius: 50%;
+    }
+    
+    .radio-input:checked ~ .radio-text {
+        color: var(--dark-gray);
+    }
+    
+    .checkbox-group {
+        margin-top: 1rem;
+    }
+    
+    .checkbox-label {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        cursor: pointer;
+        font-weight: 300;
+        color: var(--text-gray);
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+    
+    .checkbox-custom {
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(224, 224, 224, 0.8);
+        border-radius: 6px;
+        position: relative;
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+    
+    .checkbox-input:checked + .checkbox-custom {
+        border-color: var(--primary-pastel);
+        background: var(--primary-pastel);
+    }
+    
+    .checkbox-input:checked + .checkbox-custom::after {
+        content: '✓';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 0.8rem;
+    }
+    
+    /* زر التسجيل */
+    .register-btn {
+        width: 100%;
+        padding: 1.25rem;
+        background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel));
+        border: none;
+        border-radius: 12px;
+        color: var(--dark-gray);
+        font-size: 1rem;
+        font-weight: 300;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .register-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 
+            0 10px 30px rgba(255, 183, 197, 0.3),
+            0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .register-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .btn-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* فاصل التسجيل */
+    .divider {
+        display: flex;
+        align-items: center;
+        margin: 2rem 0;
+        color: var(--text-light);
+        font-size: 0.9rem;
+        font-weight: 300;
+    }
+    
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(90deg, 
+            transparent, 
+            rgba(224, 224, 224, 0.8), 
+            transparent);
+    }
+    
+    .divider span {
+        padding: 0 1rem;
+    }
+    
+    /* أزرار التسجيل الاجتماعي */
+    .social-buttons {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .social-btn {
+        padding: 0.75rem;
+        background: rgba(250, 250, 250, 0.8);
+        border: 1px solid rgba(224, 224, 224, 0.5);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-gray);
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        font-weight: 300;
+    }
+    
+    .social-btn:hover {
+        transform: translateY(-1px);
+        background: white;
+        border-color: var(--primary-pastel);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.02);
+    }
+    
+    .social-btn i {
+        margin-left: 0.5rem;
+        font-size: 1.1rem;
+    }
+    
+    .social-google { color: #DB4437; }
+    .social-facebook { color: #4267B2; }
+    .social-apple { color: #000000; }
+    
+    /* رابط تسجيل الدخول */
+    .login-link {
+        text-align: center;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(240, 240, 240, 0.8);
+    }
+    
+    .login-link a {
+        color: var(--primary-pastel);
+        text-decoration: none;
+        font-weight: 300;
+        transition: all 0.3s ease;
+    }
+    
+    .login-link a:hover {
+        text-decoration: underline;
+    }
+    
+    /* رسائل الأخطاء */
+    .error-message {
+        font-size: 0.85rem;
+        color: #ff6b6b;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    /* مؤشر القوة لكلمة المرور */
+    .password-strength {
+        margin-top: 0.5rem;
+    }
+    
+    .strength-bar {
+        height: 4px;
+        background: rgba(224, 224, 224, 0.5);
+        border-radius: 2px;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+    }
+    
+    .strength-fill {
+        height: 100%;
+        width: 0;
+        background: var(--primary-pastel);
+        transition: all 0.3s ease;
+        border-radius: 2px;
+    }
+    
+    .strength-text {
+        font-size: 0.8rem;
+        color: var(--text-light);
+        font-weight: 300;
+    }
+    
+    /* تحسينات للاستجابة */
+    @media (max-width: 1024px) {
+        .register-grid {
+            grid-template-columns: 1fr;
+            gap: 3rem;
+        }
+        
+        .register-art {
+            height: 400px;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .register-section {
+            padding: 6rem 0 3rem;
+        }
+        
+        .register-container {
+            padding: 0 1rem;
+        }
+        
+        .register-form-container {
+            padding: 2rem;
+        }
+        
+        .art-title {
+            font-size: 2rem;
+        }
+        
+        .form-title {
+            font-size: 1.75rem;
+        }
+        
+        .social-buttons {
+            grid-template-columns: 1fr;
+        }
+        
+        .radio-group {
+            flex-direction: column;
+            gap: 1rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .register-art {
+            height: 350px;
+            padding: 2rem;
+        }
+        
+        .art-title {
+            font-size: 1.75rem;
+        }
+        
+        .register-form-container {
+            padding: 1.5rem;
+        }
+    }
+    
+    /* تأثيرات الأنيميشن */
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+    
+    .floating-element {
+        animation: float 6s ease-in-out infinite;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="register-section">
+    <div class="register-container">
+        <div class="register-grid">
+            <!-- الجانب الأيسر - التصميم الفني -->
+            <div class="register-art floating-element">
+                <div class="art-background"></div>
+                <div class="art-content">
+                    <div class="art-header">
+                        <div class="art-logo">
+                            <div class="art-logo-circle">
+                                <i class="fas fa-gem"></i>
+                            </div>
+                            <span class="art-logo-text">TIVE</span>
+                        </div>
+                        
+                        <h2 class="art-title">انضمي إلى عائلة TIVE</h2>
+                        <p class="art-subtitle">
+                            حيث يجتمع الفخامـة مع الأناقة. اكتشفي عالم المجوهرات الراقية 
+                            وانضمي إلى مجتمع يقدّر الجمال والإبداع في كل تفصيل.
+                        </p>
+                    </div>
+                    
+                    <div class="art-features">
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-gem"></i>
+                            </div>
+                            <div class="feature-text">
+                                <div class="feature-title">تصاميم حصرية</div>
+                                <div class="feature-desc">مجموعات فريدة لا تجدينها إلا هنا</div>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-shipping-fast"></i>
+                            </div>
+                            <div class="feature-text">
+                                <div class="feature-title">شحن مجاني</div>
+                                <div class="feature-desc">لجميع الطلبات فوق 500 ريال</div>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="feature-text">
+                                <div class="feature-title">تجربة آمنة</div>
+                                <div class="feature-desc">حماية كاملة لبياناتك وخصوصيتك</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="art-footer">
+                        <div class="member-count">
+                            <span class="count-number">+10,000</span> عضو يثقون بنا
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- الجانب الأيمن - نموذج التسجيل -->
+            <div class="register-form-container">
+                <div class="form-header">
+                    <h2 class="form-title">ابدئي رحلتك معنا</h2>
+                    <p class="form-subtitle">أنشئي حسابك في دقائق واستمتعي بتجربة فريدة</p>
+                </div>
+                
+                <form method="post" class="register-form" id="registerForm">
+                    {% csrf_token %}
+                    
+                    {% if form.errors %}
+                    <div class="error-message" style="
+                        background: rgba(255, 107, 107, 0.1);
+                        border: 1px solid rgba(255, 107, 107, 0.2);
+                        border-radius: 8px;
+                        padding: 1rem;
+                        margin-bottom: 1.5rem;
+                    ">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>يرجى تصحيح الأخطاء في النموذج</span>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- الاسم -->
+                    <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label required">الاسم الأول</label>
+                            <div class="input-group">
+                                <input type="text" 
+                                       name="first_name" 
+                                       class="form-control" 
+                                       value="{{ form.first_name.value|default:'' }}"
+                                       placeholder="مثال: سارة"
+                                       required>
+                                <i class="fas fa-user input-icon"></i>
+                            </div>
+                            {% if form.first_name.errors %}
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ form.first_name.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label required">اسم العائلة</label>
+                            <div class="input-group">
+                                <input type="text" 
+                                       name="last_name" 
+                                       class="form-control" 
+                                       value="{{ form.last_name.value|default:'' }}"
+                                       placeholder="مثال: أحمد"
+                                       required>
+                                <i class="fas fa-user input-icon"></i>
+                            </div>
+                            {% if form.last_name.errors %}
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ form.last_name.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- معلومات الاتصال -->
+                    <div class="form-group">
+                        <label class="form-label required">البريد الإلكتروني</label>
+                        <div class="input-group">
+                            <input type="email" 
+                                   name="email" 
+                                   class="form-control" 
+                                   value="{{ form.email.value|default:'' }}"
+                                   placeholder="example@email.com"
+                                   required>
+                            <i class="fas fa-envelope input-icon"></i>
+                        </div>
+                        {% if form.email.errors %}
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form.email.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label required">رقم الهاتف</label>
+                        <div class="input-group">
+                            <input type="tel" 
+                                   name="phone" 
+                                   class="form-control" 
+                                   value="{{ form.phone.value|default:'' }}"
+                                   placeholder="05xxxxxxxx"
+                                   required>
+                            <i class="fas fa-phone input-icon"></i>
+                        </div>
+                        {% if form.phone.errors %}
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form.phone.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- اسم المستخدم -->
+                    <div class="form-group">
+                        <label class="form-label required">اسم المستخدم</label>
+                        <div class="input-group">
+                            <input type="text" 
+                                   name="username" 
+                                   class="form-control" 
+                                   value="{{ form.username.value|default:'' }}"
+                                   placeholder="اختر اسم مستخدم فريد"
+                                   required
+                                   oninput="checkUsernameAvailability(this.value)">
+                            <i class="fas fa-at input-icon"></i>
+                        </div>
+                        <small class="text-muted" style="display: block; margin-top: 0.25rem; font-size: 0.8rem;">
+                            سيتم استخدامه لتسجيل الدخول
+                        </small>
+                        <div id="usernameAvailability" style="font-size: 0.8rem; margin-top: 0.25rem;"></div>
+                        {% if form.username.errors %}
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form.username.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- كلمة المرور -->
+                    <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label required">كلمة المرور</label>
+                            <div class="input-group">
+                                <input type="password" 
+                                       name="password1" 
+                                       id="password1" 
+                                       class="form-control" 
+                                       placeholder="••••••••"
+                                       required
+                                       oninput="updatePasswordStrength(this.value)">
+                                <button type="button" class="toggle-password" onclick="togglePassword('password1', this)">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="password-strength">
+                                <div class="strength-bar">
+                                    <div class="strength-fill" id="passwordStrength"></div>
+                                </div>
+                                <div class="strength-text" id="strengthText">قوة كلمة المرور</div>
+                            </div>
+                            {% if form.password1.errors %}
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ form.password1.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label required">تأكيد كلمة المرور</label>
+                            <div class="input-group">
+                                <input type="password" 
+                                       name="password2" 
+                                       id="password2" 
+                                       class="form-control" 
+                                       placeholder="••••••••"
+                                       required
+                                       oninput="checkPasswordMatch()">
+                                <button type="button" class="toggle-password" onclick="togglePassword('password2', this)">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div id="passwordMatch" style="font-size: 0.8rem; margin-top: 0.25rem;"></div>
+                            {% if form.password2.errors %}
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ form.password2.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- النوع -->
+                    <div class="form-group">
+                        <label class="form-label required">النوع</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="gender" value="F" class="radio-input" checked>
+                                <span class="radio-custom"></span>
+                                <span class="radio-text">أنثى</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="gender" value="M" class="radio-input">
+                                <span class="radio-custom"></span>
+                                <span class="radio-text">ذكر</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- الموافقة على الشروط -->
+                    <div class="form-group checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="terms" class="checkbox-input" required>
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-text">
+                                أوافق على <a href="#" class="text-decoration-underline">شروط الاستخدام</a> 
+                                و <a href="#" class="text-decoration-underline">سياسة الخصوصية</a>
+                            </span>
+                        </label>
+                    </div>
+                    
+                    <!-- النشرة البريدية -->
+                    <div class="form-group checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="newsletter" class="checkbox-input" checked>
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-text">
+                                أرغب في تلقي عروض حصرية وأخبار من TIVE
+                            </span>
+                        </label>
+                    </div>
+                    
+                    <!-- زر التسجيل -->
+                    <button type="submit" class="register-btn" id="registerBtn">
+                        <div class="btn-content">
+                            <i class="fas fa-user-plus"></i>
+                            <span>إنشاء حساب</span>
+                        </div>
+                    </button>
+                </form>
+                
+                <!-- فاصل التسجيل -->
+                <div class="divider">
+                    <span>أو سجلي دخول باستخدام</span>
+                </div>
+                
+                <!-- أزرار التواصل الاجتماعي -->
+                <div class="social-buttons">
+                    <a href="#" class="social-btn social-google">
+                        <i class="fab fa-google"></i>
+                        <span>Google</span>
+                    </a>
+                    <a href="#" class="social-btn social-facebook">
+                        <i class="fab fa-facebook-f"></i>
+                        <span>Facebook</span>
+                    </a>
+                    <a href="#" class="social-btn social-apple">
+                        <i class="fab fa-apple"></i>
+                        <span>Apple</span>
+                    </a>
+                </div>
+                
+                <!-- رابط تسجيل الدخول -->
+                <div class="login-link">
+                    <p>
+                        لديك حساب بالفعل؟
+                        <a href="{% url 'login' %}">سجلي دخول</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // تبديل عرض كلمة المرور
+    function togglePassword(inputId, button) {
+        const input = document.getElementById(inputId);
+        const icon = button.querySelector('i');
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+    
+    // التحقق من توفر اسم المستخدم
+    let usernameTimeout;
+    function checkUsernameAvailability(username) {
+        clearTimeout(usernameTimeout);
+        
+        if (username.length < 3) {
+            document.getElementById('usernameAvailability').innerHTML = '';
+            return;
+        }
+        
+        usernameTimeout = setTimeout(() => {
+            // هنا يمكن إضافة طلب AJAX للتحقق من اسم المستخدم
+            const availabilityDiv = document.getElementById('usernameAvailability');
+            
+            if (username.length < 4) {
+                availabilityDiv.innerHTML = '<span style="color: #ff6b6b;">يجب أن يكون 4 أحرف على الأقل</span>';
+                return;
+            }
+            
+            // محاكاة التحقق
+            const takenUsernames = ['admin', 'test', 'user'];
+            if (takenUsernames.includes(username.toLowerCase())) {
+                availabilityDiv.innerHTML = '<span style="color: #ff6b6b;">اسم المستخدم غير متاح</span>';
+            } else {
+                availabilityDiv.innerHTML = '<span style="color: #4caf50;">اسم المستخدم متاح</span>';
+            }
+        }, 500);
+    }
+    
+    // تحديث قوة كلمة المرور
+    function updatePasswordStrength(password) {
+        const strengthBar = document.getElementById('passwordStrength');
+        const strengthText = document.getElementById('strengthText');
+        
+        let strength = 0;
+        let text = 'ضعيفة';
+        let color = '#ff6b6b';
+        
+        if (password.length >= 8) strength += 25;
+        if (/[A-Z]/.test(password)) strength += 25;
+        if (/[0-9]/.test(password)) strength += 25;
+        if (/[^A-Za-z0-9]/.test(password)) strength += 25;
+        
+        if (strength >= 75) {
+            text = 'قوية جداً';
+            color = '#4caf50';
+        } else if (strength >= 50) {
+            text = 'جيدة';
+            color = '#8bc34a';
+        } else if (strength >= 25) {
+            text = 'متوسطة';
+            color = '#ff9800';
+        }
+        
+        strengthBar.style.width = strength + '%';
+        strengthBar.style.backgroundColor = color;
+        strengthText.textContent = 'قوة كلمة المرور: ' + text;
+        strengthText.style.color = color;
+    }
+    
+    // التحقق من تطابق كلمتي المرور
+    function checkPasswordMatch() {
+        const password1 = document.getElementById('password1').value;
+        const password2 = document.getElementById('password2').value;
+        const matchDiv = document.getElementById('passwordMatch');
+        
+        if (!password1 || !password2) {
+            matchDiv.innerHTML = '';
+            return;
+        }
+        
+        if (password1 === password2) {
+            matchDiv.innerHTML = '<span style="color: #4caf50;">كلمات المرور متطابقة</span>';
+        } else {
+            matchDiv.innerHTML = '<span style="color: #ff6b6b;">كلمات المرور غير متطابقة</span>';
+        }
+    }
+    
+    // التحقق من النموذج قبل الإرسال
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        const password1 = document.getElementById('password1').value;
+        const password2 = document.getElementById('password2').value;
+        const terms = document.querySelector('input[name="terms"]');
+        const registerBtn = document.getElementById('registerBtn');
+        
+        // التحقق من كلمات المرور
+        if (password1 !== password2) {
+            e.preventDefault();
+            showMessage('كلمات المرور غير متطابقة', 'error');
+            return;
+        }
+        
+        // التحقق من الشروط
+        if (!terms.checked) {
+            e.preventDefault();
+            showMessage('يجب الموافقة على شروط الاستخدام', 'error');
+            return;
+        }
+        
+        // إظهار حالة التحميل
+        registerBtn.disabled = true;
+        registerBtn.innerHTML = `
+            <div class="btn-content">
+                <i class="fas fa-spinner fa-spin"></i>
+                <span>جاري إنشاء الحساب...</span>
+            </div>
+        `;
+    });
+    
+      // عرض الرسائل
+    function showMessage(message, type = 'success') {
+        // إزالة أي رسالة سابقة
+        const existingMessage = document.querySelector('.alert-message');
+        if (existingMessage) {
+            existingMessage.remove();
+        }
+        
+        // إنشاء عنصر الرسالة
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `alert-message ${type}`;
+        messageDiv.innerHTML = `
+            <div style="
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                left: 20px;
+                max-width: 500px;
+                margin: 0 auto;
+                background: ${type === 'error' ? 'rgba(255, 107, 107, 0.95)' : 'rgba(76, 175, 80, 0.95)'};
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                z-index: 1000;
+                backdrop-filter: blur(10px);
+                animation: slideDown 0.3s ease-out;
+            ">
+                <i class="fas ${type === 'error' ? 'fa-exclamation-triangle' : 'fa-check-circle'}"></i>
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()" style="
+                    margin-right: auto;
+                    background: none;
+                    border: none;
+                    color: white;
+                    cursor: pointer;
+                    opacity: 0.7;
+                    transition: opacity 0.2s;
+                " onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+        
+        document.body.appendChild(messageDiv);
+        
+        // إزالة الرسالة تلقائياً بعد 5 ثواني
+        setTimeout(() => {
+            if (messageDiv.parentElement) {
+                messageDiv.remove();
+            }
+        }, 5000);
+    }
+    
+    // التأكد من تحميل FontAwesome
+    function loadFontAwesome() {
+        if (!document.querySelector('link[href*="font-awesome"]')) {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
+            document.head.appendChild(link);
+        }
+    }
+    
+    // التحقق من صيغة البريد الإلكتروني
+    function validateEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    }
+    
+    // التحقق من صيغة رقم الهاتف السعودي
+    function validateSaudiPhone(phone) {
+        const re = /^(05|5)(5|0|3|6|4|9|1|8|7)([0-9]{7})$/;
+        return re.test(phone);
+    }
+    
+    // التحقق من الحقول عند التركيز خارجها
+    function setupFieldValidation() {
+        const fields = document.querySelectorAll('.form-control');
+        
+        fields.forEach(field => {
+            field.addEventListener('blur', function() {
+                validateField(this);
+            });
+        });
+    }
+    
+    // التحقق من حقل محدد
+    function validateField(field) {
+        const value = field.value.trim();
+        const fieldName = field.name;
+        const errorDiv = field.parentElement.nextElementSibling;
+        
+        // إزالة أي رسالة خطأ سابقة
+        if (errorDiv && errorDiv.classList.contains('error-message')) {
+            errorDiv.remove();
+        }
+        
+        let isValid = true;
+        let errorMessage = '';
+        
+        switch(fieldName) {
+            case 'email':
+                if (value && !validateEmail(value)) {
+                    isValid = false;
+                    errorMessage = 'البريد الإلكتروني غير صالح';
+                }
+                break;
+                
+            case 'phone':
+                if (value && !validateSaudiPhone(value)) {
+                    isValid = false;
+                    errorMessage = 'رقم الهاتف السعودي يجب أن يبدأ بـ 05 ويحتوي على 10 أرقام';
+                }
+                break;
+                
+            case 'password1':
+                if (value && value.length < 8) {
+                    isValid = false;
+                    errorMessage = 'كلمة المرور يجب أن تكون 8 أحرف على الأقل';
+                }
+                break;
+        }
+        
+        if (!isValid) {
+            // إضافة رسالة الخطأ
+            const newErrorDiv = document.createElement('div');
+            newErrorDiv.className = 'error-message';
+            newErrorDiv.innerHTML = `
+                <i class="fas fa-exclamation-circle"></i>
+                <span>${errorMessage}</span>
+            `;
+            field.parentElement.parentElement.appendChild(newErrorDiv);
+            
+            // إضافة حد أحمر للحقل
+            field.style.borderColor = '#ff6b6b';
+            field.style.boxShadow = '0 0 0 3px rgba(255, 107, 107, 0.1)';
+        } else {
+            // إعادة التنسيق الطبيعي
+            field.style.borderColor = '';
+            field.style.boxShadow = '';
+        }
+        
+        return isValid;
+    }
+    
+    // توليد اسم مستخدم مقترح من الاسم
+    function suggestUsername() {
+        const firstName = document.querySelector('input[name="first_name"]').value.trim();
+        const lastName = document.querySelector('input[name="last_name"]').value.trim();
+        
+        if (firstName && lastName) {
+            const baseUsername = (firstName + lastName.charAt(0)).toLowerCase().replace(/\s/g, '');
+            const randomNum = Math.floor(Math.random() * 1000);
+            const suggestedUsername = baseUsername + randomNum;
+            
+            document.querySelector('input[name="username"]').value = suggestedUsername;
+            checkUsernameAvailability(suggestedUsername);
+        }
+    }
+    
+    // إضافة تأثيرات للعناصر عند التمرير
+    function setupScrollAnimations() {
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+        
+        // مراقبة العناصر
+        const animatedElements = document.querySelectorAll('.feature-item, .register-form-container, .register-art');
+        animatedElements.forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            observer.observe(el);
+        });
+    }
+    
+    // تحديث عداد الأعضاء بشكل ديناميكي
+    function updateMemberCount() {
+        const countElement = document.querySelector('.count-number');
+        if (!countElement) return;
+        
+        const currentCount = parseInt(countElement.textContent.replace(/[^0-9]/g, ''));
+        const targetCount = currentCount + Math.floor(Math.random() * 10) + 1;
+        
+        // تأثير العد
+        let count = currentCount;
+        const interval = setInterval(() => {
+            count += Math.floor((targetCount - currentCount) / 20);
+            if (count >= targetCount) {
+                count = targetCount;
+                clearInterval(interval);
+            }
+            countElement.textContent = `+${count.toLocaleString()}`;
+        }, 50);
+    }
+    
+    // تهيئة كل شيء عند تحميل الصفحة
+    document.addEventListener('DOMContentLoaded', function() {
+        // تحميل FontAwesome
+        loadFontAwesome();
+        
+        // إعداد التحقق من الحقول
+        setupFieldValidation();
+        
+        // إعداد تأثيرات التمرير
+        setupScrollAnimations();
+        
+        // تحديث عداد الأعضاء كل 30 ثانية
+        setInterval(updateMemberCount, 30000);
+        
+        // اقتراح اسم مستخدم عند ملء الاسم
+        const nameFields = document.querySelectorAll('input[name="first_name"], input[name="last_name"]');
+        nameFields.forEach(field => {
+            field.addEventListener('blur', function() {
+                setTimeout(suggestUsername, 100);
+            });
+        });
+        
+        // إضافة تأثير عند التركيز على الحقول
+        const inputs = document.querySelectorAll('.form-control');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'translateY(-2px)';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'translateY(0)';
+            });
+        });
+        
+        // تحسين تجربة النموذج على الأجهزة المحمولة
+        if ('ontouchstart' in window) {
+            document.body.classList.add('touch-device');
+            
+            // زيادة حجم أزرار اللمس
+            const buttons = document.querySelectorAll('button, .social-btn');
+            buttons.forEach(btn => {
+                btn.style.minHeight = '44px';
+            });
+            
+            // إضافة تباعد أكبر للحقول
+            const formGroups = document.querySelectorAll('.form-group');
+            formGroups.forEach(group => {
+                group.style.marginBottom = '2rem';
+            });
+        }
+        
+        // إظهار رسالة ترحيبية إذا كان هناك أي رسالة من الخادم
+        {% if messages %}
+            {% for message in messages %}
+                showMessage('{{ message }}', '{{ message.tags }}');
+            {% endfor %}
+        {% endif %}
+    });
+
+    
+
+    
+    // أنيميشن لانزلاق الرسائل
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = `
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
+        }
+        
+        .register-btn.loading {
+            background: linear-gradient(
+                90deg,
+                var(--primary-pastel),
+                var(--secondary-pastel),
+                var(--primary-pastel)
+            );
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite linear;
+        }
+        
+        .feature-item:hover .feature-icon {
+            animation: pulse 1s ease infinite;
+        }
+        
+        /* تأثيرات خاصة للأجهزة التي تدعم اللمس */
+        .touch-device .form-control {
+            font-size: 16px; /* منع التكبير التلقائي في iOS */
+        }
+        
+        .touch-device .social-btn:active,
+        .touch-device .register-btn:active {
+            transform: scale(0.98);
+        }
+        
+        /* تأثيرات تفاعلية إضافية */
+        .form-control:valid {
+            border-color: rgba(76, 175, 80, 0.3);
+        }
+        
+        .form-control:invalid:not(:focus):not(:placeholder-shown) {
+            border-color: rgba(255, 107, 107, 0.3);
+        }
+        
+        /* تحسينات لأجهزة الكمبيوتر المكتبية */
+        @media (hover: hover) and (pointer: fine) {
+            .social-btn:hover i,
+            .register-btn:hover i {
+                transform: translateX(-3px);
+                transition: transform 0.3s ease;
+            }
+            
+            .feature-item:hover .feature-icon {
+                transform: rotate(15deg);
+                transition: transform 0.3s ease;
+            }
+        }
+    `;
+    document.head.appendChild(styleSheet);
+</script>
+
+<!-- إضافة خطوط إضافية للتحسين -->
+<style>
+    /* تحسينات إضافية */
+    .form-control::placeholder {
+        color: var(--text-light);
+        opacity: 0.7;
+        font-weight: 300;
+    }
+    
+    .form-control:focus::placeholder {
+        opacity: 0.5;
+    }
+    
+    /* تأثيرات النجمة */
+    .form-label.required::after {
+        animation: starPulse 2s infinite;
+    }
+    
+    @keyframes starPulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+    
+    /* تأثيرات التحميل */
+    .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
+    /* تحسينات الوصول */
+    .form-control:focus-visible {
+        outline: 2px solid var(--primary-pastel);
+        outline-offset: 2px;
+    }
+    
+    /* دعم وضع التباين العالي */
+    @media (prefers-contrast: high) {
+        .form-control {
+            border-width: 2px;
+        }
+        
+        .register-btn {
+            border: 2px solid var(--dark-gray);
+        }
+    }
+    
+    /* دعم الوضع المظلم */
+    @media (prefers-color-scheme: dark) {
+        .register-section {
+            background: linear-gradient(135deg, 
+                rgba(18, 18, 18, 0.98) 0%,
+                rgba(30, 30, 30, 1) 100%);
+        }
+        
+        .register-section::before {
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(255, 183, 197, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(216, 191, 216, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(181, 234, 215, 0.03) 0%, transparent 60%);
+        }
+        
+        .register-form-container,
+        .register-art {
+            background: rgba(30, 30, 30, 0.95);
+            border-color: rgba(60, 60, 60, 0.8);
+        }
+        
+        .form-control {
+            background: rgba(40, 40, 40, 0.8);
+            border-color: rgba(70, 70, 70, 0.5);
+            color: white;
+        }
+        
+        .art-title,
+        .art-subtitle,
+        .form-title,
+        .form-subtitle,
+        .form-label,
+        .feature-title {
+            color: #e0e0e0;
+        }
+        
+        .feature-desc,
+        .form-subtitle {
+            color: #b0b0b0;
+        }
+    }
+</style>
+{% endblock %}
+
+   

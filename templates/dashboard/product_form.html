@@ -1,0 +1,363 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - لوحة التحكم{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-form-section {
+        padding-top: 8rem;
+        padding-bottom: 4rem;
+        background-color: var(--off-white);
+        min-height: 100vh;
+    }
+    
+    .form-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .form-card {
+        background-color: var(--pure-white);
+        border-radius: var(--radius-lg);
+        padding: 2.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    }
+    
+    .form-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--light-gray);
+    }
+    
+    .form-title {
+        font-size: 1.5rem;
+        font-weight: 300;
+        color: var(--dark-gray);
+        margin: 0;
+    }
+    
+    .form-body {
+        margin-bottom: 2rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+        display: block;
+        font-size: 0.9rem;
+        font-weight: 300;
+        color: var(--text-gray);
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--medium-gray);
+        border-radius: var(--radius-md);
+        background-color: var(--pure-white);
+        font-size: 0.95rem;
+        font-weight: 300;
+        color: var(--dark-gray);
+        transition: all 0.2s ease;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-pastel);
+        box-shadow: 0 0 0 3px rgba(255, 183, 197, 0.1);
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-check {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-check-input {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .form-check-label {
+        font-size: 0.9rem;
+        color: var(--text-gray);
+        font-weight: 300;
+    }
+    
+    .image-preview {
+        width: 150px;
+        height: 150px;
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        margin-top: 1rem;
+        border: 1px solid var(--light-gray);
+    }
+    
+    .image-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .form-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 2rem;
+        border-top: 1px solid var(--light-gray);
+    }
+    
+    .btn-cancel {
+        background-color: var(--off-white);
+        color: var(--text-gray);
+    }
+    
+    .btn-submit {
+        background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel));
+        color: var(--dark-gray);
+    }
+    
+    /* تحسينات للاستجابة */
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-card {
+            padding: 1.5rem;
+        }
+        
+        .form-footer {
+            flex-direction: column;
+            gap: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="dashboard-form-section">
+    <div class="container">
+        <div class="form-container">
+            <div class="form-card">
+                <div class="form-header">
+                    <h2 class="form-title">{{ title }}</h2>
+                    <a href="{% url 'product_management' %}" class="btn btn-outline btn-sm">
+                        <i class="fas fa-arrow-right me-2"></i>العودة
+                    </a>
+                </div>
+                
+                <form method="post" enctype="multipart/form-data" class="form-body">
+                    {% csrf_token %}
+                    
+                    <!-- معلومات المنتج الأساسية -->
+                    <div class="form-group">
+                        <label class="form-label">اسم المنتج *</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                        <div class="text-danger mt-1" style="font-size: 0.85rem;">
+                            {{ form.name.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">رابط المنتج *</label>
+                            {{ form.slug }}
+                            <small class="form-text text-muted" style="display: block; margin-top: 0.25rem; font-size: 0.8rem;">
+                                إنجليزي فقط، مثل: golden-ring
+                            </small>
+                            {% if form.slug.errors %}
+                            <div class="text-danger mt-1" style="font-size: 0.85rem;">
+                                {{ form.slug.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">الفئة *</label>
+                            {{ form.category }}
+                            {% if form.category.errors %}
+                            <div class="text-danger mt-1" style="font-size: 0.85rem;">
+                                {{ form.category.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">الوصف *</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                        <div class="text-danger mt-1" style="font-size: 0.85rem;">
+                            {{ form.description.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">المادة *</label>
+                            {{ form.material }}
+                            {% if form.material.errors %}
+                            <div class="text-danger mt-1" style="font-size: 0.85rem;">
+                                {{ form.material.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">النوع *</label>
+                            {{ form.gender }}
+                            {% if form.gender.errors %}
+                            <div class="text-danger mt-1" style="font-size: 0.85rem;">
+                                {{ form.gender.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">السعر (ر.س) *</label>
+                            {{ form.price }}
+                            {% if form.price.errors %}
+                            <div class="text-danger mt-1" style="font-size: 0.85rem;">
+                                {{ form.price.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">الوزن (جرام)</label>
+                            {{ form.weight }}
+                            {% if form.weight.errors %}
+                            <div class="text-danger mt-1" style="font-size: 0.85rem;">
+                                {{ form.weight.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">الكمية المتاحة *</label>
+                            {{ form.stock }}
+                            {% if form.stock.errors %}
+                            <div class="text-danger mt-1" style="font-size: 0.85rem;">
+                                {{ form.stock.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">الصورة الرئيسية *</label>
+                            {{ form.image }}
+                            {% if product and product.image %}
+                            <div class="image-preview">
+                                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                            </div>
+                            {% endif %}
+                            {% if form.image.errors %}
+                            <div class="text-danger mt-1" style="font-size: 0.85rem;">
+                                {{ form.image.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">صور إضافية</label>
+                        {{ form.additional_images }}
+                        <small class="form-text text-muted" style="display: block; margin-top: 0.25rem; font-size: 0.8rem;">
+                            يمكن اختيار أكثر من صورة
+                        </small>
+                        {% if form.additional_images.errors %}
+                        <div class="text-danger mt-1" style="font-size: 0.85rem;">
+                            {{ form.additional_images.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-check">
+                            {{ form.is_featured }}
+                            <label class="form-check-label">منتج مميز</label>
+                        </div>
+                        <div class="form-check">
+                            {{ form.is_active }}
+                            <label class="form-check-label">نشط</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-footer">
+                        <a href="{% url 'product_management' %}" class="btn btn-cancel">
+                            إلغاء
+                        </a>
+                        <button type="submit" class="btn btn-submit">
+                            <i class="fas fa-save me-2"></i>حفظ المنتج
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // معاينة الصورة عند التحديد
+    const imageInput = document.querySelector('#id_image');
+    const previewContainer = document.querySelector('.image-preview');
+    
+    if (imageInput && previewContainer) {
+        imageInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const img = previewContainer.querySelector('img') || document.createElement('img');
+                    img.src = e.target.result;
+                    
+                    if (!previewContainer.querySelector('img')) {
+                        previewContainer.appendChild(img);
+                    }
+                }
+                
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    }
+    
+    // إنشاء رابط تلقائي من الاسم
+    const nameInput = document.querySelector('#id_name');
+    const slugInput = document.querySelector('#id_slug');
+    
+    if (nameInput && slugInput) {
+        nameInput.addEventListener('blur', function() {
+            if (!slugInput.value) {
+                const slug = this.value
+                    .toLowerCase()
+                    .replace(/[^\w\s-]/g, '')  // إزالة الرموز الخاصة
+                    .replace(/\s+/g, '-')      // استبدال المسافات بشرطة
+                    .replace(/--+/g, '-')      // إزالة الشرطات المتكررة
+                    .trim();
+                slugInput.value = slug;
+            }
+        });
+    }
+</script>
+{% endblock %}

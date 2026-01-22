@@ -1,0 +1,1047 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}تسجيل الدخول - TIVE{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* صفحة تسجيل الدخول الكونية */
+    .auth-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        background: linear-gradient(135deg, 
+            rgba(15, 11, 36, 0.95) 0%,
+            rgba(26, 27, 62, 0.9) 100%);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .auth-page::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+            radial-gradient(circle at 20% 80%, rgba(108, 99, 255, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(255, 62, 157, 0.05) 0%, transparent 50%);
+        z-index: 0;
+    }
+    
+    .auth-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        max-width: 1200px;
+        width: 100%;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 
+            0 25px 50px rgba(0, 0, 0, 0.3),
+            0 15px 35px rgba(108, 99, 255, 0.2);
+        background: rgba(26, 27, 62, 0.8);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        position: relative;
+        z-index: 1;
+        animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* الجانب الأيسر - التصميم الكوني */
+    .auth-design {
+        background: linear-gradient(135deg, 
+            rgba(108, 99, 255, 0.15) 0%,
+            rgba(168, 85, 247, 0.1) 100%);
+        padding: 4rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .design-pattern {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: 
+            radial-gradient(circle at 20% 30%, rgba(108, 99, 255, 0.15) 0%, transparent 40%),
+            radial-gradient(circle at 80% 70%, rgba(168, 85, 247, 0.15) 0%, transparent 40%);
+        animation: pulse 4s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 0.5; }
+        50% { opacity: 0.8; }
+    }
+    
+    .design-content {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+    }
+    
+    .logo-large {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .logo-circle-large {
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(135deg, #6C63FF, #FF3E9D);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(108, 99, 255, 0.4);
+    }
+    
+    .logo-circle-large::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(45deg, 
+            transparent 30%, 
+            rgba(255, 255, 255, 0.3), 
+            transparent 70%);
+        animation: shine 3s infinite linear;
+    }
+    
+    @keyframes shine {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+    
+    .logo-icon-large {
+        color: white;
+        font-size: 2rem;
+        z-index: 1;
+    }
+    
+    .logo-text-large {
+        font-size: 3rem;
+        font-weight: 700;
+        background: linear-gradient(90deg, #6C63FF, #A855F7, #FF3E9D);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: 1px;
+    }
+    
+    .design-title {
+        font-size: 2.5rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: white;
+    }
+    
+    .design-subtitle {
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.8);
+        line-height: 1.6;
+        margin-bottom: 2rem;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .design-features {
+        margin-top: 3rem;
+    }
+    
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding: 1.2rem;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .feature-item:hover {
+        background: rgba(108, 99, 255, 0.15);
+        border-color: rgba(108, 99, 255, 0.3);
+        transform: translateX(10px);
+    }
+    
+    .feature-icon {
+        width: 45px;
+        height: 45px;
+        background: linear-gradient(135deg, #6C63FF, #A855F7);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+    }
+    
+    .feature-text {
+        font-size: 1rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 300;
+    }
+    
+    /* الجانب الأيمن - نموذج الدخول الكوني */
+    .auth-form-side {
+        padding: 4rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: rgba(15, 11, 36, 0.6);
+    }
+    
+    .form-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+    
+    .form-title {
+        font-size: 2.5rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(90deg, #6C63FF, #A855F7);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .form-subtitle {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 1.1rem;
+        font-weight: 300;
+    }
+    
+    /* تحسينات النموذج الكوني */
+    .auth-form {
+        max-width: 400px;
+        margin: 0 auto;
+        width: 100%;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+    
+    .form-label {
+        display: block;
+        font-size: 0.95rem;
+        font-weight: 400;
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 1rem 1.25rem 1rem 3.5rem;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 15px;
+        font-size: 1rem;
+        color: white;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #6C63FF;
+        background: rgba(255, 255, 255, 0.12);
+        box-shadow: 
+            0 0 0 3px rgba(108, 99, 255, 0.2),
+            0 5px 20px rgba(108, 99, 255, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    .form-control:hover {
+        border-color: rgba(108, 99, 255, 0.4);
+    }
+    
+    .input-with-icon {
+        position: relative;
+    }
+    
+    .input-icon {
+        position: absolute;
+        right: 1.25rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255, 255, 255, 0.6);
+        pointer-events: none;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus + .input-icon {
+        color: #6C63FF;
+    }
+    
+    .password-toggle {
+        position: absolute;
+        right: 1.25rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.6);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        z-index: 2;
+    }
+    
+    .password-toggle:hover {
+        color: #6C63FF;
+        transform: translateY(-50%) scale(1.1);
+    }
+    
+    /* خيارات تذكرني ونسيت كلمة المرور */
+    .form-options {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    
+    .remember-me {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-check-input {
+        width: 20px;
+        height: 20px;
+        border-radius: 5px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        cursor: pointer;
+        appearance: none;
+        -webkit-appearance: none;
+        position: relative;
+        transition: all 0.3s ease;
+        background: transparent;
+    }
+    
+    .form-check-input:checked {
+        background: #6C63FF;
+        border-color: #6C63FF;
+    }
+    
+    .form-check-input:checked::after {
+        content: '✓';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 0.9rem;
+        font-weight: bold;
+    }
+    
+    .form-check-label {
+        font-size: 0.95rem;
+        color: rgba(255, 255, 255, 0.8);
+        cursor: pointer;
+        user-select: none;
+    }
+    
+    .forgot-password {
+        font-size: 0.95rem;
+        color: #6C63FF;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        position: relative;
+        font-weight: 400;
+    }
+    
+    .forgot-password::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        right: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #6C63FF);
+        transition: width 0.3s ease;
+    }
+    
+    .forgot-password:hover::after {
+        width: 100%;
+    }
+    
+    /* زر تسجيل الدخول الكوني */
+    .btn-login {
+        width: 100%;
+        padding: 1rem 2rem;
+        background: linear-gradient(90deg, #6C63FF, #A855F7);
+        color: white;
+        border: none;
+        border-radius: 15px;
+        font-size: 1.1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 10px 25px rgba(108, 99, 255, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-login::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: right 0.6s ease;
+    }
+    
+    .btn-login:hover {
+        transform: translateY(-3px);
+        box-shadow: 
+            0 15px 35px rgba(108, 99, 255, 0.4),
+            0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .btn-login:hover::before {
+        right: 100%;
+    }
+    
+    .btn-login:active {
+        transform: translateY(-1px);
+    }
+    
+    /* الخط الفاصل الكوني */
+    .divider {
+        display: flex;
+        align-items: center;
+        margin: 2rem 0;
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.95rem;
+    }
+    
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    }
+    
+    .divider span {
+        padding: 0 1rem;
+    }
+    
+    /* خيارات تسجيل الدخول الاجتماعية */
+    .social-login {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .btn-social {
+        padding: 0.9rem 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.05);
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.95rem;
+        font-weight: 400;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        backdrop-filter: blur(10px);
+    }
+    
+    .btn-social:hover {
+        background: rgba(108, 99, 255, 0.15);
+        border-color: rgba(108, 99, 255, 0.4);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 99, 255, 0.1);
+    }
+    
+    .btn-google {
+        color: #4285F4;
+    }
+    
+    .btn-apple {
+        color: white;
+    }
+    
+    /* رابط التسجيل الكوني */
+    .register-link {
+        text-align: center;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 1rem;
+    }
+    
+    .register-link a {
+        color: #6C63FF;
+        text-decoration: none;
+        font-weight: 500;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+    
+    .register-link a::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        right: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #6C63FF, #A855F7);
+        transition: width 0.3s ease;
+    }
+    
+    .register-link a:hover::after {
+        width: 100%;
+    }
+    
+    /* الرسائل الكونية */
+    .alert {
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        font-size: 0.95rem;
+        animation: slideDown 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+    
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-15px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .alert-danger {
+        background: rgba(255, 62, 157, 0.15);
+        border: 1px solid rgba(255, 62, 157, 0.3);
+        color: #FF3E9D;
+        border-right: 3px solid #FF3E9D;
+    }
+    
+    .alert-success {
+        background: rgba(0, 255, 157, 0.15);
+        border: 1px solid rgba(0, 255, 157, 0.3);
+        color: #00FF9D;
+        border-right: 3px solid #00FF9D;
+    }
+    
+    .alert-info {
+        background: rgba(0, 224, 255, 0.15);
+        border: 1px solid rgba(0, 224, 255, 0.3);
+        color: #00E0FF;
+        border-right: 3px solid #00E0FF;
+    }
+    
+    /* تحسينات للاستجابة */
+    @media (max-width: 1024px) {
+        .auth-container {
+            grid-template-columns: 1fr;
+            max-width: 600px;
+        }
+        
+        .auth-design {
+            padding: 3rem;
+            display: none;
+        }
+        
+        .auth-form-side {
+            padding: 3rem;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .auth-page {
+            padding: 1rem;
+            background: linear-gradient(135deg, 
+                rgba(15, 11, 36, 0.98) 0%,
+                rgba(26, 27, 62, 0.95) 100%);
+        }
+        
+        .auth-container {
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+        
+        .auth-form-side {
+            padding: 2rem;
+        }
+        
+        .social-login {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-options {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .logo-text-large {
+            font-size: 2.5rem;
+        }
+        
+        .design-title {
+            font-size: 2rem;
+        }
+        
+        .form-title {
+            font-size: 2rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .auth-form-side {
+            padding: 1.5rem;
+        }
+        
+        .logo-text-large {
+            font-size: 2rem;
+        }
+        
+        .design-title {
+            font-size: 1.8rem;
+        }
+        
+        .form-title {
+            font-size: 1.8rem;
+        }
+        
+        .btn-login {
+            padding: 0.9rem 1.5rem;
+            font-size: 1rem;
+        }
+        
+        .form-control {
+            padding: 0.9rem 1rem 0.9rem 3rem;
+        }
+    }
+    
+    /* تأثيرات إضافية */
+    .glow-effect {
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(108, 99, 255, 0.2), transparent 70%);
+        border-radius: 50%;
+        filter: blur(40px);
+        animation: float 6s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% {
+            transform: translate(0, 0) scale(1);
+        }
+        50% {
+            transform: translate(20px, -20px) scale(1.1);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <!-- تأثيرات ضوئية -->
+    <div class="glow-effect" style="top: 10%; left: 5%;"></div>
+    <div class="glow-effect" style="bottom: 10%; right: 5%; background: radial-gradient(circle, rgba(168, 85, 247, 0.2), transparent 70%);"></div>
+    
+    <div class="auth-container">
+        <!-- الجانب الأيسر: التصميم الكوني -->
+        <div class="auth-design">
+            <div class="design-pattern"></div>
+            <div class="design-content">
+                <div class="logo-large">
+                    <div class="logo-circle-large">
+                        <i class="fas fa-gem logo-icon-large"></i>
+                    </div>
+                    <span class="logo-text-large">TIVE</span>
+                </div>
+                
+                <h2 class="design-title">مرحباً بعودتك</h2>
+                <p class="design-subtitle">
+                    سجل دخولك للوصول إلى عالم TIVE الكوني، حيث تجد أجمل تصاميم المجوهرات الفاخرة والعروض الحصرية.
+                </p>
+                
+                <div class="design-features">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-gem"></i>
+                        </div>
+                        <span class="feature-text">تصاميم حصرية من كبار المصممين العالميين</span>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-shipping-fast"></i>
+                        </div>
+                        <span class="feature-text">شحن مجاني لجميع أنحاء المملكة</span>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <span class="feature-text">ضمان 24 شهر على جميع منتجاتنا</span>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-crown"></i>
+                        </div>
+                        <span class="feature-text">عضويتك VIP تمنحك خصومات حصرية</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- الجانب الأيمن: نموذج تسجيل الدخول -->
+        <div class="auth-form-side">
+            <div class="form-header">
+                <h2 class="form-title">تسجيل الدخول</h2>
+                <p class="form-subtitle">أدخل بياناتك للوصول إلى عالم TIVE الفاخر</p>
+            </div>
+            
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}info-circle{% endif %} me-2"></i>
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+            
+            {% if form.errors %}
+<!-- في بداية الفورم، عدل العنوان والوصف: -->
+<div class="form-header">
+    <h2 class="form-title">تسجيل الدخول</h2>
+    <p class="form-subtitle">أدخل اسم المستخدم وكلمة المرور للوصول إلى حسابك</p>
+</div>
+            {% endif %}
+            
+            <form method="post" class="auth-form" id="loginForm" novalidate>
+                {% csrf_token %}
+                
+
+
+
+<div class="form-group">
+    <label for="username" class="form-label">اسم المستخدم</label>
+    <div class="input-with-icon">
+        <input type="text" 
+               name="username" 
+               id="username" 
+               class="form-control" 
+               required
+               placeholder="أدخل اسم المستخدم"
+               autocomplete="username"
+               value="{{ form.username.value|default:'' }}"
+               autofocus>
+        <i class="fas fa-user input-icon"></i>
+    </div>
+</div>
+                
+                <div class="form-group">
+                    <label for="password" class="form-label">كلمة المرور</label>
+                    <div class="input-with-icon">
+                        <input type="password" 
+                               name="password" 
+                               id="password" 
+                               class="form-control" 
+                               required
+                               placeholder="أدخل كلمة المرور"
+                               autocomplete="current-password">
+                        <button type="button" class="password-toggle" id="togglePassword" title="إظهار/إخفاء">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-options">
+                    <div class="remember-me">
+                        <input type="checkbox" 
+                               class="form-check-input" 
+                               id="rememberMe" 
+                               name="remember_me">
+                        <label for="rememberMe" class="form-check-label">تذكرني على هذا الجهاز</label>
+                    </div>
+                    
+                    <a href="{% url 'logout' %}" class="forgot-password">نسيت كلمة المرور؟</a>
+                </div>
+                
+                <button type="submit" class="btn btn-login">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>تسجيل الدخول</span>
+                </button>
+                
+                <div class="divider">
+                    <span>أو سجل الدخول باستخدام</span>
+                </div>
+                
+                <div class="social-login">
+                    <button type="button" class="btn-social btn-google">
+                        <i class="fab fa-google"></i>
+                        <span>حساب Google</span>
+                    </button>
+                    
+                    <button type="button" class="btn-social btn-apple">
+                        <i class="fab fa-apple"></i>
+                        <span>حساب Apple</span>
+                    </button>
+                </div>
+                
+                <div class="register-link">
+                    <p>ليس لديك حساب في TIVE؟ 
+                        <a href="{% url 'register' %}">أنشئ حساب مجاني الآن</a>
+                    </p>
+                    <p style="font-size: 0.9rem; color: rgba(255,255,255,0.5); margin-top: 0.5rem;">
+                        التسجيل يستغرق أقل من دقيقة
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // تفعيل إظهار/إخفاء كلمة المرور
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    
+    if (togglePassword && passwordInput) {
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            const icon = this.querySelector('i');
+            if (type === 'password') {
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+                this.title = 'إظهار كلمة المرور';
+            } else {
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+                this.title = 'إخفاء كلمة المرور';
+            }
+        });
+    }
+    
+    // تحسين تجربة الإدخال
+    const inputs = document.querySelectorAll('.form-control');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.classList.add('focused');
+        });
+        
+        input.addEventListener('blur', function() {
+            this.parentElement.classList.remove('focused');
+        });
+        
+        // تأثيرات عند الكتابة
+        input.addEventListener('input', function() {
+            if (this.value.trim() !== '') {
+                this.style.boxShadow = '0 0 0 2px rgba(108, 99, 255, 0.1)';
+            } else {
+                this.style.boxShadow = '';
+            }
+        });
+    });
+    
+    // تحسين تجربة النموذج
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            if (!username || !password) {
+                e.preventDefault();
+                showMessage('يرجى ملء جميع الحقول المطلوبة', 'error');
+                return false;
+            }
+            
+            if (username.length < 3) {
+                e.preventDefault();
+                showMessage('اسم المستخدم يجب أن يكون 3 أحرف على الأقل', 'error');
+                return false;
+            }
+            
+            // إضافة تأثير التحميل
+            const submitBtn = this.querySelector('.btn-login');
+            const originalContent = submitBtn.innerHTML;
+            
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>جاري تسجيل الدخول...</span>';
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.8';
+            
+            // إعادة التفعيل بعد 3 ثواني (في حالة فشل الإرسال)
+            setTimeout(() => {
+                submitBtn.innerHTML = originalContent;
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+            }, 3000);
+        });
+    }
+    
+    // التحقق من صحة البريد الإلكتروني
+    function isValidEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    }
+    
+    // عرض رسائل التنبيه
+    function showMessage(message, type = 'info') {
+        // إخفاء الرسائل السابقة
+        const existingAlerts = document.querySelectorAll('.alert:not(.alert-danger, .alert-success)');
+        existingAlerts.forEach(alert => {
+            alert.style.opacity = '0';
+            alert.style.transform = 'translateY(-10px)';
+            setTimeout(() => alert.remove(), 300);
+        });
+        
+        // إنشاء رسالة جديدة
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.innerHTML = `
+            <i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
+            ${message}
+        `;
+        
+        // إضافة الأنميشن
+        alertDiv.style.opacity = '0';
+        alertDiv.style.transform = 'translateY(-15px)';
+        
+        // إضافة الرسالة بعد النموذج
+        const formHeader = document.querySelector('.form-header');
+        if (formHeader) {
+            formHeader.insertAdjacentElement('afterend', alertDiv);
+            
+            // إظهار الرسالة مع تأثير
+            setTimeout(() => {
+                alertDiv.style.opacity = '1';
+                alertDiv.style.transform = 'translateY(0)';
+            }, 10);
+            
+            // إزالة الرسالة بعد 5 ثواني
+            setTimeout(() => {
+                alertDiv.style.opacity = '0';
+                alertDiv.style.transform = 'translateY(-10px)';
+                setTimeout(() => {
+                    if (alertDiv.parentNode) {
+                        alertDiv.remove();
+                    }
+                }, 300);
+            }, 5000);
+        }
+    }
+    
+    // تسجيل الدخول بالجوجل
+    const googleBtn = document.querySelector('.btn-google');
+    if (googleBtn) {
+        googleBtn.addEventListener('click', function() {
+            showMessage('سيتم تفعيل تسجيل الدخول بحساب Google قريباً', 'info');
+        });
+    }
+    
+    // تسجيل الدخول بالآبل
+    const appleBtn = document.querySelector('.btn-apple');
+    if (appleBtn) {
+        appleBtn.addEventListener('click', function() {
+            showMessage('سيتم تفعيل تسجيل الدخول بحساب Apple قريباً', 'info');
+        });
+    }
+    
+    // Auto-focus على حقل البريد
+    document.addEventListener('DOMContentLoaded', function() {
+        const usernameInput = document.getElementById('username');
+        if (usernameInput && !usernameInput.value) {
+            setTimeout(() => {
+                usernameInput.focus();
+            }, 300);
+        }
+        
+        // تحميل بيانات تذكرني من localStorage
+        const rememberMe = document.getElementById('rememberMe');
+        if (rememberMe) {
+            const savedUsername = localStorage.getItem('tive_username');
+            const savedRemember = localStorage.getItem('tive_remember');
+            
+            if (savedRemember === 'true' && savedUsername && usernameInput) {
+                usernameInput.value = savedUsername;
+                rememberMe.checked = true;
+            }
+            
+            // حفظ عند الخروج
+            window.addEventListener('beforeunload', function() {
+                if (rememberMe.checked && usernameInput && usernameInput.value) {
+                    localStorage.setItem('tive_username', usernameInput.value);
+                    localStorage.setItem('tive_remember', 'true');
+                } else {
+                    localStorage.removeItem('tive_username');
+                    localStorage.removeItem('tive_remember');
+                }
+            });
+        }
+        
+        // تأثيرات إضافية
+        const formControls = document.querySelectorAll('.form-control');
+        formControls.forEach(control => {
+            control.addEventListener('focus', () => {
+                control.parentElement.style.transform = 'scale(1.02)';
+            });
+            
+            control.addEventListener('blur', () => {
+                control.parentElement.style.transform = 'scale(1)';
+            });
+        });
+    });
+</script>
+{% endblock %}

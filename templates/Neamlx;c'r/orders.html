@@ -1,0 +1,873 @@
+<!-- dashboard/orders.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}إدارة الطلبات - TIVE Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* توجد CSS في ملف products.html */
+    .orders-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .order-stat-card {
+        background: var(--off-white);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        border: 1px solid rgba(240, 240, 240, 0.8);
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .order-stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+    }
+    
+    .order-stat-card.pending { border-right: 4px solid #ff9800; }
+    .order-stat-card.processing { border-right: 4px solid #2196f3; }
+    .order-stat-card.shipped { border-right: 4px solid #4caf50; }
+    .order-stat-card.delivered { border-right: 4px solid #2e7d32; }
+    .order-stat-card.cancelled { border-right: 4px solid #f44336; }
+    
+    .order-table th:nth-child(1) { width: 60px; }
+    .order-table th:nth-child(2) { width: 120px; }
+    .order-table th:nth-child(3) { width: 200px; }
+    .order-table th:nth-child(4) { width: 120px; }
+    .order-table th:nth-child(5) { width: 100px; }
+    .order-table th:nth-child(6) { width: 150px; }
+    .order-table th:nth-child(7) { width: 120px; }
+    
+    .order-customer {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .customer-avatar {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--pure-white);
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+    
+    .customer-info h4 {
+        font-weight: 300;
+        margin-bottom: 0.25rem;
+        font-size: 0.95rem;
+    }
+    
+    .customer-info .email {
+        color: var(--text-light);
+        font-size: 0.85rem;
+    }
+    
+    .order-items-count {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        background: var(--off-white);
+        border-radius: var(--radius-round);
+        font-size: 0.85rem;
+        color: var(--text-gray);
+    }
+    
+    .order-status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: var(--radius-round);
+        font-size: 0.85rem;
+        font-weight: 300;
+    }
+    
+    .status-pending {
+        background: rgba(255, 152, 0, 0.1);
+        color: #ff9800;
+    }
+    
+    .status-processing {
+        background: rgba(33, 150, 243, 0.1);
+        color: #2196f3;
+    }
+    
+    .status-shipped {
+        background: rgba(76, 175, 80, 0.1);
+        color: #4caf50;
+    }
+    
+    .status-delivered {
+        background: rgba(46, 125, 50, 0.1);
+        color: #2e7d32;
+    }
+    
+    .status-cancelled {
+        background: rgba(244, 67, 54, 0.1);
+        color: #f44336;
+    }
+    
+    .payment-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+    }
+    
+    .payment-paid {
+        color: #4caf50;
+    }
+    
+    .payment-pending {
+        color: #ff9800;
+    }
+    
+    .payment-failed {
+        color: #f44336;
+    }
+    
+    .order-actions-dropdown {
+        position: relative;
+        display: inline-block;
+    }
+    
+    .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background: var(--pure-white);
+        border: 1px solid rgba(240, 240, 240, 0.8);
+        border-radius: var(--radius-md);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        min-width: 180px;
+        z-index: 1000;
+        display: none;
+    }
+    
+    .dropdown-menu.show {
+        display: block;
+        animation: fadeIn 0.2s ease;
+    }
+    
+    .dropdown-item {
+        display: block;
+        padding: 0.75rem 1rem;
+        color: var(--text-gray);
+        text-decoration: none;
+        font-weight: 300;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        border-bottom: 1px solid rgba(240, 240, 240, 0.5);
+    }
+    
+    .dropdown-item:last-child {
+        border-bottom: none;
+    }
+    
+    .dropdown-item:hover {
+        background: rgba(255, 183, 197, 0.1);
+        color: var(--dark-gray);
+    }
+    
+    .dropdown-item i {
+        width: 20px;
+        text-align: center;
+        margin-left: 0.5rem;
+    }
+    
+    .date-range-picker {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .date-input {
+        padding: 0.75rem 1rem;
+        border: 1px solid rgba(224, 224, 224, 0.5);
+        border-radius: var(--radius-md);
+        background: var(--pure-white);
+        color: var(--text-gray);
+        font-weight: 300;
+        min-width: 150px;
+    }
+    
+    .export-options {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+    
+    .export-btn {
+        padding: 0.5rem 1rem;
+        border: 1px solid rgba(224, 224, 224, 0.5);
+        border-radius: var(--radius-md);
+        background: transparent;
+        color: var(--text-gray);
+        font-weight: 300;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.9rem;
+    }
+    
+    .export-btn:hover {
+        border-color: var(--primary-pastel);
+        color: var(--dark-gray);
+    }
+    
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .quick-action-btn {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.5rem;
+        background: var(--off-white);
+        border: 1px solid rgba(240, 240, 240, 0.8);
+        border-radius: var(--radius-lg);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: right;
+    }
+    
+    .quick-action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+        border-color: var(--primary-pastel);
+    }
+    
+    .quick-action-icon {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel));
+        border-radius: var(--radius-round);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--pure-white);
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+    
+    .quick-action-info h4 {
+        font-weight: 300;
+        margin-bottom: 0.25rem;
+    }
+    
+    .quick-action-info p {
+        color: var(--text-light);
+        font-size: 0.9rem;
+        margin: 0;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @media (max-width: 768px) {
+        .orders-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .date-range-picker {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .quick-actions {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="dashboard-section fade-in">
+    <div class="container">
+        <div class="dashboard-container">
+            <div class="dashboard-grid">
+                <!-- الشريط الجانبي -->
+                <div class="dashboard-sidebar">
+                    <!-- معلومات المستخدم -->
+                    <div class="user-card">
+                        <div class="user-avatar">
+                            {{ user.get_full_name|default:user.username|slice:":1"|upper }}
+                        </div>
+                        <h3 class="user-name">{{ user.get_full_name|default:user.username }}</h3>
+                        <span class="user-role">
+                            <i class="fas fa-user-shield me-1"></i>
+                            {% if user.is_superuser %}مدير نظام{% else %}مسؤول الطلبات{% endif %}
+                        </span>
+                    </div>
+                    
+                    <!-- قائمة التنقل -->
+                    <ul class="dashboard-menu">
+                        <li class="menu-item">
+                            <a href="{% url 'dashboard' %}" class="menu-link">
+                                <i class="fas fa-tachometer-alt"></i>
+                                <span>لوحة التحكم</span>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{% url 'dashboard_products' %}" class="menu-link">
+                                <i class="fas fa-gem"></i>
+                                <span>المنتجات</span>
+                                <span class="badge">{{ stats.total_products }}</span>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{% url 'dashboard_orders' %}" class="menu-link active">
+                                <i class="fas fa-shopping-bag"></i>
+                                <span>الطلبات</span>
+                                <span class="badge">{{ orders.paginator.count }}</span>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{% url 'dashboard_users' %}" class="menu-link">
+                                <i class="fas fa-users"></i>
+                                <span>المستخدمين</span>
+                                <span class="badge">{{ stats.total_users }}</span>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{% url 'dashboard_reports' %}" class="menu-link">
+                                <i class="fas fa-chart-bar"></i>
+                                <span>التقارير</span>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{% url 'dashboard_categories' %}" class="menu-link">
+                                <i class="fas fa-tags"></i>
+                                <span>الفئات</span>
+                                <span class="badge">{{ stats.total_categories }}</span>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{% url 'home' %}" class="menu-link">
+                                <i class="fas fa-store"></i>
+                                <span>العودة للمتجر</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- المحتوى الرئيسي -->
+                <div class="dashboard-content">
+                    <!-- رأس الصفحة -->
+                    <div class="dashboard-header">
+                        <h1 class="dashboard-title">
+                            <i class="fas fa-shopping-bag"></i>
+                            إدارة الطلبات
+                        </h1>
+                        
+                        <div class="dashboard-actions">
+                            <button class="action-btn" onclick="exportOrders()">
+                                <i class="fas fa-file-export"></i>
+                                تصدير
+                            </button>
+                            <button class="action-btn" onclick="printOrders()">
+                                <i class="fas fa-print"></i>
+                                طباعة
+                            </button>
+                            <a href="{% url 'dashboard_order_create' %}" class="action-btn primary">
+                                <i class="fas fa-plus"></i>
+                                طلب جديد
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- إحصائيات سريعة -->
+                    <div class="orders-stats">
+                        <div class="order-stat-card pending" onclick="filterByStatus('pending')">
+                            <div class="stat-value">{{ stats.pending_orders }}</div>
+                            <div class="stat-label">قيد الانتظار</div>
+                        </div>
+                        <div class="order-stat-card processing" onclick="filterByStatus('processing')">
+                            <div class="stat-value">{{ stats.processing_orders }}</div>
+                            <div class="stat-label">قيد المعالجة</div>
+                        </div>
+                        <div class="order-stat-card shipped" onclick="filterByStatus('shipped')">
+                            <div class="stat-value">{{ stats.shipped_orders }}</div>
+                            <div class="stat-label">تم الشحن</div>
+                        </div>
+                        <div class="order-stat-card delivered" onclick="filterByStatus('delivered')">
+                            <div class="stat-value">{{ stats.delivered_orders }}</div>
+                            <div class="stat-label">تم التسليم</div>
+                        </div>
+                        <div class="order-stat-card cancelled" onclick="filterByStatus('cancelled')">
+                            <div class="stat-value">{{ stats.cancelled_orders }}</div>
+                            <div class="stat-label">ملغاة</div>
+                        </div>
+                    </div>
+                    
+                    <!-- إجراءات سريعة -->
+                    <div class="quick-actions">
+                        <div class="quick-action-btn" onclick="processPendingOrders()">
+                            <div class="quick-action-icon">
+                                <i class="fas fa-cogs"></i>
+                            </div>
+                            <div class="quick-action-info">
+                                <h4>معالجة الطلبات المعلقة</h4>
+                                <p>{{ stats.pending_orders }} طلب يحتاج المعالجة</p>
+                            </div>
+                        </div>
+                        
+                        <div class="quick-action-btn" onclick="updateShipping()">
+                            <div class="quick-action-icon">
+                                <i class="fas fa-truck"></i>
+                            </div>
+                            <div class="quick-action-info">
+                                <h4>تحديث حالات الشحن</h4>
+                                <p>تحديث تلقائي لجميع الطلبات المشحونة</p>
+                            </div>
+                        </div>
+                        
+                        <div class="quick-action-btn" onclick="generateInvoices()">
+                            <div class="quick-action-icon">
+                                <i class="fas fa-file-invoice"></i>
+                            </div>
+                            <div class="quick-action-info">
+                                <h4>إنشاء فواتير</h4>
+                                <p>إنشاء فواتير للطلبات الجديدة</p>
+                            </div>
+                        </div>
+                        
+                        <div class="quick-action-btn" onclick="showAnalytics()">
+                            <div class="quick-action-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="quick-action-info">
+                                <h4>تحليل الطلبات</h4>
+                                <p>عرض تقارير وتحليلات مفصلة</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- نطاق التاريخ -->
+                    <div class="date-range-picker">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <label for="fromDate" style="color: var(--text-gray); font-weight: 300;">من:</label>
+                            <input type="date" id="fromDate" class="date-input" value="{{ default_from_date }}">
+                            
+                            <label for="toDate" style="color: var(--text-gray); font-weight: 300; margin-right: 1rem;">إلى:</label>
+                            <input type="date" id="toDate" class="date-input" value="{{ default_to_date }}">
+                            
+                            <button class="action-btn" onclick="filterByDate()" style="padding: 0.75rem 1.5rem;">
+                                <i class="fas fa-filter me-2"></i>
+                                تطبيق
+                            </button>
+                        </div>
+                        
+                        <div class="export-options">
+                            <button class="export-btn" onclick="exportAsCSV()">
+                                <i class="fas fa-file-csv me-1"></i> CSV
+                            </button>
+                            <button class="export-btn" onclick="exportAsExcel()">
+                                <i class="fas fa-file-excel me-1"></i> Excel
+                            </button>
+                            <button class="export-btn" onclick="exportAsPDF()">
+                                <i class="fas fa-file-pdf me-1"></i> PDF
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- شريط الفلاتر -->
+                    <div class="filters-bar">
+                        <!-- البحث -->
+                        <div class="search-box">
+                            <input type="text" 
+                                   class="search-input" 
+                                   placeholder="بحث في الطلبات..."
+                                   id="orderSearch"
+                                   onkeyup="searchOrders()">
+                            <i class="fas fa-search search-icon"></i>
+                        </div>
+                        
+                        <!-- خيارات التصفية -->
+                        <div class="filter-options">
+                            <select class="filter-select" id="statusFilter" onchange="filterOrders()">
+                                <option value="">جميع الحالات</option>
+                                <option value="pending">قيد الانتظار</option>
+                                <option value="processing">قيد المعالجة</option>
+                                <option value="shipped">تم الشحن</option>
+                                <option value="delivered">تم التسليم</option>
+                                <option value="cancelled">ملغاة</option>
+                            </select>
+                            
+                            <select class="filter-select" id="paymentFilter" onchange="filterOrders()">
+                                <option value="">جميع طرق الدفع</option>
+                                <option value="credit_card">بطاقة ائتمان</option>
+                                <option value="mada">مدى</option>
+                                <option value="cod">الدفع عند الاستلام</option>
+                                <option value="apple_pay">Apple Pay</option>
+                            </select>
+                            
+                            <select class="filter-select" id="sortBy" onchange="sortOrders()">
+                                <option value="newest">الأحدث أولاً</option>
+                                <option value="oldest">الأقدم أولاً</option>
+                                <option value="total_high">المجموع: من الأعلى</option>
+                                <option value="total_low">المجموع: من الأقل</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- جدول الطلبات -->
+                    <div class="products-table-container">
+                        <table class="products-table order-table">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <input type="checkbox" id="selectAllOrders" onchange="toggleSelectAllOrders()">
+                                    </th>
+                                    <th>رقم الطلب</th>
+                                    <th>العميل</th>
+                                    <th>المجموع</th>
+                                    <th>الحالة</th>
+                                    <th>طريقة الدفع</th>
+                                    <th>تاريخ الطلب</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ordersTableBody">
+                                {% for order in orders %}
+                                <tr class="order-row" data-id="{{ order.id }}" 
+                                    data-status="{{ order.status }}"
+                                    data-payment="{{ order.payment_method }}"
+                                    data-total="{{ order.total_price }}"
+                                    data-date="{{ order.created_at|date:'Y-m-d' }}">
+                                    <td>
+                                        <input type="checkbox" class="order-checkbox" value="{{ order.id }}">
+                                    </td>
+                                    <td>
+                                        <strong>#{{ order.id|stringformat:"06d" }}</strong>
+                                        <div class="order-items-count">
+                                            {{ order.items.count }} منتج
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="order-customer">
+                                            <div class="customer-avatar">
+                                                {{ order.user.first_name|default:order.user.username|slice:":1"|upper }}
+                                            </div>
+                                            <div class="customer-info">
+                                                <h4>{{ order.user.get_full_name|default:order.user.username }}</h4>
+                                                <div class="email">{{ order.user.email }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ order.total_price }} ر.س</td>
+                                    <td>
+                                        <span class="order-status-badge status-{{ order.status }}">
+                                            {{ order.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="payment-status {% if order.paid %}payment-paid{% else %}payment-pending{% endif %}">
+                                            <i class="fas {% if order.paid %}fa-check-circle{% else %}fa-clock{% endif %}"></i>
+                                            {{ order.get_payment_method_display }}
+                                        </div>
+                                    </td>
+                                    <td>{{ order.created_at|date:"Y/m/d - h:i A" }}</td>
+                                    <td>
+                                        <div class="table-actions">
+                                            <button class="table-btn" title="عرض"
+                                                    onclick="viewOrder({{ order.id }})">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <div class="order-actions-dropdown">
+                                                <button class="table-btn" title="المزيد"
+                                                        onclick="toggleDropdown(this)">
+                                                    <i class="fas fa-ellipsis-h"></i>
+                                                </button>
+                                                <div class="dropdown-menu">
+                                                    <a href="#" class="dropdown-item" 
+                                                       onclick="updateOrderStatus({{ order.id }}, 'processing')">
+                                                        <i class="fas fa-cogs"></i>
+                                                        معالجة
+                                                    </a>
+                                                    <a href="#" class="dropdown-item"
+                                                       onclick="updateOrderStatus({{ order.id }}, 'shipped')">
+                                                        <i class="fas fa-truck"></i>
+                                                        شحن
+                                                    </a>
+                                                    <a href="#" class="dropdown-item"
+                                                       onclick="updateOrderStatus({{ order.id }}, 'delivered')">
+                                                        <i class="fas fa-check-circle"></i>
+                                                        تسليم
+                                                    </a>
+                                                    <div class="dropdown-divider"></div>
+                                                    <a href="#" class="dropdown-item"
+                                                       onclick="printInvoice({{ order.id }})">
+                                                        <i class="fas fa-print"></i>
+                                                        طباعة الفاتورة
+                                                    </a>
+                                                    <a href="#" class="dropdown-item"
+                                                       onclick="sendNotification({{ order.id }})">
+                                                        <i class="fas fa-bell"></i>
+                                                        إرسال تنبيه
+                                                    </a>
+                                                    <div class="dropdown-divider"></div>
+                                                    <a href="#" class="dropdown-item text-danger"
+                                                       onclick="cancelOrder({{ order.id }})">
+                                                        <i class="fas fa-times"></i>
+                                                        إلغاء الطلب
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8" style="text-align: center; padding: 3rem; color: var(--text-light);">
+                                        <i class="fas fa-shopping-bag fa-2x mb-3"></i>
+                                        <p>لا توجد طلبات</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- الترقيم الصفحي -->
+                    {% if orders.has_other_pages %}
+                    <div class="pagination">
+                        {% if orders.has_previous %}
+                        <button class="page-btn" onclick="changeOrderPage({{ orders.previous_page_number }})">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        {% else %}
+                        <button class="page-btn disabled">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        {% endif %}
+                        
+                        {% for num in orders.paginator.page_range %}
+                            {% if orders.number == num %}
+                            <button class="page-btn active">{{ num }}</button>
+                            {% elif num > orders.number|add:-3 and num < orders.number|add:3 %}
+                            <button class="page-btn" onclick="changeOrderPage({{ num }})">{{ num }}</button>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if orders.has_next %}
+                        <button class="page-btn" onclick="changeOrderPage({{ orders.next_page_number }})">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        {% else %}
+                        <button class="page-btn disabled">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal تحديث حالة الطلب -->
+<div id="statusModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+     background: rgba(0, 0, 0, 0.5); z-index: 2000; align-items: center; justify-content: center;">
+    <div style="background: var(--pure-white); border-radius: var(--radius-lg); padding: 2rem; 
+                max-width: 400px; width: 90%;">
+        <h3 style="font-weight: 300; margin-bottom: 1rem; color: var(--dark-gray);" id="statusModalTitle"></h3>
+        <div id="statusModalContent"></div>
+        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+            <button onclick="closeStatusModal()" class="action-btn">إلغاء</button>
+            <button onclick="confirmStatusUpdate()" class="action-btn primary">
+                تحديث
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let selectedOrderId = null;
+    let selectedOrders = new Set();
+    let currentAction = null;
+    
+    // البحث في الطلبات
+    function searchOrders() {
+        const searchTerm = document.getElementById('orderSearch').value.toLowerCase();
+        const rows = document.querySelectorAll('.order-row');
+        
+        rows.forEach(row => {
+            const orderNumber = row.querySelector('td:nth-child(2) strong').textContent.toLowerCase();
+            const customerName = row.querySelector('.customer-info h4').textContent.toLowerCase();
+            const customerEmail = row.querySelector('.customer-info .email').textContent.toLowerCase();
+            
+            if (orderNumber.includes(searchTerm) || 
+                customerName.includes(searchTerm) || 
+                customerEmail.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+    
+    // تصفية الطلبات
+    function filterOrders() {
+        const statusFilter = document.getElementById('statusFilter').value;
+        const paymentFilter = document.getElementById('paymentFilter').value;
+        const rows = document.querySelectorAll('.order-row');
+        
+        rows.forEach(row => {
+            const status = row.dataset.status;
+            const payment = row.dataset.payment;
+            
+            let showRow = true;
+            
+            // تصفية حسب الحالة
+            if (statusFilter && status !== statusFilter) {
+                showRow = false;
+            }
+            
+            // تصفية حسب طريقة الدفع
+            if (paymentFilter && payment !== paymentFilter) {
+                showRow = false;
+            }
+            
+            row.style.display = showRow ? '' : 'none';
+        });
+    }
+    
+    // تصفية حسب الحالة (من الإحصائيات)
+    function filterByStatus(status) {
+        document.getElementById('statusFilter').value = status;
+        filterOrders();
+    }
+    
+    // تصفية حسب التاريخ
+    function filterByDate() {
+        const fromDate = document.getElementById('fromDate').value;
+        const toDate = document.getElementById('toDate').value;
+        
+        if (!fromDate || !toDate) {
+            TIVE.showMessage('يرجى تحديد نطاق تاريخ صحيح', 'warning');
+            return;
+        }
+        
+        window.location.href = `?from_date=${fromDate}&to_date=${toDate}`;
+    }
+    
+    // ترتيب الطلبات
+    function sortOrders() {
+        const sortBy = document.getElementById('sortBy').value;
+        const rows = Array.from(document.querySelectorAll('.order-row'));
+        const tbody = document.getElementById('ordersTableBody');
+        
+        rows.sort((a, b) => {
+            switch (sortBy) {
+                case 'newest':
+                    return new Date(b.dataset.date) - new Date(a.dataset.date);
+                case 'oldest':
+                    return new Date(a.dataset.date) - new Date(b.dataset.date);
+                case 'total_high':
+                    return parseFloat(b.dataset.total) - parseFloat(a.dataset.total);
+                case 'total_low':
+                    return parseFloat(a.dataset.total) - parseFloat(b.dataset.total);
+                default:
+                    return 0;
+            }
+        });
+        
+        // إعادة ترتيب الصفوف
+        rows.forEach(row => tbody.appendChild(row));
+    }
+    
+    // تحديد كل الطلبات
+    function toggleSelectAllOrders() {
+        const selectAll = document.getElementById('selectAllOrders');
+        const checkboxes = document.querySelectorAll('.order-checkbox');
+        
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = selectAll.checked;
+            if (selectAll.checked) {
+                selectedOrders.add(checkbox.value);
+            } else {
+                selectedOrders.delete(checkbox.value);
+            }
+        });
+    }
+    
+    // تحديث مجموعة الطلبات المختارة
+    document.querySelectorAll('.order-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            if (this.checked) {
+                selectedOrders.add(this.value);
+            } else {
+                selectedOrders.delete(this.value);
+            }
+            
+            // تحديث حالة تحديد الكل
+            const allChecked = document.querySelectorAll('.order-checkbox').length === 
+                              document.querySelectorAll('.order-checkbox:checked').length;
+            document.getElementById('selectAllOrders').checked = allChecked;
+        });
+    }
+    
+    // تبديل القائمة المنسدلة
+    function toggleDropdown(button) {
+        const dropdown = button.parentNode.querySelector('.dropdown-menu');
+        dropdown.classList.toggle('show');
+        
+        // إغلاق القوائم الأخرى
+        document.querySelectorAll('.dropdown-menu').forEach(menu => {
+            if (menu !== dropdown) {
+                menu.classList.remove('show');
+            }
+        });
+    }
+    
+    // إغلاق جميع القوائم المنسدلة عند النقر خارجها
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('.order-actions-dropdown')) {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.classList.remove('show');
+            });
+        }
+    });
+    
+    // عرض الطلب
+    function viewOrder(id) {
+        window.open(`/dashboard/orders/${id}/`, '_blank');
+    }
+    
+    // تحديث حالة الطلب
+    function updateOrderStatus(id, status) {
+        selectedOrderId = id;
+        currentAction = { type: 'status', status: status };
+        
+        const statusNames = {
+            'pending': 'قيد الانتظار',
+            'processing': 'قيد المعالجة',
+            'shipped': 'تم الشحن',
+            'delivered': 'تم التسليم',
+            'cancelled': 'ملغاة'
+        };
+        
+        document.getElementById('statusModalTitle').textContent = 'تحديث حالة الطلب';
+        document.getElementById('statusModalContent').innerHTML = `
+            <p style="color: var(--text-gray); margin-bottom: 1.5rem;">
+                هل تريد تغيير حالة الطلب #${id.toString().padStart(6, '0')} إلى

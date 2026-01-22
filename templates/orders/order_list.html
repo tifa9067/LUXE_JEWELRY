@@ -1,0 +1,804 @@
+order_list.html
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}طلباتي - TIVE{% endblock %}
+
+{% block extra_css %}
+<style>
+    .orders-section {
+        padding-top: 8rem;
+        padding-bottom: 4rem;
+        background-color: var(--off-white);
+        min-height: 100vh;
+    }
+    
+    .orders-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+    
+    .orders-title {
+        font-size: 2rem;
+        font-weight: 200;
+        margin-bottom: 0.5rem;
+        color: var(--dark-gray);
+    }
+    
+    .orders-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+    
+    .stat-card {
+        background-color: var(--pure-white);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+    }
+    
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        background-color: var(--primary-pastel);
+        border-radius: var(--radius-round);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        color: white;
+        font-size: 1.2rem;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 200;
+        color: var(--dark-gray);
+        margin-bottom: 0.25rem;
+    }
+    
+    .stat-label {
+        color: var(--text-light);
+        font-size: 0.9rem;
+        font-weight: 300;
+    }
+    
+    .orders-filter {
+        background-color: var(--pure-white);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+    }
+    
+    .filter-title {
+        font-size: 1.1rem;
+        font-weight: 300;
+        margin-bottom: 1rem;
+        color: var(--dark-gray);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .filter-title i {
+        color: var(--primary-pastel);
+    }
+    
+    .filter-buttons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .filter-btn {
+        padding: 0.5rem 1.25rem;
+        background-color: var(--off-white);
+        border: 1px solid var(--light-gray);
+        border-radius: 20px;
+        color: var(--text-gray);
+        font-size: 0.85rem;
+        font-weight: 300;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .filter-btn:hover,
+    .filter-btn.active {
+        background-color: var(--primary-pastel);
+        border-color: var(--primary-pastel);
+        color: white;
+    }
+    
+    .orders-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .order-card {
+        background-color: var(--pure-white);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .order-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+    }
+    
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--light-gray);
+    }
+    
+    .order-info {
+        flex: 1;
+    }
+    
+    .order-number {
+        font-size: 1.1rem;
+        font-weight: 300;
+        color: var(--dark-gray);
+        margin-bottom: 0.5rem;
+    }
+    
+    .order-date {
+        color: var(--text-light);
+        font-size: 0.9rem;
+        font-weight: 300;
+    }
+    
+    .order-status {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 300;
+        text-align: center;
+        min-width: 100px;
+    }
+    
+    .status-pending {
+        background-color: rgba(255, 193, 7, 0.1);
+        color: #ff9800;
+    }
+    
+    .status-confirmed {
+        background-color: rgba(33, 150, 243, 0.1);
+        color: #2196f3;
+    }
+    
+    .status-processing {
+        background-color: rgba(156, 39, 176, 0.1);
+        color: #9c27b0;
+    }
+    
+    .status-shipped {
+        background-color: rgba(3, 169, 244, 0.1);
+        color: #03a9f4;
+    }
+    
+    .status-delivered {
+        background-color: rgba(76, 175, 80, 0.1);
+        color: #4caf50;
+    }
+    
+    .status-cancelled {
+        background-color: rgba(244, 67, 54, 0.1);
+        color: #f44336;
+    }
+    
+    .order-items-preview {
+        margin-bottom: 1.5rem;
+    }
+    
+    .preview-title {
+        font-size: 0.9rem;
+        color: var(--text-light);
+        margin-bottom: 1rem;
+        font-weight: 300;
+    }
+    
+    .preview-images {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+    
+    .preview-image {
+        width: 60px;
+        height: 60px;
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .preview-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .image-count {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 300;
+    }
+    
+    .order-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--light-gray);
+    }
+    
+    .order-total {
+        font-size: 1.2rem;
+        font-weight: 300;
+        color: var(--dark-gray);
+    }
+    
+    .order-actions {
+        display: flex;
+        gap: 0.75rem;
+    }
+    
+    .action-btn {
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--light-gray);
+        border-radius: 20px;
+        background-color: transparent;
+        color: var(--text-gray);
+        font-size: 0.85rem;
+        font-weight: 300;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .action-btn:hover {
+        border-color: var(--primary-pastel);
+        color: var(--primary-pastel);
+    }
+    
+    .action-btn.cancel:hover {
+        border-color: #f44336;
+        color: #f44336;
+    }
+    
+    .action-btn.track:hover {
+        border-color: #2196f3;
+        color: #2196f3;
+    }
+    
+    .empty-orders {
+        text-align: center;
+        padding: 4rem 2rem;
+        background-color: var(--pure-white);
+        border-radius: var(--radius-lg);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+    }
+    
+    .empty-icon {
+        width: 80px;
+        height: 80px;
+        background-color: var(--off-white);
+        border-radius: var(--radius-round);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        color: var(--text-light);
+        font-size: 2rem;
+    }
+    
+    .empty-title {
+        font-size: 1.5rem;
+        font-weight: 200;
+        margin-bottom: 0.5rem;
+        color: var(--dark-gray);
+    }
+    
+    .empty-message {
+        color: var(--text-gray);
+        margin-bottom: 2rem;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 3rem;
+    }
+    
+    .page-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: var(--radius-round);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--pure-white);
+        border: 1px solid var(--light-gray);
+        color: var(--text-gray);
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .page-btn:hover {
+        background-color: var(--primary-pastel);
+        border-color: var(--primary-pastel);
+        color: white;
+    }
+    
+    .page-btn.active {
+        background-color: var(--primary-pastel);
+        border-color: var(--primary-pastel);
+        color: white;
+    }
+    
+    .page-btn.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    /* تحسينات للاستجابة */
+    @media (max-width: 768px) {
+        .order-header {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .order-footer {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: stretch;
+        }
+        
+        .order-actions {
+            flex-direction: column;
+        }
+        
+        .filter-buttons {
+            justify-content: center;
+        }
+        
+        .orders-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .orders-stats {
+            grid-template-columns: 1fr;
+        }
+        
+        .stat-card {
+            padding: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="orders-section">
+    <div class="container">
+        <!-- رأس الصفحة -->
+        <div class="orders-header">
+            <h1 class="orders-title">طلباتي</h1>
+            <p class="text-muted">تتبع جميع طلباتك السابقة والحالية</p>
+        </div>
+
+        <!-- إحصائيات الطلبات -->
+        <div class="orders-stats">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-shopping-bag"></i>
+                </div>
+                <div class="stat-value">{{ total_orders }}</div>
+                <div class="stat-label">إجمالي الطلبات</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon" style="background-color: var(--secondary-pastel);">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-value">{{ pending_orders }}</div>
+                <div class="stat-label">طلبات قيد المعالجة</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon" style="background-color: var(--accent-pastel);">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-value">{{ delivered_orders }}</div>
+                <div class="stat-label">طلبات مكتملة</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon" style="background-color: rgba(255, 183, 197, 0.8);">
+                    <i class="fas fa-truck"></i>
+                </div>
+                <div class="stat-value">{{ shipped_orders }}</div>
+                <div class="stat-label">طلبات قيد الشحن</div>
+            </div>
+        </div>
+
+        <!-- فلترة الطلبات -->
+        <div class="orders-filter">
+            <h3 class="filter-title">
+                <i class="fas fa-filter"></i>
+                تصفية الطلبات
+            </h3>
+            <div class="filter-buttons">
+                <button class="filter-btn active" onclick="filterOrders('all')">الكل</button>
+                <button class="filter-btn" onclick="filterOrders('pending')">قيد الانتظار</button>
+                <button class="filter-btn" onclick="filterOrders('confirmed')">تم التأكيد</button>
+                <button class="filter-btn" onclick="filterOrders('processing')">قيد المعالجة</button>
+                <button class="filter-btn" onclick="filterOrders('shipped')">قيد الشحن</button>
+                <button class="filter-btn" onclick="filterOrders('delivered')">مكتملة</button>
+                <button class="filter-btn" onclick="filterOrders('cancelled')">ملغية</button>
+            </div>
+        </div>
+
+        <!-- قائمة الطلبات -->
+        <div class="orders-list">
+            {% if orders %}
+                {% for order in orders %}
+                <div class="order-card" data-status="{{ order.status }}">
+                    <div class="order-header">
+                        <div class="order-info">
+                            <div class="order-number">طلب #{{ order.order_number }}</div>
+                            <div class="order-date">
+                                <i class="far fa-calendar me-1"></i>
+                                {{ order.created_at|date:"Y/m/d" }}
+                                <span style="margin: 0 0.5rem;">•</span>
+                                <i class="far fa-clock me-1"></i>
+                                {{ order.created_at|date:"h:i A" }}
+                            </div>
+                        </div>
+                        <div class="order-status status-{{ order.status }}">
+                            {{ order.get_status_display }}
+                        </div>
+                    </div>
+
+                    <div class="order-items-preview">
+                        <div class="preview-title">المنتجات:</div>
+                        <div class="preview-images">
+                            {% for item in order.items.all|slice:":4" %}
+                            <div class="preview-image">
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                            </div>
+                            {% endfor %}
+                            {% if order.items.count > 4 %}
+                            <div class="preview-image">
+                                <div class="image-count">
+                                    +{{ order.items.count|add:"-4" }}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="order-footer">
+                        <div class="order-total">{{ order.total }} ر.س</div>
+                        <div class="order-actions">
+                            <a href="{% url 'order_detail' order.id %}" class="action-btn">
+                                <i class="fas fa-eye"></i>
+                                تفاصيل
+                            </a>
+                            {% if order.status == 'pending' or order.status == 'confirmed' %}
+                            <button class="action-btn cancel" onclick="cancelOrder({{ order.id }})">
+                                <i class="fas fa-times"></i>
+                                إلغاء
+                            </button>
+                            {% endif %}
+                            {% if order.status == 'shipped' %}
+                            <button class="action-btn track" onclick="trackOrder({{ order.id }})">
+                                <i class="fas fa-truck"></i>
+                                تتبع
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <!-- حالة عدم وجود طلبات -->
+                <div class="empty-orders">
+                    <div class="empty-icon">
+                        <i class="fas fa-box-open"></i>
+                    </div>
+                    <h3 class="empty-title">لا توجد طلبات</h3>
+                    <p class="empty-message">
+                        لم تقم بإنشاء أي طلبات حتى الآن. ابدأ بالتسوق لاكتشاف منتجاتنا الفاخرة.
+                    </p>
+                    <a href="{% url 'product_list' %}" class="btn btn-primary">
+                        <i class="fas fa-shopping-bag me-2"></i>
+                        ابدأ التسوق
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- الترقيم الصفحي -->
+        {% if orders.has_other_pages %}
+        <div class="pagination">
+            {% if orders.has_previous %}
+            <a href="?page={{ orders.previous_page_number }}" class="page-btn">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+            {% else %}
+            <span class="page-btn disabled">
+                <i class="fas fa-chevron-right"></i>
+            </span>
+            {% endif %}
+
+            {% for i in orders.paginator.page_range %}
+                {% if orders.number == i %}
+                <span class="page-btn active">{{ i }}</span>
+                {% elif i > orders.number|add:'-3' and i < orders.number|add:'3' %}
+                <a href="?page={{ i }}" class="page-btn">{{ i }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if orders.has_next %}
+            <a href="?page={{ orders.next_page_number }}" class="page-btn">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            {% else %}
+            <span class="page-btn disabled">
+                <i class="fas fa-chevron-left"></i>
+            </span>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // فلترة الطلبات حسب الحالة
+    function filterOrders(status) {
+        // تحديث أزرار الفلترة
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+        
+        // إخفاء/إظهار الطلبات حسب الحالة
+        const orderCards = document.querySelectorAll('.order-card');
+        
+        orderCards.forEach(card => {
+            if (status === 'all') {
+                card.style.display = 'block';
+            } else {
+                if (card.dataset.status === status) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            }
+        });
+        
+        // إضافة تأثير الانتقال
+        orderCards.forEach(card => {
+            if (card.style.display === 'block') {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 100);
+            }
+        });
+    }
+    
+    // إلغاء الطلب
+    function cancelOrder(orderId) {
+        if (confirm('هل أنت متأكد من إلغاء هذا الطلب؟ لا يمكن التراجع عن هذا الإجراء.')) {
+            fetch(`/orders/cancel/${orderId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const orderCard = document.querySelector(`[onclick*="${orderId}"]`).closest('.order-card');
+                    
+                    // تحديث حالة الطلب
+                    const statusElement = orderCard.querySelector('.order-status');
+                    statusElement.textContent = 'ملغي';
+                    statusElement.className = 'order-status status-cancelled';
+                    
+                    // إخفاء أزرار الإجراءات
+                    const actions = orderCard.querySelector('.order-actions');
+                    actions.innerHTML = `
+                        <a href="/orders/detail/${orderId}/" class="action-btn">
+                            <i class="fas fa-eye"></i>
+                            تفاصيل
+                        </a>
+                    `;
+                    
+                    showMessage('تم إلغاء الطلب بنجاح', 'success');
+                    
+                    // تحديث الإحصائيات
+                    updateOrderStats();
+                } else {
+                    showMessage(data.message || 'حدث خطأ أثناء إلغاء الطلب', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('حدث خطأ أثناء إلغاء الطلب', 'error');
+            });
+        }
+    }
+    
+    // تتبع الطلب
+    function trackOrder(orderId) {
+        // يمكن استبدال هذا بفتح صفحة التتبع الفعلية
+        alert('ميزة تتبع الطلب قريباً...');
+    }
+    
+    // تحديث إحصائيات الطلبات
+    function updateOrderStats() {
+        fetch('/orders/stats/', {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.querySelectorAll('.stat-value').forEach((element, index) => {
+                switch(index) {
+                    case 0: element.textContent = data.total_orders; break;
+                    case 1: element.textContent = data.pending_orders; break;
+                    case 2: element.textContent = data.delivered_orders; break;
+                    case 3: element.textContent = data.shipped_orders; break;
+                }
+            });
+        });
+    }
+    
+    // عرض الرسائل
+    function showMessage(message, type = 'info') {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.style.cssText = `
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: ${type === 'error' ? '#ffebee' : type === 'success' ? '#e8f5e9' : 'white'};
+            border: 1px solid ${type === 'error' ? '#ffcdd2' : type === 'success' ? '#c8e6c9' : 'var(--light-gray)'};
+            border-right: 3px solid ${type === 'error' ? '#f44336' : type === 'success' ? '#4caf50' : 'var(--primary-pastel)'};
+            border-radius: var(--radius-md);
+            padding: 1rem 1.5rem;
+            z-index: 2000;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            max-width: 300px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        `;
+        alertDiv.textContent = message;
+        
+        document.body.appendChild(alertDiv);
+        
+        setTimeout(() => {
+            alertDiv.style.transform = 'translateX(0)';
+        }, 10);
+        
+        setTimeout(() => {
+            alertDiv.style.transform = 'translateX(120%)';
+            setTimeout(() => {
+                document.body.removeChild(alertDiv);
+            }, 300);
+        }, 3000);
+    }
+    
+    // تحميل أكثر (للتشغيل اللاحق)
+    function loadMoreOrders() {
+        const nextPage = {{ orders.number|add:1 }};
+        const totalPages = {{ orders.paginator.num_pages }};
+        
+        if (nextPage > totalPages) return;
+        
+        fetch(`?page=${nextPage}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            // استخراج الطلبات الجديدة من الـ HTML
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newOrders = doc.querySelectorAll('.order-card');
+            
+            // إضافة الطلبات الجديدة
+            const ordersList = document.querySelector('.orders-list');
+            newOrders.forEach(order => {
+                ordersList.appendChild(order);
+            });
+            
+            // تحديث الترقيم الصفحي
+            updatePagination(nextPage);
+        });
+    }
+    
+    // تحديث الترقيم الصفحي
+    function updatePagination(currentPage) {
+        const pageButtons = document.querySelectorAll('.page-btn');
+        pageButtons.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.textContent == currentPage) {
+                btn.classList.add('active');
+            }
+        });
+    }
+    
+    // الكشف عن نهاية الصفحة لتحميل المزيد
+    window.addEventListener('scroll', function() {
+        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
+            loadMoreOrders();
+        }
+    });
+    
+    // التهيئة عند تحميل الصفحة
+    document.addEventListener('DOMContentLoaded', function() {
+        // إضافة تأثيرات للطلبات
+        const orderCards = document.querySelectorAll('.order-card');
+        orderCards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    });
+</script>
+{% endblock %}
+```
+

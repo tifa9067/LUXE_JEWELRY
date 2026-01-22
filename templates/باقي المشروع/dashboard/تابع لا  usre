@@ -1,0 +1,629 @@
+أتابع لك باقي الكود. يبدو أن الكود توقف عند دالة showMessage. إليك استكمال الكود بالإضافة إلى بعض التحسينات:
+
+```javascript
+success' ? '#e8f5e9' : '#e3f2fd'};
+            color: ${type === 'error' ? '#c62828' : type === 'success' ? '#2e7d32' : '#1565c0'};
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-md);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 3000;
+            min-width: 300px;
+            max-width: 400px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideIn 0.3s ease;
+            border-right: 4px solid ${type === 'error' ? '#ef5350' : type === 'success' ? '#66bb6a' : '#42a5f5'};
+        `;
+        
+        const icon = document.createElement('i');
+        icon.className = `fas fa-${type === 'error' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle'}`;
+        
+        const text = document.createElement('span');
+        text.textContent = message;
+        text.style.cssText = 'font-size: 0.9rem; font-weight: 300;';
+        
+        const closeBtn = document.createElement('button');
+        closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+        closeBtn.style.cssText = `
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            margin-right: auto;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            padding: 0.25rem;
+            border-radius: var(--radius-round);
+            transition: all 0.2s ease;
+        `;
+        closeBtn.onmouseover = () => closeBtn.style.opacity = '1';
+        closeBtn.onmouseout = () => closeBtn.style.opacity = '0.7';
+        closeBtn.onclick = () => messageDiv.remove();
+        
+        messageDiv.appendChild(icon);
+        messageDiv.appendChild(text);
+        messageDiv.appendChild(closeBtn);
+        
+        document.body.appendChild(messageDiv);
+        
+        // إزالة الرسالة بعد 5 ثواني
+        setTimeout(() => {
+            if (messageDiv.parentNode) {
+                messageDiv.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => messageDiv.remove(), 300);
+            }
+        }, 5000);
+    }
+
+    // إضافة الأنيميشن للرسائل
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // تفعيل/تعطيل المستخدم
+    function toggleUserStatus(userId, username, currentStatus) {
+        const action = currentStatus ? 'تعطيل' : 'تفعيل';
+        
+        if (confirm(`هل أنت متأكد من ${action} المستخدم "${username}"؟`)) {
+            fetch(`/dashboard/users/${userId}/toggle-status/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ action: currentStatus ? 'deactivate' : 'activate' })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage(`تم ${action} المستخدم ${username} بنجاح`, 'success');
+                    
+                    // تحديث الحالة في الجدول دون تحديث الصفحة
+                    const statusSpan = document.querySelector(`tr[data-user-id="${userId}"] .user-status`);
+                    if (statusSpan) {
+                        const newStatus = !currentStatus;
+                        statusSpan.className = `user-status status-${newStatus ? 'active' : 'inactive'}`;
+                        statusSpan.textContent = newStatus ? 'نشط' : 'غير نشط';
+                        
+                        // تحديث الإحصائيات
+                        updateStats(newStatus ? 'activate' : 'deactivate');
+                    }
+                } else {
+                    showMessage(data.message || `حدث خطأ أثناء ${action} المستخدم`, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('حدث خطأ في الاتصال بالخادم', 'error');
+            });
+        }
+    }
+    
+    // تحديث الإحصائيات
+    function updateStats(action) {
+        const totalElement = document.querySelector('.stat-card:nth-child(1) .stat-value');
+        const activeElement = document.querySelector('.stat-card:nth-child(3) .stat-value');
+        const inactiveElement = document.querySelector('.stat-card:nth-child(4) .stat-value');
+        
+        if (totalElement && activeElement && inactiveElement) {
+            let total = parseInt(totalElement.textContent) || 0;
+            let active = parseInt(activeElement.textContent) || 0;
+            let inactive = parseInt(inactiveElement.textContent) || 0;
+            
+            if (action === 'activate') {
+                active++;
+                inactive--;
+            } else if (action === 'deactivate') {
+                active--;
+                inactive++;
+            }
+            
+            // تحديث القيم
+            activeElement.textContent = active;
+            inactiveElement.textContent = inactive;
+            
+            // إضافة أنيميشن بسيط
+            [activeElement, inactiveElement].forEach(el => {
+                el.style.transform = 'scale(1.2)';
+                setTimeout(() => {
+                    el.style.transform = 'scale(1)';
+                }, 300);
+            });
+        }
+    }
+    
+    // تصدير البيانات
+    function exportData(format = 'csv') {
+        const params = new URLSearchParams(window.location.search);
+        params.set('export', format);
+        
+        showMessage('جاري تحضير الملف للتحميل...', 'info');
+        
+        fetch(`/dashboard/users/export/?${params.toString()}`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.blob();
+            }
+            throw new Error('Network response was not ok.');
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `users_export_${new Date().toISOString().split('T')[0]}.${format}`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
+            showMessage(`تم تصدير البيانات بنجاح إلى ملف ${format.toUpperCase()}`, 'success');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showMessage('حدث خطأ أثناء تصدير البيانات', 'error');
+        });
+    }
+    
+    // الفرز في الجدول
+    function sortTable(columnIndex) {
+        const table = document.querySelector('.users-table');
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const header = table.querySelectorAll('th')[columnIndex];
+        const isAscending = !header.classList.contains('asc');
+        
+        // إزالة علامات الفرز من جميع العناوين
+        table.querySelectorAll('th').forEach(th => {
+            th.classList.remove('asc', 'desc');
+            th.querySelector('.sort-icon')?.remove();
+        });
+        
+        // إضافة علامة الفرز للعنوان الحالي
+        header.classList.add(isAscending ? 'asc' : 'desc');
+        
+        const sortIcon = document.createElement('i');
+        sortIcon.className = `fas fa-chevron-${isAscending ? 'up' : 'down'} sort-icon`;
+        sortIcon.style.cssText = 'margin-right: 0.5rem; font-size: 0.8rem;';
+        header.insertBefore(sortIcon, header.firstChild);
+        
+        // فرز الصفوف
+        rows.sort((a, b) => {
+            const aValue = a.cells[columnIndex].textContent.trim();
+            const bValue = b.cells[columnIndex].textContent.trim();
+            
+            // محاولة تحويل إلى تاريخ إذا كان العمود يحتوي على تاريخ
+            if (columnIndex === 3 || columnIndex === 4) {
+                const aDate = new Date(aValue.replace(/\//g, '-'));
+                const bDate = new Date(bValue.replace(/\//g, '-'));
+                
+                if (!isNaN(aDate) && !isNaN(bDate)) {
+                    return isAscending ? aDate - bDate : bDate - aDate;
+                }
+            }
+            
+            // محاولة تحويل إلى رقم إذا كان ممكنًا
+            if (!isNaN(aValue) && !isNaN(bValue) && aValue !== '' && bValue !== '') {
+                return isAscending ? parseFloat(aValue) - parseFloat(bValue) : parseFloat(bValue) - parseFloat(aValue);
+            }
+            
+            // فرز نصي
+            return isAscending ? 
+                aValue.localeCompare(bValue, 'ar') : 
+                bValue.localeCompare(aValue, 'ar');
+        });
+        
+        // إعادة ترتيب الصفوف في الجدول
+        rows.forEach(row => tbody.appendChild(row));
+    }
+    
+    // إضافة إمكانية الفرز عند النقر على العناوين
+    document.querySelectorAll('.users-table th').forEach((th, index) => {
+        if (index < 5) { // استبعاد عمود الإجراءات
+            th.style.cursor = 'pointer';
+            th.addEventListener('click', () => sortTable(index));
+            
+            // إضافة تأثير hover
+            th.addEventListener('mouseenter', () => {
+                th.style.backgroundColor = 'var(--light-gray)';
+            });
+            
+            th.addEventListener('mouseleave', () => {
+                th.style.backgroundColor = '';
+            });
+        }
+    });
+    
+    // بحث متقدم
+    function advancedSearch() {
+        const modal = document.getElementById('advancedSearchModal');
+        if (!modal) {
+            createAdvancedSearchModal();
+        } else {
+            modal.classList.add('show');
+        }
+        document.body.style.overflow = 'hidden';
+    }
+    
+    // إنشاء مودال البحث المتقدم
+    function createAdvancedSearchModal() {
+        const modalHTML = `
+            <div class="modal-overlay show" id="advancedSearchModal">
+                <div class="modal" style="max-width: 600px;">
+                    <div class="modal-header">
+                        <h3 class="modal-title">بحث متقدم</h3>
+                        <button class="modal-close" onclick="closeAdvancedSearchModal()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="advancedSearchForm">
+                            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                                <div class="form-group">
+                                    <label class="form-label">تاريخ التسجيل من</label>
+                                    <input type="date" name="date_from" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">تاريخ التسجيل إلى</label>
+                                    <input type="date" name="date_to" class="form-control">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">المدينة</label>
+                                <input type="text" name="city" class="form-control" placeholder="اكتب المدينة...">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">نطاق الطلبات</label>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                    <input type="number" name="min_orders" class="form-control" placeholder="الحد الأدنى">
+                                    <input type="number" name="max_orders" class="form-control" placeholder="الحد الأعلى">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">ترتيب النتائج حسب</label>
+                                <select name="order_by" class="form-control">
+                                    <option value="">الترتيب الافتراضي</option>
+                                    <option value="date_joined">تاريخ التسجيل</option>
+                                    <option value="last_login">آخر دخول</option>
+                                    <option value="username">اسم المستخدم</option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline" onclick="closeAdvancedSearchModal()">إلغاء</button>
+                        <button type="button" class="btn btn-primary" onclick="applyAdvancedSearch()">تطبيق البحث</button>
+                        <button type="button" class="btn btn-secondary" onclick="resetAdvancedSearch()">إعادة تعيين</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+    }
+    
+    function closeAdvancedSearchModal() {
+        const modal = document.getElementById('advancedSearchModal');
+        if (modal) {
+            modal.classList.remove('show');
+            setTimeout(() => modal.remove(), 300);
+        }
+        document.body.style.overflow = 'auto';
+    }
+    
+    function applyAdvancedSearch() {
+        const form = document.getElementById('advancedSearchForm');
+        const formData = new FormData(form);
+        const params = new URLSearchParams();
+        
+        for (let [key, value] of formData) {
+            if (value) {
+                params.append(key, value);
+            }
+        }
+        
+        // إضافة معلمات البحث الحالية
+        const currentParams = new URLSearchParams(window.location.search);
+        for (let [key, value] of currentParams) {
+            if (key !== 'page' && !params.has(key)) {
+                params.append(key, value);
+            }
+        }
+        
+        window.location.href = `?${params.toString()}`;
+    }
+    
+    function resetAdvancedSearch() {
+        const form = document.getElementById('advancedSearchForm');
+        form.reset();
+    }
+    
+    // تحديث تلقائي للجدول كل 30 ثانية (اختياري)
+    function autoRefreshTable() {
+        setTimeout(() => {
+            if (document.visibilityState === 'visible') {
+                const refreshBtn = document.querySelector('.table-actions .btn-outline');
+                if (refreshBtn) {
+                    refreshBtn.click();
+                }
+            }
+        }, 30000); // 30 ثانية
+    }
+    
+    // بدء التحديث التلقائي
+    autoRefreshTable();
+    
+    // تحسين تجربة المستخدم عند التحميل
+    document.addEventListener('DOMContentLoaded', function() {
+        // إضافة تأثير تحميل للجدول
+        const table = document.querySelector('.users-table tbody');
+        if (table) {
+            table.style.opacity = '0';
+            setTimeout(() => {
+                table.style.transition = 'opacity 0.3s ease';
+                table.style.opacity = '1';
+            }, 100);
+        }
+        
+        // إضافة tooltip للأزرار
+        document.querySelectorAll('[title]').forEach(el => {
+            el.addEventListener('mouseenter', function(e) {
+                const tooltip = document.createElement('div');
+                tooltip.className = 'tooltip';
+                tooltip.textContent = this.title;
+                tooltip.style.cssText = `
+                    position: absolute;
+                    background: var(--dark-gray);
+                    color: white;
+                    padding: 0.5rem 0.75rem;
+                    border-radius: var(--radius-sm);
+                    font-size: 0.8rem;
+                    font-weight: 300;
+                    z-index: 1000;
+                    white-space: nowrap;
+                    pointer-events: none;
+                    transform: translateY(-100%) translateX(-50%);
+                    left: 50%;
+                    margin-top: -5px;
+                `;
+                
+                document.body.appendChild(tooltip);
+                
+                this.dataset.tooltipId = 'tooltip-' + Date.now();
+                this.addEventListener('mouseleave', function() {
+                    if (tooltip.parentNode) {
+                        tooltip.remove();
+                    }
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}
+```
+
+ملاحظات وتحسينات إضافية:
+
+1. ملف Django View (views.py) المقترح:
+
+```python
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.http import JsonResponse
+from django.core.paginator import Paginator
+from django.db.models import Q
+import json
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser or u.userprofile.user_type == 'admin')
+def user_management(request):
+    # جلب جميع المستخدمين
+    users = UserProfile.objects.select_related('user').all()
+    
+    # التصفية
+    search = request.GET.get('search', '')
+    if search:
+        users = users.filter(
+            Q(user__username__icontains=search) |
+            Q(user__email__icontains=search) |
+            Q(user__first_name__icontains=search) |
+            Q(user__last_name__icontains=search)
+        )
+    
+    user_type = request.GET.get('user_type', '')
+    if user_type:
+        users = users.filter(user_type=user_type)
+    
+    is_active = request.GET.get('is_active', '')
+    if is_active == 'active':
+        users = users.filter(user__is_active=True)
+    elif is_active == 'inactive':
+        users = users.filter(user__is_active=False)
+    
+    # الترحيم
+    paginator = Paginator(users, 10)
+    page = request.GET.get('page', 1)
+    users_page = paginator.get_page(page)
+    
+    # الإحصائيات
+    total_users = users.count()
+    admin_users = users.filter(user_type='admin').count()
+    active_users = users.filter(user__is_active=True).count()
+    inactive_users = users.filter(user__is_active=False).count()
+    
+    context = {
+        'users': users_page,
+        'total_users': total_users,
+        'admin_users': admin_users,
+        'active_users': active_users,
+        'inactive_users': inactive_users,
+    }
+    
+    return render(request, 'dashboard/users.html', context)
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser or u.userprofile.user_type == 'admin')
+def user_details(request, user_id):
+    if request.method == 'GET' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        try:
+            user_profile = get_object_or_404(UserProfile, user__id=user_id)
+            user = user_profile.user
+            
+            data = {
+                'username': user.username,
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'full_name': user.get_full_name(),
+                'user_type': user_profile.user_type,
+                'user_type_display': user_profile.get_user_type_display(),
+                'is_active': user.is_active,
+                'phone': user_profile.phone,
+                'city': user_profile.city,
+                'address': user_profile.address,
+                'date_joined': user.date_joined.strftime('%Y/%m/%d'),
+                'last_login': user.last_login.strftime('%Y/%m/%d') if user.last_login else None,
+                'total_orders': user_profile.orders.count(),  # إذا كان هناك نموذج للطلبات
+            }
+            
+            return JsonResponse(data)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+```
+
+2. ملف URLs (urls.py):
+
+```python
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('users/', views.user_management, name='user_management'),
+    path('users/<int:user_id>/details/', views.user_details, name='user_details'),
+    path('users/<int:user_id>/toggle-status/', views.toggle_user_status, name='toggle_user_status'),
+    path('users/export/', views.export_users, name='export_users'),
+]
+```
+
+3. إضافة CSS إضافي (في ملف منفصل أو في base.html):
+
+```css
+/* تحسينات إضافية */
+.tooltip {
+    position: absolute;
+    background: var(--dark-gray);
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 300;
+    z-index: 1000;
+    white-space: nowrap;
+    pointer-events: none;
+    transform: translateY(-100%) translateX(-50%);
+    left: 50%;
+    margin-top: -5px;
+}
+
+/* تحسينات للجدول */
+.users-table th {
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s ease;
+}
+
+.users-table th:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.sort-icon {
+    margin-right: 0.5rem;
+    font-size: 0.8rem;
+    opacity: 0.6;
+}
+
+/* تأثيرات التحميل */
+.loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* تحسينات للاستجابة */
+@media (max-width: 768px) {
+    .dashboard-section .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    .users-table td, .users-table th {
+        padding: 0.75rem 1rem;
+    }
+    
+    .modal {
+        width: 95%;
+        margin: 1rem;
+    }
+}
+```
+
+4. الميزات المضافة في الكود الكامل:
+
+1. نظام رسائل متطور مع أنيميشن وإغلاق تلقائي
+2. تفعيل/تعطيل المستخدمين بدون تحديث الصفحة (AJAX)
+3. تحديث الإحصائيات الديناميكي عند تغيير حالة المستخدم
+4. نظام تصدير البيانات (CSV/Excel)
+5. فرز الجدول عند النقر على العناوين
+6. بحث متقدم مع فلترة بتاريخ التسجيل والمدينة
+7. تحديث تلقائي للجدول
+8. Tooltips للأزرار
+9. تحسينات UX مثل تأثيرات التحميل
+10. تحسينات للاستجابة على جميع الشاشات
+
+هذا الكود الكامل يوفر لوحة تحكم متكاملة لإدارة المستخدمين مع واجهة مستخدم جميلة وسلسة وتجربة مستخدم محسنة.

@@ -1,0 +1,569 @@
+<!-- orders/order_create.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}إنشاء طلب جديد - TIVE{% endblock %}
+
+{% block extra_css %}
+<style>
+    .checkout-section {
+        padding-top: 8rem;
+        padding-bottom: 6rem;
+        background-color: var(--off-white);
+        min-height: 80vh;
+    }
+    
+    .checkout-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .checkout-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+    
+    .checkout-title {
+        font-size: 2rem;
+        font-weight: 200;
+        color: var(--dark-gray);
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.02em;
+    }
+    
+    .checkout-steps {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+    
+    .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .step-number {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--light-gray);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 300;
+        color: var(--text-gray);
+    }
+    
+    .step.active .step-number {
+        background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel));
+        color: var(--dark-gray);
+    }
+    
+    .step-label {
+        font-size: 0.85rem;
+        color: var(--text-light);
+    }
+    
+    .checkout-form-section {
+        background: var(--pure-white);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        border: 1px solid rgba(240, 240, 240, 0.8);
+    }
+    
+    .section-title {
+        font-size: 1.2rem;
+        font-weight: 200;
+        color: var(--dark-gray);
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(240, 240, 240, 0.8);
+    }
+    
+    .address-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .address-card {
+        border: 2px solid rgba(240, 240, 240, 0.8);
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .address-card:hover {
+        border-color: var(--primary-pastel);
+    }
+    
+    .address-card.selected {
+        border-color: var(--primary-pastel);
+        background: rgba(255, 183, 197, 0.05);
+    }
+    
+    .address-card.default::after {
+        content: 'افتراضي';
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel));
+        color: var(--dark-gray);
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--radius-round);
+        font-size: 0.75rem;
+        font-weight: 300;
+    }
+    
+    .address-name {
+        font-weight: 300;
+        margin-bottom: 0.5rem;
+    }
+    
+    .address-details {
+        color: var(--text-gray);
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+    
+    .add-address-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border: 2px dashed rgba(224, 224, 224, 0.5);
+        border-radius: var(--radius-md);
+        padding: 2rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: var(--text-light);
+    }
+    
+    .add-address-btn:hover {
+        border-color: var(--primary-pastel);
+        color: var(--dark-gray);
+    }
+    
+    .payment-methods {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .payment-method {
+        border: 2px solid rgba(240, 240, 240, 0.8);
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .payment-method:hover {
+        border-color: var(--primary-pastel);
+    }
+    
+    .payment-method.selected {
+        border-color: var(--primary-pastel);
+        background: rgba(255, 183, 197, 0.05);
+    }
+    
+    .method-icon {
+        width: 48px;
+        height: 48px;
+        background: var(--off-white);
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: var(--text-gray);
+    }
+    
+    .method-info h4 {
+        font-weight: 300;
+        margin-bottom: 0.25rem;
+    }
+    
+    .method-info p {
+        color: var(--text-light);
+        font-size: 0.9rem;
+        margin: 0;
+    }
+    
+    .order-summary {
+        position: sticky;
+        top: 100px;
+    }
+    
+    .summary-items {
+        margin-bottom: 1.5rem;
+    }
+    
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(240, 240, 240, 0.8);
+    }
+    
+    .item-name {
+        color: var(--text-gray);
+    }
+    
+    .item-total {
+        font-weight: 300;
+    }
+    
+    .summary-total {
+        display: flex;
+        justify-content: space-between;
+        font-size: 1.2rem;
+        font-weight: 300;
+        padding-top: 1rem;
+        margin-top: 1rem;
+        border-top: 2px solid rgba(240, 240, 240, 0.8);
+    }
+    
+    .terms-checkbox {
+        margin: 2rem 0;
+    }
+    
+    .complete-order-btn {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel));
+        border: none;
+        border-radius: var(--radius-md);
+        color: var(--dark-gray);
+        font-size: 1rem;
+        font-weight: 300;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+    
+    .complete-order-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    @media (max-width: 768px) {
+        .checkout-steps {
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .checkout-form-section {
+            padding: 1.5rem;
+        }
+        
+        .address-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="checkout-section fade-in">
+    <div class="container">
+        <div class="checkout-container">
+            <div class="checkout-header">
+                <h1 class="checkout-title">إتمام الطلب</h1>
+                <p class="checkout-subtitle">أكمل عملية الشراء بخطوات بسيطة</p>
+                
+                <div class="checkout-steps">
+                    <div class="step active">
+                        <div class="step-number">1</div>
+                        <span class="step-label">العنوان</span>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <span class="step-label">الدفع</span>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <span class="step-label">التأكيد</span>
+                    </div>
+                </div>
+            </div>
+            
+            <form method="post" action="{% url 'order_create' %}" id="checkoutForm">
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-lg-8">
+                        <!-- العنوان -->
+                        <div class="checkout-form-section">
+                            <h3 class="section-title">عنوان الشحن</h3>
+                            
+                            {% if addresses %}
+                            <div class="address-grid">
+                                {% for address in addresses %}
+                                <div class="address-card {% if address.is_default %}default{% endif %} {% if forloop.first %}selected{% endif %}"
+                                     onclick="selectAddress(this, {{ address.id }})">
+                                    <input type="radio" name="address_id" value="{{ address.id }}" 
+                                           {% if forloop.first %}checked{% endif %} style="display: none;">
+                                    <h4 class="address-name">{{ address.name }}</h4>
+                                    <div class="address-details">
+                                        {{ address.street }}<br>
+                                        {{ address.city }}، {{ address.region }}<br>
+                                        {{ address.postal_code }}<br>
+                                        {{ address.phone }}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                                
+                                <div class="add-address-btn" onclick="window.location.href='{% url 'add_address' %}'">
+                                    <i class="fas fa-plus fa-2x mb-2"></i>
+                                    <span>إضافة عنوان جديد</span>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-4">
+                                <p>لا توجد عناوين مسجلة</p>
+                                <a href="{% url 'add_address' %}" class="btn" 
+                                   style="background: var(--primary-pastel); color: var(--dark-gray);">
+                                    إضافة عنوان جديد
+                                </a>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- ملاحظات -->
+                            <div class="mt-4">
+                                <label for="notes" class="form-label">ملاحظات على الطلب (اختياري)</label>
+                                <textarea name="notes" id="notes" rows="3" class="form-control" 
+                                          placeholder="أي تعليمات خاصة للشحن..."></textarea>
+                            </div>
+                        </div>
+                        
+                        <!-- طريقة الدفع -->
+                        <div class="checkout-form-section">
+                            <h3 class="section-title">طريقة الدفع</h3>
+                            
+                            <div class="payment-methods">
+                                {% for method in payment_methods %}
+                                <div class="payment-method {% if forloop.first %}selected{% endif %}"
+                                     onclick="selectPaymentMethod(this, '{{ method.code }}')">
+                                    <input type="radio" name="payment_method" value="{{ method.code }}"
+                                           {% if forloop.first %}checked{% endif %} style="display: none;">
+                                    <div class="method-icon">
+                                        <i class="{{ method.icon }}"></i>
+                                    </div>
+                                    <div class="method-info">
+                                        <h4>{{ method.name }}</h4>
+                                        <p>{{ method.description }}</p>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <!-- تفاصيل البطاقة (للدفع الإلكتروني) -->
+                            <div id="cardDetails" style="display: none; margin-top: 1.5rem;">
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <label for="cardNumber" class="form-label">رقم البطاقة</label>
+                                        <input type="text" id="cardNumber" class="form-control" 
+                                               placeholder="1234 5678 9012 3456" maxlength="19">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="expiryDate" class="form-label">تاريخ الانتهاء</label>
+                                        <input type="text" id="expiryDate" class="form-control" 
+                                               placeholder="MM/YY" maxlength="5">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="cvv" class="form-label">CVV</label>
+                                        <input type="password" id="cvv" class="form-control" 
+                                               placeholder="123" maxlength="3">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- ملخص الطلب -->
+                    <div class="col-lg-4">
+                        <div class="checkout-form-section order-summary">
+                            <h3 class="section-title">ملخص الطلب</h3>
+                            
+                            <div class="summary-items">
+                                {% for item in cart_items %}
+                                <div class="summary-item">
+                                    <div class="item-name">
+                                        {{ item.product.name|truncatechars:30 }} × {{ item.quantity }}
+                                    </div>
+                                    <div class="item-total">{{ item.total_price }} ر.س</div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <div class="summary-item">
+                                <span>المجموع الفرعي</span>
+                                <span id="summarySubtotal">{{ cart.get_total_price }} ر.س</span>
+                            </div>
+                            
+                            <div class="summary-item">
+                                <span>التوصيل</span>
+                                <span id="summaryShipping">
+                                    {% if cart.get_total_price >= 500 %}
+                                    مجاناً
+                                    {% else %}
+                                    50 ر.س
+                                    {% endif %}
+                                </span>
+                            </div>
+                            
+                            <div class="summary-item">
+                                <span>الضريبة (15%)</span>
+                                <span id="summaryTax">
+                                    {% with tax=cart.get_total_price|multiply:0.15 %}
+                                    {{ tax|floatformat:2 }} ر.س
+                                    {% endwith %}
+                                </span>
+                            </div>
+                            
+                            <div class="summary-total">
+                                <span>المجموع الكلي</span>
+                                <span id="summaryGrandTotal">
+                                    {% with subtotal=cart.get_total_price|add:0 %}
+                                    {% with tax=subtotal|multiply:0.15 %}
+                                    {% with shipping=subtotal >= 500|yesno:"0,50" %}
+                                    {{ subtotal|add:tax|add:shipping|floatformat:2 }} ر.س
+                                    {% endwith %}
+                                    {% endwith %}
+                                    {% endwith %}
+                                </span>
+                            </div>
+                            
+                            <!-- الشروط -->
+                            <div class="terms-checkbox">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="agreeTerms" required>
+                                    <label class="form-check-label" for="agreeTerms">
+                                        أوافق على 
+                                        <a href="{% url 'terms' %}" target="_blank">الشروط والأحكام</a>
+                                        و
+                                        <a href="{% url 'privacy' %}" target="_blank">سياسة الخصوصية</a>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- إتمام الطلب -->
+                            <button type="submit" class="complete-order-btn" id="completeOrderBtn">
+                                <i class="fas fa-lock me-2"></i>
+                                إتمام الطلب
+                            </button>
+                            
+                            <!-- معلومات أمان -->
+                            <div class="mt-4 pt-3 border-top">
+                                <div class="text-center">
+                                    <i class="fas fa-shield-alt text-muted me-2"></i>
+                                    <small class="text-muted">دفع آمن ومشفر</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // اختيار العنوان
+    function selectAddress(card, addressId) {
+        document.querySelectorAll('.address-card').forEach(c => {
+            c.classList.remove('selected');
+        });
+        card.classList.add('selected');
+        
+        const radioInput = card.querySelector('input[type="radio"]');
+        if (radioInput) {
+            radioInput.checked = true;
+        }
+    }
+    
+    // اختيار طريقة الدفع
+    function selectPaymentMethod(card, methodCode) {
+        document.querySelectorAll('.payment-method').forEach(c => {
+            c.classList.remove('selected');
+        });
+        card.classList.add('selected');
+        
+        const radioInput = card.querySelector('input[type="radio"]');
+        if (radioInput) {
+            radioInput.checked = true;
+        }
+        
+        // إظهار/إخفاء تفاصيل البطاقة
+        const cardDetails = document.getElementById('cardDetails');
+        if (methodCode === 'credit_card') {
+            cardDetails.style.display = 'block';
+        } else {
+            cardDetails.style.display = 'none';
+        }
+    }
+    
+    // تحقق من نموذج الدفع
+    document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+        const selectedPayment = document.querySelector('input[name="payment_method"]:checked');
+        const agreeTerms = document.getElementById('agreeTerms');
+        
+        if (!agreeTerms.checked) {
+            e.preventDefault();
+            TIVE.showMessage('يجب الموافقة على الشروط والأحكام', 'warning');
+            return;
+        }
+        
+        if (selectedPayment && selectedPayment.value === 'credit_card') {
+            const cardNumber = document.getElementById('cardNumber').value;
+            const expiryDate = document.getElementById('expiryDate').value;
+            const cvv = document.getElementById('cvv').value;
+            
+            if (!cardNumber || !expiryDate || !cvv) {
+                e.preventDefault();
+                TIVE.showMessage('يرجى إدخال تفاصيل البطاقة', 'warning');
+                return;
+            }
+        }
+        
+        // إضافة مؤشر التحميل
+        const submitBtn = document.getElementById('completeOrderBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> جاري المعالجة...';
+    });
+    
+    // تنسيق رقم البطاقة
+    document.getElementById('cardNumber')?.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        value = value.replace(/(\d{4})/g, '$1 ').trim();
+        e.target.value = value.substring(0, 19);
+    });
+    
+    // تنسيق تاريخ الانتهاء
+    document.getElementById('expiryDate')?.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length >= 2) {
+            value = value.substring(0, 2) + '/' + value.substring(2, 4);
+        }
+        e.target.value = value.substring(0, 5);
+    });
+</script>
+{% endblock %}

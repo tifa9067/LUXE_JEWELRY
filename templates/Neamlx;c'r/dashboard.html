@@ -1,0 +1,658 @@
+<!-- dashboard/dashboard.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}لوحة التحكم - TIVE{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-section {
+        padding-top: 8rem;
+        padding-bottom: 6rem;
+        background-color: var(--off-white);
+        min-height: 100vh;
+    }
+    
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+    
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 2rem;
+    }
+    
+    .dashboard-sidebar {
+        background: var(--pure-white);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        border: 1px solid rgba(240, 240, 240, 0.8);
+        height: fit-content;
+        position: sticky;
+        top: 100px;
+    }
+    
+    .user-card {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid rgba(240, 240, 240, 0.8);
+    }
+    
+    .user-avatar {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        color: var(--pure-white);
+        font-size: 2rem;
+    }
+    
+    .user-name {
+        font-weight: 300;
+        margin-bottom: 0.25rem;
+    }
+    
+    .user-role {
+        color: var(--text-light);
+        font-size: 0.85rem;
+        padding: 0.25rem 0.75rem;
+        background: var(--off-white);
+        border-radius: var(--radius-round);
+        display: inline-block;
+    }
+    
+    .dashboard-menu {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .menu-item {
+        margin-bottom: 0.5rem;
+    }
+    
+    .menu-link {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.875rem 1rem;
+        color: var(--text-gray);
+        text-decoration: none;
+        border-radius: var(--radius-md);
+        transition: all 0.2s ease;
+        font-weight: 300;
+    }
+    
+    .menu-link:hover,
+    .menu-link.active {
+        background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel));
+        color: var(--dark-gray);
+    }
+    
+    .menu-link i {
+        width: 20px;
+        text-align: center;
+    }
+    
+    .dashboard-content {
+        background: var(--pure-white);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        border: 1px solid rgba(240, 240, 240, 0.8);
+    }
+    
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid rgba(240, 240, 240, 0.8);
+    }
+    
+    .dashboard-title {
+        font-size: 1.8rem;
+        font-weight: 200;
+        color: var(--dark-gray);
+        margin: 0;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: var(--off-white);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(240, 240, 240, 0.8);
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+    }
+    
+    .stat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: var(--radius-round);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+    
+    .stat-icon.blue { background: rgba(33, 150, 243, 0.1); color: #2196f3; }
+    .stat-icon.green { background: rgba(76, 175, 80, 0.1); color: #4caf50; }
+    .stat-icon.orange { background: rgba(255, 193, 7, 0.1); color: #ff9800; }
+    .stat-icon.purple { background: rgba(156, 39, 176, 0.1); color: #9c27b0; }
+    
+    .stat-trend {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.85rem;
+    }
+    
+    .trend-up { color: #4caf50; }
+    .trend-down { color: #f44336; }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 200;
+        margin-bottom: 0.25rem;
+    }
+    
+    .stat-label {
+        color: var(--text-light);
+        font-size: 0.9rem;
+    }
+    
+    .charts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .chart-card {
+        background: var(--off-white);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        border: 1px solid rgba(240, 240, 240, 0.8);
+    }
+    
+    .chart-header {
+        margin-bottom: 1rem;
+    }
+    
+    .chart-title {
+        font-weight: 300;
+        margin: 0;
+    }
+    
+    .recent-orders {
+        margin-top: 2rem;
+    }
+    
+    .orders-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .orders-table th {
+        text-align: right;
+        padding: 1rem;
+        border-bottom: 2px solid rgba(240, 240, 240, 0.8);
+        font-weight: 300;
+        color: var(--text-gray);
+    }
+    
+    .orders-table td {
+        padding: 1rem;
+        border-bottom: 1px solid rgba(240, 240, 240, 0.8);
+        font-weight: 300;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--radius-round);
+        font-size: 0.85rem;
+    }
+    
+    @media (max-width: 992px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .dashboard-sidebar {
+            position: static;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .dashboard-section {
+            padding-top: 7rem;
+        }
+        
+        .dashboard-content {
+            padding: 1.5rem;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .orders-table {
+            display: block;
+            overflow-x: auto;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="dashboard-section fade-in">
+    <div class="container">
+        <div class="dashboard-container">
+            <div class="dashboard-grid">
+                <!-- الشريط الجانبي -->
+                <div class="dashboard-sidebar">
+                    <!-- معلومات المستخدم -->
+                    <div class="user-card">
+                        <div class="user-avatar">
+                            {{ user.get_full_name|default:user.username|slice:":1"|upper }}
+                        </div>
+                        <h3 class="user-name">{{ user.get_full_name|default:user.username }}</h3>
+                        <span class="user-role">
+                            <i class="fas fa-user-shield me-1"></i>
+                            {% if user.is_superuser %}مدير نظام{% else %}مسؤول{% endif %}
+                        </span>
+                    </div>
+                    
+                    <!-- قائمة التنقل -->
+                    <ul class="dashboard-menu">
+                        <li class="menu-item">
+                                <i class="fas fa-tachometer-alt"></i>
+                                <span>لوحة التحكم</span>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{% url 'dashboard' %}" class="menu-link">
+                                <i class="fas fa-gem"></i>
+                                <span>المنتجات</span>
+                                <span class="ms-auto badge" style="background: var(--primary-pastel); color: var(--dark-gray);">
+                                    {{ product_count }}
+                                </span>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{% url 'dashboard_orders' %}" class="menu-link">
+                                <i class="fas fa-shopping-bag"></i>
+                                <span>الطلبات</span>
+                                <span class="ms-auto badge" style="background: var(--accent-pastel); color: var(--dark-gray);">
+                                    {{ order_count }}
+                                </span>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{% url 'dashboard_users' %}" class="menu-link">
+                                <i class="fas fa-users"></i>
+                                <span>المستخدمين</span>
+                                <span class="ms-auto badge" style="background: var(--secondary-pastel); color: var(--dark-gray);">
+                                    {{ user_count }}
+                                </span>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{% url 'dashboard_reports' %}" class="menu-link">
+                                <i class="fas fa-chart-bar"></i>
+                                <span>التقارير</span>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{% url 'dashboard_settings' %}" class="menu-link">
+                                <i class="fas fa-cog"></i>
+                                <span>الإعدادات</span>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{% url 'home' %}" class="menu-link">
+                                <i class="fas fa-store"></i>
+                                <span>العودة للمتجر</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- المحتوى الرئيسي -->
+                <div class="dashboard-content">
+                    <!-- رأس الصفحة -->
+                    <div class="dashboard-header">
+                        <h1 class="dashboard-title">لوحة التحكم</h1>
+                        <div class="date-range">
+                            <span style="color: var(--text-light); font-size: 0.9rem;">
+                                <i class="far fa-calendar me-1"></i>
+                                {{ current_date|date:"Y/m/d" }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- الإحصائيات -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon blue">
+                                    <i class="fas fa-shopping-bag"></i>
+                                </div>
+                                <div class="stat-trend trend-up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>12%</span>
+                                </div>
+                            </div>
+                            <div class="stat-value">{{ stats.total_orders }}</div>
+                            <div class="stat-label">إجمالي الطلبات</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon green">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                </div>
+                                <div class="stat-trend trend-up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>8%</span>
+                                </div>
+                            </div>
+                            <div class="stat-value">{{ stats.total_revenue }} ر.س</div>
+                            <div class="stat-label">إجمالي المبيعات</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon orange">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="stat-trend trend-up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>5%</span>
+                                </div>
+                            </div>
+                            <div class="stat-value">{{ stats.total_customers }}</div>
+                            <div class="stat-label">عملاء جدد</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon purple">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div class="stat-trend trend-up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>15%</span>
+                                </div>
+                            </div>
+                            <div class="stat-value">{{ stats.conversion_rate }}%</div>
+                            <div class="stat-label">معدل التحويل</div>
+                        </div>
+                    </div>
+                    
+                    <!-- المخططات -->
+                    <div class="charts-grid">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h3 class="chart-title">المبيعات خلال الشهر</h3>
+                            </div>
+                            <div class="chart-container" style="height: 250px;">
+                                <canvas id="salesChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h3 class="chart-title">أكثر المنتجات مبيعاً</h3>
+                            </div>
+                            <div class="chart-container" style="height: 250px;">
+                                <canvas id="productsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- الطلبات الأخيرة -->
+                    <div class="recent-orders">
+                        <h3 class="chart-title mb-3">آخر الطلبات</h3>
+                        
+                        {% if recent_orders %}
+                        <div class="table-responsive">
+                            <table class="orders-table">
+                                <thead>
+                                    <tr>
+                                        <th>رقم الطلب</th>
+                                        <th>العميل</th>
+                                        <th>التاريخ</th>
+                                        <th>المجموع</th>
+                                        <th>الحالة</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in recent_orders %}
+                                    <tr>
+                                        <td>#{{ order.id|stringformat:"06d" }}</td>
+                                        <td>{{ order.user.get_full_name|default:order.user.username }}</td>
+                                        <td>{{ order.created_at|date:"Y/m/d" }}</td>
+                                        <td>{{ order.total_price }} ر.س</td>
+                                        <td>
+                                            <span class="status-badge status-{{ order.status }}">
+                                                {{ order.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'dashboard_order_detail' order.id %}" 
+                                               class="action-btn" style="font-size: 0.85rem; padding: 0.25rem 0.5rem;">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <p style="color: var(--text-light);">لا توجد طلبات حديثة</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- نظرة سريعة -->
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="chart-card">
+                                <h4 class="chart-title mb-3"><i class="fas fa-bell me-2"></i>التنبيهات</h4>
+                                <ul style="list-style: none; padding: 0; margin: 0;">
+                                    {% for alert in alerts %}
+                                    <li style="padding: 0.5rem 0; border-bottom: 1px solid rgba(240, 240, 240, 0.5);">
+                                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                            <i class="fas fa-circle" style="font-size: 0.5rem; color: {% if alert.type == 'warning' %}#ff9800{% else %}#4caf50{% endif %};"></i>
+                                            <span>{{ alert.message }}</span>
+                                        </div>
+                                    </li>
+                                    {% empty %}
+                                    <li style="color: var(--text-light); text-align: center; padding: 1rem;">
+                                        لا توجد تنبيهات
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="chart-card">
+                                <h4 class="chart-title mb-3"><i class="fas fa-chart-pie me-2"></i>نظرة سريعة</h4>
+                                <div class="row text-center">
+                                    <div class="col-6">
+                                        <div style="font-size: 1.5rem; font-weight: 200; color: var(--dark-gray);">
+                                            {{ stats.pending_orders }}
+                                        </div>
+                                        <div style="color: var(--text-light); font-size: 0.9rem;">طلبات قيد الانتظار</div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div style="font-size: 1.5rem; font-weight: 200; color: var(--dark-gray);">
+                                            {{ stats.low_stock }}
+                                        </div>
+                                        <div style="color: var(--text-light); font-size: 0.9rem;">منتجات منخفضة المخزون</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></canvas>
+<script>
+    // مخطط المبيعات
+    const salesCtx = document.getElementById('salesChart').getContext('2d');
+    const salesChart = new Chart(salesCtx, {
+        type: 'line',
+        data: {
+            labels: ['الأسبوع 1', 'الأسبوع 2', 'الأسبوع 3', 'الأسبوع 4'],
+            datasets: [{
+                label: 'المبيعات',
+                data: [12000, 19000, 15000, 25000],
+                borderColor: 'rgba(255, 183, 197, 1)',
+                backgroundColor: 'rgba(255, 183, 197, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(240, 240, 240, 0.5)'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            ret-]-urn value.toLocaleString('ar-SA') + ' ر.س';
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(240, 240, 240, 0.5)'
+                    }
+                }
+            }
+        }
+    });
+    
+    // مخطط المنتجات
+    const productsCtx = document.getElementById('productsChart').getContext('2d');
+    const productsChart = new Chart(productsCtx, {
+        type: 'bar',
+        data: {
+            labels: ['خواتم', 'أساور', 'قلادات', 'أقراط', 'ساعات'],
+            datasets: [{
+                label: 'المبيعات',
+                data: [65, 59, 80, 81, 56],
+                backgroundColor: [
+                    'rgba(255, 183, 197, 0.7)',
+                    'rgba(216, 191, 216, 0.7)',
+                    'rgba(181, 234, 215, 0.7)',
+                    'rgba(255, 218, 121, 0.7)',
+                    'rgba(173, 216, 230, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(255, 183, 197, 1)',
+                    'rgba(216, 191, 216, 1)',
+                    'rgba(181, 234, 215, 1)',
+                    'rgba(255, 218, 121, 1)',
+                    'rgba(173, 216, 230, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(240, 240, 240, 0.5)'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return value + ' عملية بيع';
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+    
+    // تحديث البيانات تلقائياً
+    function updateDashboard() {
+        fetch('/api/dashboard/stats/')
+            .then(response => response.json())
+            .then(data => {
+                // تحديث الإحصائيات
+                document.querySelectorAll('.stat-value')[0].textContent = data.total_orders;
+                document.querySelectorAll('.stat-value')[1].textContent = data.total_revenue + ' ر.س';
+                document.querySelectorAll('.stat-value')[2].textContent = data.total_customers;
+                document.querySelectorAll('.stat-value')[3].textContent = data.conversion_rate + '%';
+            })
+            .catch(error => console.error('Error updating dashboard:', error));
+    }
+    
+    // تحديث كل دقيقة
+    setInterval(updateDashboard, 60000);
+</script>
+{% endblock %}

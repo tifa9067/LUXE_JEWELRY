@@ -1,0 +1,70 @@
+<div class="product-card">
+    <div class="product-image">
+        <a href="{{ product.get_absolute_url }}">
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid">
+            {% if product.is_featured %}
+            <span class="badge-featured">مميز</span>
+            {% endif %}
+            {% if product.stock == 0 %}
+            <span class="badge-sold">نفذت الكمية</span>
+            {% endif %}
+        </a>
+        <div class="product-actions">
+            <button class="btn-action wishlist-btn" data-product-id="{{ product.id }}" title="أضف للمفضلة">
+                <i class="far fa-heart"></i>
+            </button>
+            <button class="btn-action quick-view-btn" data-product-id="{{ product.id }}" title="عرض سريع">
+                <i class="far fa-eye"></i>
+            </button>
+        </div>
+        {% if product.stock > 0 %}
+        <form action="{% url 'cart_add' product.id %}" method="post" class="add-to-cart-form">
+            {% csrf_token %}
+            <input type="hidden" name="quantity" value="1">
+            <button type="submit" class="btn-add-to-cart">
+                <i class="fas fa-shopping-bag me-2"></i>أضف للسلة
+            </button>
+        </form>
+        {% endif %}
+    </div>
+    
+    <div class="product-info">
+        <div class="product-category">
+            <a href="{% url 'category_detail' product.category.slug %}" class="category-link">
+                {{ product.category.name }}
+            </a>
+        </div>
+        
+        <h3 class="product-title">
+            <a href="{{ product.get_absolute_url }}">{{ product.name }}</a>
+        </h3>
+        
+        <div class="product-meta">
+            <span class="product-material">
+                <i class="fas fa-gem"></i> {{ product.get_material_display }}
+            </span>
+            {% if product.weight %}
+            <span class="product-weight">
+                <i class="fas fa-weight"></i> {{ product.weight }} جرام
+            </span>
+            {% endif %}
+        </div>
+        
+        <div class="product-price">
+            <span class="current-price">{{ product.price }} ر.س</span>
+        </div>
+        
+        <div class="product-rating">
+            <div class="stars">
+                {% for i in "12345"|make_list %}
+                    {% if forloop.counter <= product.average_rating %}
+                    <i class="fas fa-star text-warning"></i>
+                    {% else %}
+                    <i class="far fa-star text-warning"></i>
+                    {% endif %}
+                {% endfor %}
+                <span class="rating-count">({{ product.reviews.count }})</span>
+            </div>
+        </div>
+    </div>
+</div>

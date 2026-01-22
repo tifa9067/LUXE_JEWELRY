@@ -1,0 +1,927 @@
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}تفاصيل الطلب #{{ order.order_number }} - TIVE{% endblock %}
+
+{% block extra_css %}
+<style>
+    .order-detail-section {
+        padding-top: 8rem;
+        padding-bottom: 4rem;
+        background-color: var(--off-white);
+        min-height: 100vh;
+    }
+    
+    .order-header {
+        background-color: var(--pure-white);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    }
+    
+    .order-title {
+        font-size: 1.8rem;
+        font-weight: 200;
+        margin-bottom: 0.5rem;
+        color: var(--dark-gray);
+    }
+    
+    .order-meta {
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+        margin-bottom: 1.5rem;
+    }
+    
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-gray);
+        font-size: 0.9rem;
+    }
+    
+    .meta-item i {
+        color: var(--primary-pastel);
+    }
+    
+    .order-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    
+    .order-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+    }
+    
+    /* حالة الطلب */
+    .order-status-card {
+        background-color: var(--pure-white);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    }
+    
+    .status-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+    
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 300;
+    }
+    
+    .status-pending { background: rgba(255, 193, 7, 0.1); color: #ff9800; }
+    .status-confirmed { background: rgba(33, 150, 243, 0.1); color: #2196f3; }
+    .status-processing { background: rgba(156, 39, 176, 0.1); color: #9c27b0; }
+    .status-shipped { background: rgba(0, 150, 136, 0.1); color: #009688; }
+    .status-delivered { background: rgba(76, 175, 80, 0.1); color: #4caf50; }
+    .status-cancelled { background: rgba(244, 67, 54, 0.1); color: #f44336; }
+    
+    .status-timeline {
+        position: relative;
+        padding-right: 2rem;
+    }
+    
+    .status-timeline::before {
+        content: '';
+        position: absolute;
+        right: 7px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: var(--light-gray);
+    }
+    
+    .timeline-item {
+        position: relative;
+        padding-bottom: 2rem;
+    }
+    
+    .timeline-item:last-child {
+        padding-bottom: 0;
+    }
+    
+    .timeline-dot {
+        position: absolute;
+        right: -2px;
+        top: 0;
+        transform: translateX(50%);
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--light-gray);
+        border: 3px solid var(--pure-white);
+    }
+    
+    .timeline-item.active .timeline-dot {
+        background: var(--primary-pastel);
+        box-shadow: 0 0 0 3px rgba(255, 183, 197, 0.2);
+    }
+    
+    .timeline-item.completed .timeline-dot {
+        background: var(--accent-pastel);
+    }
+    
+    .timeline-content {
+        margin-right: 2rem;
+    }
+    
+    .timeline-title {
+        font-weight: 300;
+        margin-bottom: 0.25rem;
+        color: var(--dark-gray);
+    }
+    
+    .timeline-date {
+        font-size: 0.85rem;
+        color: var(--text-light);
+    }
+    
+    /* المنتجات */
+    .order-products {
+        background-color: var(--pure-white);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    }
+    
+    .products-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--light-gray);
+    }
+    
+    .products-title {
+        font-size: 1.2rem;
+        font-weight: 300;
+        color: var(--dark-gray);
+    }
+    
+    .products-count {
+        color: var(--text-light);
+        font-size: 0.9rem;
+    }
+    
+    .product-list {
+        margin-bottom: 2rem;
+    }
+    
+    .product-item {
+        display: flex;
+        gap: 1.5rem;
+        padding: 1.5rem 0;
+        border-bottom: 1px solid var(--light-gray);
+    }
+    
+    .product-item:last-child {
+        border-bottom: none;
+    }
+    
+    .product-image {
+        width: 100px;
+        height: 100px;
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+    
+    .product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .product-info {
+        flex: 1;
+    }
+    
+    .product-name {
+        font-weight: 300;
+        margin-bottom: 0.5rem;
+        color: var(--dark-gray);
+    }
+    
+    .product-meta {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 0.75rem;
+        font-size: 0.9rem;
+        color: var(--text-gray);
+    }
+    
+    .product-price {
+        font-weight: 300;
+        color: var(--dark-gray);
+    }
+    
+    /* معلومات الطلب */
+    .order-info {
+        background-color: var(--pure-white);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    }
+    
+    .info-section {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--light-gray);
+    }
+    
+    .info-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    
+    .info-title {
+        font-size: 1.1rem;
+        font-weight: 300;
+        margin-bottom: 1rem;
+        color: var(--dark-gray);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .info-title i {
+        color: var(--primary-pastel);
+    }
+    
+    .info-details {
+        color: var(--text-gray);
+        line-height: 1.7;
+    }
+    
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(240, 240, 240, 0.5);
+    }
+    
+    .info-row:last-child {
+        border-bottom: none;
+    }
+    
+    .info-row.total {
+        font-weight: 300;
+        color: var(--dark-gray);
+        font-size: 1.1rem;
+        padding-top: 1rem;
+        margin-top: 1rem;
+        border-top: 1px solid var(--light-gray);
+    }
+    
+    /* التتبع */
+    .tracking-info {
+        background: linear-gradient(135deg, rgba(255, 183, 197, 0.05), rgba(216, 191, 216, 0.05));
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+    }
+    
+    .tracking-number {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .tracking-label {
+        font-weight: 300;
+        color: var(--dark-gray);
+    }
+    
+    .tracking-value {
+        font-family: monospace;
+        background: var(--pure-white);
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--light-gray);
+    }
+    
+    .tracking-actions {
+        display: flex;
+        gap: 1rem;
+    }
+    
+    /* التحسينات للاستجابة */
+    @media (max-width: 1024px) {
+        .order-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .order-meta {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .order-actions {
+            flex-direction: column;
+        }
+        
+        .product-item {
+            flex-direction: column;
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 200px;
+        }
+        
+        .tracking-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="order-detail-section">
+    <div class="container">
+        <!-- رأس الطلب -->
+        <div class="order-header">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h1 class="order-title">الطلب #{{ order.order_number }}</h1>
+                    <div class="order-meta">
+                        <div class="meta-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>تاريخ الطلب: {{ order.created_at|date:"Y/m/d" }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            <span>الوقت: {{ order.created_at|time:"g:i A" }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span>{{ order.items.count }} منتج</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="order-status-badge">
+                    <span class="status-badge status-{{ order.status }}">
+                        {{ order.get_status_display }}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="order-actions">
+                {% if order.status == 'pending' or order.status == 'confirmed' %}
+                <button class="btn btn-outline" onclick="cancelOrder({{ order.id }})">
+                    <i class="fas fa-times me-2"></i>إلغاء الطلب
+                </button>
+                {% endif %}
+                
+                {% if order.status == 'shipped' %}
+                <button class="btn btn-primary" onclick="confirmDelivery({{ order.id }})">
+                    <i class="fas fa-check me-2"></i>تأكيد الاستلام
+                </button>
+                {% endif %}
+                
+                <a href="{% url 'order_list' %}" class="btn btn-outline">
+                    <i class="fas fa-arrow-right me-2"></i>عودة للطلبات
+                </a>
+                
+                <button class="btn btn-secondary" onclick="printOrder()">
+                    <i class="fas fa-print me-2"></i>طباعة الفاتورة
+                </button>
+            </div>
+        </div>
+
+        <div class="order-grid">
+            <!-- الجانب الأيسر -->
+            <div class="order-left">
+                <!-- حالة الطلب -->
+                <div class="order-status-card">
+                    <div class="status-header">
+                        <h3 class="section-title">
+                            <i class="fas fa-shipping-fast"></i>
+                            حالة الطلب
+                        </h3>
+                    </div>
+                    
+                    <div class="status-timeline">
+                        <div class="timeline-item completed">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-title">تم استلام الطلب</div>
+                                <div class="timeline-date">{{ order.created_at|date:"Y/m/d - g:i A" }}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item {% if order.status != 'pending' %}completed{% elif order.status == 'pending' %}active{% endif %}">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-title">قيد المراجعة</div>
+                                {% if order.status != 'pending' %}
+                                <div class="timeline-date">{{ order.created_at|date:"Y/m/d" }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        {% if order.status in 'confirmed,processing,shipped,delivered' %}
+                        <div class="timeline-item {% if order.status == 'confirmed' %}active{% else %}completed{% endif %}">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-title">تم تأكيد الطلب</div>
+                                <div class="timeline-date">{{ order.updated_at|date:"Y/m/d" }}</div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if order.status in 'processing,shipped,delivered' %}
+                        <div class="timeline-item {% if order.status == 'processing' %}active{% else %}completed{% endif %}">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-title">قيد المعالجة</div>
+                                <div class="timeline-date">{{ order.updated_at|date:"Y/m/d" }}</div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if order.status in 'shipped,delivered' %}
+                        <div class="timeline-item {% if order.status == 'shipped' %}active{% else %}completed{% endif %}">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-title">تم الشحن</div>
+                                <div class="timeline-date">
+                                    {% if order.status == 'delivered' %}
+                                    {{ order.delivered_at|date:"Y/m/d" }}
+                                    {% else %}
+                                    قيد التوصيل
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if order.status == 'delivered' %}
+                        <div class="timeline-item completed">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-title">تم التسليم</div>
+                                <div class="timeline-date">{{ order.delivered_at|date:"Y/m/d" }}</div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    {% if order.status == 'shipped' %}
+                    <div class="tracking-info">
+                        <div class="tracking-number">
+                            <span class="tracking-label">رقم التتبع:</span>
+                            <span class="tracking-value">TRK-{{ order.order_number }}</span>
+                        </div>
+                        <div class="tracking-actions">
+                            <button class="btn btn-outline btn-sm" onclick="copyTrackingNumber()">
+                                <i class="fas fa-copy me-1"></i>نسخ الرقم
+                            </button>
+                            <a href="#" class="btn btn-primary btn-sm">
+                                <i class="fas fa-external-link-alt me-1"></i>تتبع الشحنة
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- المنتجات -->
+                <div class="order-products">
+                    <div class="products-header">
+                        <h3 class="products-title">المنتجات</h3>
+                        <span class="products-count">{{ order.items.count }} منتج</span>
+                    </div>
+                    
+                    <div class="product-list">
+                        {% for item in order.items.all %}
+                        <div class="product-item">
+                            <div class="product-image">
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                            </div>
+                            <div class="product-info">
+                                <h4 class="product-name">{{ item.product.name }}</h4>
+                                <div class="product-meta">
+                                    <span>الكمية: {{ item.quantity }}</span>
+                                    <span>السعر: {{ item.price }} ر.س</span>
+                                </div>
+                                <div class="product-price">{{ item.total_price }} ر.س</div>
+                                <div class="mt-2">
+                                    <a href="{{ item.product.get_absolute_url }}" class="btn btn-outline btn-sm">
+                                        <i class="fas fa-eye me-1"></i>عرض المنتج
+                                    </a>
+                                    {% if order.status == 'delivered' %}
+                                    <button class="btn btn-outline btn-sm" onclick="addReview({{ item.product.id }})">
+                                        <i class="fas fa-star me-1"></i>إضافة تقييم
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- الجانب الأيمن (المعلومات) -->
+            <div class="order-info">
+                <!-- معلومات الشحن -->
+                <div class="info-section">
+                    <h3 class="info-title">
+                        <i class="fas fa-map-marker-alt"></i>
+                        معلومات الشحن
+                    </h3>
+                    <div class="info-details">
+                        <p><strong>{{ order.full_name }}</strong></p>
+                        <p>{{ order.address }}</p>
+                        <p>{{ order.city }}</p>
+                        <p>📱 {{ order.phone }}</p>
+                        <p>📧 {{ order.email }}</p>
+                    </div>
+                </div>
+
+                <!-- معلومات الدفع -->
+                <div class="info-section">
+                    <h3 class="info-title">
+                        <i class="fas fa-credit-card"></i>
+                        معلومات الدفع
+                    </h3>
+                    <div class="info-details">
+                        <p><strong>طريقة الدفع:</strong> {{ order.get_payment_method_display }}</p>
+                        <p><strong>حالة الدفع:</strong> 
+                            {% if order.is_paid %}
+                            <span class="text-success">✅ تم الدفع</span>
+                            {% else %}
+                            <span class="text-warning">⏳ في انتظار الدفع</span>
+                            {% endif %}
+                        </p>
+                        {% if order.is_paid and order.paid_at %}
+                        <p><strong>تاريخ الدفع:</strong> {{ order.paid_at|date:"Y/m/d" }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- ملخص الفاتورة -->
+                <div class="info-section">
+                    <h3 class="info-title">
+                        <i class="fas fa-receipt"></i>
+                        ملخص الفاتورة
+                    </h3>
+                    <div class="info-details">
+                        <div class="info-row">
+                            <span>المجموع الفرعي</span>
+                            <span>{{ order.subtotal }} ر.س</span>
+                        </div>
+                        <div class="info-row">
+                            <span>رسوم الشحن</span>
+                            <span>{{ order.shipping }} ر.س</span>
+                        </div>
+                        {% if order.discount > 0 %}
+                        <div class="info-row">
+                            <span>الخصم</span>
+                            <span class="text-success">-{{ order.discount }} ر.س</span>
+                        </div>
+                        {% endif %}
+                        <div class="info-row total">
+                            <span>المجموع النهائي</span>
+                            <span>{{ order.total }} ر.س</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- معلومات إضافية -->
+                {% if order.notes %}
+                <div class="info-section">
+                    <h3 class="info-title">
+                        <i class="fas fa-sticky-note"></i>
+                        ملاحظات إضافية
+                    </h3>
+                    <div class="info-details">
+                        <p>{{ order.notes }}</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- المساعدة -->
+                <div class="info-section">
+                    <h3 class="info-title">
+                        <i class="fas fa-headset"></i>
+                        تحتاج مساعدة؟
+                    </h3>
+                    <div class="info-details">
+                        <p>للاستفسارات حول طلبك:</p>
+                        <ul style="padding-right: 1.5rem; margin-bottom: 1rem;">
+                            <li>الهاتف: 0500000000</li>
+                            <li>البريد: support@tive.com</li>
+                            <li>ساعات العمل: 9 ص - 9 م</li>
+                        </ul>
+                        <button class="btn btn-outline btn-sm" onclick="openSupportChat()">
+                            <i class="fas fa-comment me-1"></i>الدردشة مع الدعم
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- نموذج إلغاء الطلب -->
+<div class="modal fade" id="cancelOrderModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">إلغاء الطلب</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>هل أنت متأكد من إلغاء هذا الطلب؟</p>
+                <div class="form-group">
+                    <label class="form-label">سبب الإلغاء (اختياري)</label>
+                    <textarea class="form-control" rows="3" placeholder="اختياري..." id="cancelReason"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" data-bs-dismiss="modal">تراجع</button>
+                <button type="button" class="btn btn-danger" onclick="confirmCancel()">تأكيد الإلغاء</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- نموذج تأكيد الاستلام -->
+<div class="modal fade" id="deliveryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">تأكيد الاستلام</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>هل استلمت طلبك بالفعل؟</p>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    يرجى التأكد من فحص المنتجات قبل تأكيد الاستلام
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" data-bs-dismiss="modal">لاحقاً</button>
+                <button type="button" class="btn btn-success" onclick="confirmDeliveryAction()">نعم، استلمت الطلب</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentOrderId = null;
+    
+    // إلغاء الطلب
+    function cancelOrder(orderId) {
+        currentOrderId = orderId;
+        const modal = new bootstrap.Modal(document.getElementById('cancelOrderModal'));
+        modal.show();
+    }
+    
+    function confirmCancel() {
+        const reason = document.getElementById('cancelReason').value;
+        
+        fetch(`/orders/cancel/${currentOrderId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ reason: reason })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showMessage('تم إلغاء الطلب بنجاح', 'success');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+                
+                const modal = bootstrap.Modal.getInstance(document.getElementById('cancelOrderModal'));
+                modal.hide();
+            }
+        });
+    }
+    
+    // تأكيد الاستلام
+    function confirmDelivery(orderId) {
+        currentOrderId = orderId;
+        const modal = new bootstrap.Modal(document.getElementById('deliveryModal'));
+        modal.show();
+    }
+    
+    function confirmDeliveryAction() {
+        fetch(`/orders/confirm-delivery/${currentOrderId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showMessage('تم تأكيد استلام الطلب بنجاح', 'success');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+                
+                const modal = bootstrap.Modal.getInstance(document.getElementById('deliveryModal'));
+                modal.hide();
+            }
+        });
+    }
+    
+    // نسخ رقم التتبع
+    function copyTrackingNumber() {
+        const trackingNumber = 'TRK-{{ order.order_number }}';
+        navigator.clipboard.writeText(trackingNumber)
+            .then(() => {
+                showMessage('تم نسخ رقم التتبع', 'success');
+            })
+            .catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+    }
+    
+    // طباعة الفاتورة
+    function printOrder() {
+        const printContent = `
+            <div style="font-family: 'Cairo', sans-serif; padding: 2rem; max-width: 800px; margin: 0 auto;">
+                <div style="text-align: center; margin-bottom: 2rem; border-bottom: 2px solid #333; padding-bottom: 1rem;">
+                    <h1 style="font-weight: 300; margin-bottom: 0.5rem;">فاتورة TIVE</h1>
+                    <p style="color: #666; margin: 0;">رقم الطلب: {{ order.order_number }}</p>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                    <div>
+                        <h3 style="font-weight: 300; margin-bottom: 1rem;">معلومات الطلب</h3>
+                        <p><strong>التاريخ:</strong> {{ order.created_at|date:"Y/m/d" }}</p>
+                        <p><strong>الحالة:</strong> {{ order.get_status_display }}</p>
+                        <p><strong>طريقة الدفع:</strong> {{ order.get_payment_method_display }}</p>
+                    </div>
+                    <div>
+                        <h3 style="font-weight: 300; margin-bottom: 1rem;">معلومات العميل</h3>
+                        <p><strong>الاسم:</strong> {{ order.full_name }}</p>
+                        <p><strong>الهاتف:</strong> {{ order.phone }}</p>
+                        <p><strong>العنوان:</strong> {{ order.address }}, {{ order.city }}</p>
+                    </div>
+                </div>
+                
+                <h3 style="font-weight: 300; margin-bottom: 1rem;">المنتجات</h3>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 2rem;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <th style="text-align: right; padding: 0.75rem; font-weight: 300;">المنتج</th>
+                            <th style="text-align: center; padding: 0.75rem; font-weight: 300;">الكمية</th>
+                            <th style="text-align: left; padding: 0.75rem; font-weight: 300;">السعر</th>
+                            <th style="text-align: left; padding: 0.75rem; font-weight: 300;">المجموع</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order.items.all %}
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="text-align: right; padding: 0.75rem;">{{ item.product.name }}</td>
+                            <td style="text-align: center; padding: 0.75rem;">{{ item.quantity }}</td>
+                            <td style="text-align: left; padding: 0.75rem;">{{ item.price }} ر.س</td>
+                            <td style="text-align: left; padding: 0.75rem;">{{ item.total_price }} ر.س</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+                <div style="text-align: left; margin-top: 2rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span>المجموع الفرعي:</span>
+                        <span>{{ order.subtotal }} ر.س</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span>رسوم الشحن:</span>
+                        <span>{{ order.shipping }} ر.س</span>
+                    </div>
+                    {% if order.discount > 0 %}
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span>الخصم:</span>
+                        <span>-{{ order.discount }} ر.س</span>
+                    </div>
+                    {% endif %}
+                    <div style="display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: 300; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #333;">
+                        <span>المجموع النهائي:</span>
+                        <span>{{ order.total }} ر.س</span>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #ddd; color: #666; font-size: 0.9rem;">
+                    <p>شكراً لاختيارك TIVE</p>
+                    <p>للاستفسارات: 0500000000 | support@tive.com</p>
+                </div>
+            </div>
+        `;
+        
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>فاتورة الطلب {{ order.order_number }}</title>
+                    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400&display=swap" rel="stylesheet">
+                    <style>
+                        @media print {
+                            @page { margin: 0; }
+                            body { margin: 1.6cm; }
+                        }
+                    </style>
+                </head>
+                <body>${printContent}</body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.focus();
+        setTimeout(() => printWindow.print(), 500);
+    }
+    
+    // إضافة تقييم
+    function addReview(productId) {
+        window.location.href = `/products/${productId}/#reviews`;
+    }
+    
+    // الدردشة مع الدعم
+    function openSupportChat() {
+        alert('ميزة الدردشة مع الدعم ستكون متاحة قريباً!');
+    }
+    
+    // تحديث حالة الطلب تلقائياً
+    function checkOrderStatus() {
+        // يمكن إضافة تحديث تلقائي للحالة إذا لزم الأمر
+    }
+    
+    // تهيئة الصفحة
+    document.addEventListener('DOMContentLoaded', function() {
+        // تحديث حالة الخط الزمني
+        updateTimeline();
+        
+        // تحقق من حالة الطلب كل دقيقة
+        setInterval(checkOrderStatus, 60000);
+    });
+    
+    function updateTimeline() {
+        // يمكن إضافة منطق لتحديث الخط الزمني ديناميكياً
+    }
+    
+    // عرض الرسائل
+    function showMessage(message, type = 'info') {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.style.cssText = `
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: ${type === 'error' ? '#ffebee' : type === 'success' ? '#e8f5e9' : 'white'};
+            border: 1px solid ${type === 'error' ? '#ffcdd2' : type === 'success' ? '#c8e6c9' : 'var(--light-gray)'};
+            border-right: 3px solid ${type === 'error' ? '#f44336' : type === 'success' ? '#4caf50' : 'var(--primary-pastel)'};
+            border-radius: var(--radius-md);
+            padding: 1rem 1.5rem;
+            z-index: 2000;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            max-width: 300px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        `;
+        alertDiv.textContent = message;
+        
+        document.body.appendChild(alertDiv);
+        
+        setTimeout(() => {
+            alertDiv.style.transform = 'translateX(0)';
+        }, 10);
+        
+        setTimeout(() => {
+            alertDiv.style.transform = 'translateX(120%)';
+            setTimeout(() => {
+                document.body.removeChild(alertDiv);
+            }, 300);
+        }, 3000);
+    }
+</script>
+{% endblock %}

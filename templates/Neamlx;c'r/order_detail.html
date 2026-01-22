@@ -1,0 +1,610 @@
+<!-- orders/order_detail.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}طلب #{{ order.id }} - TIVE{% endblock %}
+
+{% block extra_css %}
+<style>
+    .order-detail-section {
+        padding-top: 8rem;
+        padding-bottom: 6rem;
+        background-color: var(--off-white);
+        min-height: 80vh;
+    }
+    
+    .order-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+    
+    .order-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+    
+    .order-title {
+        font-size: 2rem;
+        font-weight: 200;
+        color: var(--dark-gray);
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.02em;
+    }
+    
+    .order-status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--radius-round);
+        font-size: 0.9rem;
+        margin-top: 1rem;
+    }
+    
+    .order-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+    }
+    
+    .order-card {
+        background: var(--pure-white);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        border: 1px solid rgba(240, 240, 240, 0.8);
+    }
+    
+    .card-title {
+        font-size: 1.2rem;
+        font-weight: 200;
+        color: var(--dark-gray);
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(240, 240, 240, 0.8);
+    }
+    
+    .items-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .order-item {
+        display: flex;
+        gap: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid rgba(240, 240, 240, 0.8);
+    }
+    
+    .order-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    
+    .item-image {
+        width: 100px;
+        height: 100px;
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        background: var(--off-white);
+        flex-shrink: 0;
+    }
+    
+    .item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        padding: 0.75rem;
+    }
+    
+    .item-details {
+        flex: 1;
+    }
+    
+    .item-name {
+        font-weight: 300;
+        margin-bottom: 0.5rem;
+    }
+    
+    .item-name a {
+        color: inherit;
+        text-decoration: none;
+    }
+    
+    .item-name a:hover {
+        color: var(--primary-pastel);
+    }
+    
+    .item-info {
+        display: flex;
+        gap: 1.5rem;
+        color: var(--text-light);
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .item-actions {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 0.75rem;
+    }
+    
+    .address-info {
+        line-height: 1.6;
+        color: var(--text-gray);
+    }
+    
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(240, 240, 240, 0.8);
+    }
+    
+    .info-row:last-child {
+        border-bottom: none;
+    }
+    
+    .info-label {
+        color: var(--text-gray);
+    }
+    
+    .info-value {
+        font-weight: 300;
+    }
+    
+    .order-total {
+        display: flex;
+        justify-content: space-between;
+        font-size: 1.3rem;
+        font-weight: 300;
+        padding-top: 1rem;
+        margin-top: 1rem;
+        border-top: 2px solid rgba(240, 240, 240, 0.8);
+    }
+    
+    .timeline {
+        position: relative;
+        padding-left: 2rem;
+        margin-top: 2rem;
+    }
+    
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 7px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: var(--light-gray);
+    }
+    
+    .timeline-step {
+        position: relative;
+        margin-bottom: 2rem;
+    }
+    
+    .timeline-step:last-child {
+        margin-bottom: 0;
+    }
+    
+    .timeline-step::before {
+        content: '';
+        position: absolute;
+        left: -2rem;
+        top: 0;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--light-gray);
+    }
+    
+    .timeline-step.completed::before {
+        background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel));
+    }
+    
+    .timeline-step.current::before {
+        background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel));
+        box-shadow: 0 0 0 4px rgba(255, 183, 197, 0.2);
+    }
+    
+    .step-title {
+        font-weight: 300;
+        margin-bottom: 0.25rem;
+    }
+    
+    .step-date {
+        color: var(--text-light);
+        font-size: 0.9rem;
+    }
+    
+    .step-description {
+        color: var(--text-gray);
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+    
+    .order-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .print-btn {
+        padding: 0.75rem 1.5rem;
+        background: transparent;
+        border: 1px solid rgba(224, 224, 224, 0.5);
+        border-radius: var(--radius-md);
+        color: var(--text-gray);
+        font-weight: 300;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .print-btn:hover {
+        border-color: var(--primary-pastel);
+        color: var(--dark-gray);
+    }
+    
+    @media (max-width: 992px) {
+        .order-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .order-item {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .item-image {
+            margin: 0 auto;
+        }
+        
+        .item-info {
+            justify-content: center;
+        }
+        
+        .item-actions {
+            justify-content: center;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .order-detail-section {
+            padding-top: 7rem;
+        }
+        
+        .order-title {
+            font-size: 1.7rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="order-detail-section fade-in">
+    <div class="container">
+        <div class="order-container">
+            <!-- رأس الطلب -->
+            <div class="order-header">
+                <h1 class="order-title">طلب #{{ order.id|stringformat:"06d" }}</h1>
+                <p class="order-subtitle">بتاريخ {{ order.created_at|date:"Y/m/d - h:i A" }}</p>
+                <div class="order-status-badge status-{{ order.status }}">
+                    <i class="fas fa-circle"></i>
+                    {{ order.get_status_display }}
+                </div>
+            </div>
+            
+            <div class="order-grid">
+                <!-- الجانب الأيسر -->
+                <div class="order-left">
+                    <!-- المنتجات -->
+                    <div class="order-card">
+                        <h3 class="card-title">المنتجات</h3>
+                        <div class="items-list">
+                            {% for item in order.items.all %}
+                            <div class="order-item">
+                                <div class="item-image">
+                                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                                </div>
+                                <div class="item-details">
+                                    <h4 class="item-name">
+                                        <a href="{% url 'product_detail' item.product.slug %}">
+                                            {{ item.product.name }}
+                                        </a>
+                                    </h4>
+                                    <div class="item-info">
+                                        <span>الكمية: {{ item.quantity }}</span>
+                                        <span>سعر الوحدة: {{ item.price }} ر.س</span>
+                                    </div>
+                                    <div class="item-total">
+                                        المجموع: {{ item.total_price }} ر.س
+                                    </div>
+                                    <div class="item-actions">
+                                        <a href="{% url 'product_detail' item.product.slug %}" 
+                                           class="action-btn" style="font-size: 0.85rem;">
+                                            <i class="fas fa-eye me-1"></i> عرض المنتج
+                                        </a>
+                                        {% if order.status == 'delivered' %}
+                                        <button class="action-btn" style="font-size: 0.85rem;"
+                                                onclick="addToCart({{ item.product.id }})">
+                                            <i class="fas fa-redo me-1"></i> إعادة شراء
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- معلومات الشحن -->
+                    <div class="order-card">
+                        <h3 class="card-title">معلومات الشحن</h3>
+                        <div class="address-info">
+                            <p><strong>{{ order.shipping_address.name }}</strong></p>
+                            <p>{{ order.shipping_address.street }}</p>
+                            <p>{{ order.shipping_address.city }}، {{ order.shipping_address.region }}</p>
+                            <p>الرمز البريدي: {{ order.shipping_address.postal_code }}</p>
+                            <p>الهاتف: {{ order.shipping_address.phone }}</p>
+                            
+                            {% if order.notes %}
+                            <div class="mt-3 pt-3 border-top">
+                                <p><strong>ملاحظات:</strong></p>
+                                <p>{{ order.notes }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- الجانب الأيمن -->
+                <div class="order-right">
+                    <!-- ملخص الطلب -->
+                    <div class="order-card">
+                        <h3 class="card-title">ملخص الطلب</h3>
+                        
+                        <div class="info-row">
+                            <span class="info-label">رقم الطلب</span>
+                            <span class="info-value">#{{ order.id|stringformat:"06d" }}</span>
+                        </div>
+                        
+                        <div class="info-row">
+                            <span class="info-label">تاريخ الطلب</span>
+                            <span class="info-value">{{ order.created_at|date:"Y/m/d" }}</span>
+                        </div>
+                        
+                        <div class="info-row">
+                            <span class="info-label">طريقة الدفع</span>
+                            <span class="info-value">{{ order.get_payment_method_display }}</span>
+                        </div>
+                        
+                        <div class="info-row">
+                            <span class="info-label">حالة الدفع</span>
+                            <span class="info-value">
+                                {% if order.paid %}
+                                <span style="color: #4caf50;">مدفوع</span>
+                                {% else %}
+                                <span style="color: #ff9800;">بانتظار الدفع</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                        
+                        <div class="info-row">
+                            <span class="info-label">المجموع الفرعي</span>
+                            <span class="info-value">{{ order.subtotal }} ر.س</span>
+                        </div>
+                        
+                        <div class="info-row">
+                            <span class="info-label">التوصيل</span>
+                            <span class="info-value">{{ order.shipping_cost }} ر.س</span>
+                        </div>
+                        
+                        <div class="info-row">
+                            <span class="info-label">الضريبة (15%)</span>
+                            <span class="info-value">{{ order.tax }} ر.س</span>
+                        </div>
+                        
+                        {% if order.discount %}
+                        <div class="info-row">
+                            <span class="info-label">الخصم</span>
+                            <span class="info-value" style="color: #4caf50;">-{{ order.discount }} ر.س</span>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="order-total">
+                            <span>المجموع الكلي</span>
+                            <span>{{ order.total_price }} ر.س</span>
+                        </div>
+                    </div>
+                    
+                    <!-- تتبع الطلب -->
+                    <div class="order-card">
+                        <h3 class="card-title">تتبع الطلب</h3>
+                        <div class="timeline">
+                            <div class="timeline-step completed">
+                                <h4 class="step-title">تم استلام الطلب</h4>
+                                <div class="step-date">{{ order.created_at|date:"Y/m/d - h:i A" }}</div>
+                            </div>
+                            
+                            <div class="timeline-step {% if order.status != 'pending' %}completed{% endif %}">
+                                <h4 class="step-title">قيد المعالجة</h4>
+                                {% if order.status != 'pending' %}
+                                <div class="step-date">{{ order.updated_at|date:"Y/m/d - h:i A" }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="timeline-step {% if order.status == 'shipped' or order.status == 'delivered' %}completed{% elif order.status == 'shipped' %}current{% endif %}">
+                                <h4 class="step-title">تم الشحن</h4>
+                                {% if order.shipped_at %}
+                                <div class="step-date">{{ order.shipped_at|date:"Y/m/d - h:i A" }}</div>
+                                <div class="step-description">
+                                    رقم التتبع: {{ order.tracking_number }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="timeline-step {% if order.status == 'delivered' %}completed current{% endif %}">
+                                <h4 class="step-title">تم التسليم</h4>
+                                {% if order.delivered_at %}
+                                <div class="step-date">{{ order.delivered_at|date:"Y/m/d - h:i A" }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- الإجراءات -->
+                    <div class="order-actions">
+                        {% if order.status == 'pending' %}
+                        <button class="print-btn" onclick="cancelOrder({{ order.id }})">
+                            <i class="fas fa-times"></i>
+                            إلغاء الطلب
+                        </button>
+                        {% endif %}
+                        
+                        <button class="print-btn" onclick="printOrder()">
+                            <i class="fas fa-print"></i>
+                            طباعة الفاتورة
+                        </button>
+                        
+                        <a href="{% url 'order_list' %}" class="print-btn">
+                            <i class="fas fa-arrow-right"></i>
+                            العودة للطلبات
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // إلغاء الطلب
+    function cancelOrder(orderId) {
+        if (!confirm('هل أنت متأكد من إلغاء هذا الطلب؟')) return;
+        
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+        
+        fetch(`/orders/${orderId}/cancel/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                TIVE.showMessage('تم إلغاء الطلب بنجاح', 'success');
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+            } else {
+                TIVE.showMessage(data.message || 'حدث خطأ أثناء الإلغاء', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            TIVE.showMessage('حدث خطأ أثناء الإلغاء', 'error');
+        });
+    }
+    
+    // إضافة للسلة
+    function addToCart(productId) {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+        
+        fetch(`/cart/add/${productId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                TIVE.updateCartCount();
+                TIVE.showMessage('تمت الإضافة إلى السلة', 'success');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            TIVE.showMessage('حدث خطأ أثناء الإضافة للسلة', 'error');
+        });
+    }
+    
+    // طباعة الفاتورة
+    function printOrder() {
+        const printContent = `
+            <html>
+                <head>
+                    <title>فاتورة طلب #{{ order.id }}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        .header { text-align: center; margin-bottom: 30px; }
+                        .info { margin-bottom: 20px; }
+                        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                        th, td { border: 1px solid #ddd; padding: 10px; text-align: right; }
+                        .total { font-size: 18px; font-weight: bold; margin-top: 20px; }
+                        @media print {
+                            body { padding: 0; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>فاتورة طلب #{{ order.id }}</h1>
+                        <p>TIVE - متجر المجوهرات الفاخرة</p>
+                    </div>
+                    
+                    <div class="info">
+                        <p><strong>تاريخ الطلب:</strong> {{ order.created_at|date:"Y/m/d - h:i A" }}</p>
+                        <p><strong>حالة الطلب:</strong> {{ order.get_status_display }}</p>
+                    </div>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>المنتج</th>
+                                <th>الكمية</th>
+                                <th>السعر</th>
+                                <th>المجموع</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order.items.all %}
+                            <tr>
+                                <td>{{ item.product.name }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>{{ item.price }} ر.س</td>
+                                <td>{{ item.total_price }} ر.س</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    
+                    <div class="total">
+                        <p>المجموع الكلي: {{ order.total_price }} ر.س</p>
+                    </div>
+                    
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                        };
+                    <\/script>
+                </body>
+            </html>
+        `;
+        
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(printContent);
+        printWindow.document.close();
+    }
+</script>
+{% endblock %}

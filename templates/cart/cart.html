@@ -1,0 +1,1027 @@
+<!-- cart/cart.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}سلة التسوق - TIVE{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* تصميم صفحة السلة */
+    .cart-section {
+        padding-top: 8rem;
+        padding-bottom: 6rem;
+        background-color: var(--off-white);
+        min-height: 70vh;
+    }
+    
+    .cart-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .cart-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+    
+    .cart-title {
+        font-size: 2rem;
+        font-weight: 200;
+        color: var(--dark-gray);
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.02em;
+    }
+    
+    .cart-subtitle {
+        color: var(--text-light);
+        font-weight: 300;
+        font-size: 0.95rem;
+    }
+    
+    /* عناصر السلة */
+    .cart-items {
+        margin-bottom: 3rem;
+    }
+    
+    .cart-item {
+        background-color: var(--pure-white);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        border: 1px solid rgba(240, 240, 240, 0.8);
+        transition: all 0.3s ease;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 1.5rem;
+        align-items: center;
+    }
+    
+    .cart-item:hover {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+        transform: translateY(-2px);
+    }
+    
+    .item-image {
+        width: 120px;
+        height: 120px;
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        background: linear-gradient(135deg, var(--off-white), var(--pure-white));
+        flex-shrink: 0;
+        position: relative;
+    }
+    
+    .item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        padding: 0.75rem;
+        transition: transform 0.3s ease;
+    }
+    
+    .item-image .no-image {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel));
+        color: var(--pure-white);
+        font-size: 2rem;
+    }
+    
+    .cart-item:hover .item-image img {
+        transform: scale(1.05);
+    }
+    
+    .item-details {
+        flex: 1;
+        padding: 0 1rem;
+    }
+    
+    .item-title {
+        font-size: 1.1rem;
+        font-weight: 300;
+        color: var(--dark-gray);
+        margin-bottom: 0.5rem;
+        line-height: 1.4;
+    }
+    
+    .item-title a {
+        color: inherit;
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+    
+    .item-title a:hover {
+        color: var(--primary-pastel);
+    }
+    
+    .item-category {
+        display: inline-block;
+        background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel));
+        color: var(--dark-gray);
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--radius-round);
+        font-size: 0.75rem;
+        font-weight: 300;
+        margin-bottom: 1rem;
+        text-decoration: none;
+    }
+    
+    .item-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    
+    .quantity-selector {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: var(--off-white);
+        padding: 0.5rem 0.75rem;
+        border-radius: var(--radius-round);
+    }
+    
+    .quantity-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--pure-white);
+        border: 1px solid rgba(224, 224, 224, 0.5);
+        color: var(--text-gray);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        font-size: 0.9rem;
+    }
+    
+    .quantity-btn:hover {
+        border-color: var(--primary-pastel);
+        background: var(--primary-pastel);
+        color: var(--pure-white);
+    }
+    
+    .quantity-input {
+        width: 40px;
+        text-align: center;
+        border: none;
+        background: transparent;
+        font-size: 0.95rem;
+        color: var(--dark-gray);
+        font-weight: 300;
+        font-family: inherit;
+    }
+    
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    
+    .remove-btn {
+        background: none;
+        border: none;
+        color: var(--text-light);
+        cursor: pointer;
+        padding: 0.5rem;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .remove-btn:hover {
+        color: #ff6b6b;
+    }
+    
+    .item-price {
+        text-align: right;
+        min-width: 120px;
+    }
+    
+    .current-price {
+        font-size: 1.2rem;
+        font-weight: 300;
+        color: var(--dark-gray);
+        margin-bottom: 0.25rem;
+    }
+    
+    .unit-price {
+        font-size: 0.85rem;
+        color: var(--text-light);
+    }
+    
+    /* ملخص السلة */
+    .cart-summary {
+        background-color: var(--pure-white);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        border: 1px solid rgba(240, 240, 240, 0.8);
+        position: sticky;
+        top: 100px;
+    }
+    
+    .summary-title {
+        font-size: 1.2rem;
+        font-weight: 200;
+        color: var(--dark-gray);
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(240, 240, 240, 0.8);
+    }
+    
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        padding: 0.5rem 0;
+    }
+    
+    .summary-label {
+        color: var(--text-gray);
+        font-weight: 300;
+        font-size: 0.95rem;
+    }
+    
+    .summary-value {
+        color: var(--dark-gray);
+        font-weight: 300;
+        font-size: 0.95rem;
+    }
+    
+    .summary-divider {
+        height: 1px;
+        background: linear-gradient(90deg, 
+            transparent, 
+            var(--light-gray), 
+            transparent);
+        margin: 1.5rem 0;
+    }
+    
+    .summary-total {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(240, 240, 240, 0.8);
+        margin-top: 1rem;
+    }
+    
+    .total-label {
+        font-size: 1.1rem;
+        font-weight: 300;
+        color: var(--dark-gray);
+    }
+    
+    .total-value {
+        font-size: 1.4rem;
+        font-weight: 200;
+        color: var(--dark-gray);
+    }
+    
+    /* كود الخصم */
+    .coupon-form {
+        margin: 1.5rem 0;
+    }
+    
+    .coupon-input-group {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .coupon-input {
+        flex: 1;
+        padding: 0.75rem 1rem;
+        border: 1px solid rgba(224, 224, 224, 0.5);
+        border-radius: var(--radius-md);
+        background: var(--pure-white);
+        color: var(--dark-gray);
+        font-size: 0.95rem;
+        font-weight: 300;
+        transition: all 0.2s ease;
+    }
+    
+    .coupon-input:focus {
+        outline: none;
+        border-color: var(--primary-pastel);
+        box-shadow: 0 0 0 3px rgba(255, 183, 197, 0.1);
+    }
+    
+    .coupon-btn {
+        padding: 0.75rem 1.5rem;
+        background: var(--primary-pastel);
+        border: none;
+        border-radius: var(--radius-md);
+        color: var(--dark-gray);
+        font-size: 0.95rem;
+        font-weight: 300;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .coupon-btn:hover {
+        background: rgba(255, 183, 197, 0.9);
+        transform: translateY(-1px);
+    }
+    
+    .coupon-message {
+        font-size: 0.85rem;
+        padding: 0.5rem;
+        border-radius: var(--radius-sm);
+        margin-top: 0.5rem;
+        text-align: center;
+    }
+    
+    .coupon-success {
+        background: rgba(181, 234, 215, 0.1);
+        color: var(--dark-gray);
+        border: 1px solid rgba(181, 234, 215, 0.3);
+    }
+    
+    .coupon-error {
+        background: rgba(255, 107, 107, 0.1);
+        color: #ff6b6b;
+        border: 1px solid rgba(255, 107, 107, 0.3);
+    }
+    
+    /* أزرار الإجراءات */
+    .cart-actions {
+        margin-top: 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .checkout-btn {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel));
+        border: none;
+        border-radius: var(--radius-md);
+        color: var(--dark-gray);
+        font-size: 1rem;
+        font-weight: 300;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+    
+    .checkout-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .checkout-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+    
+    .continue-shopping-btn {
+        width: 100%;
+        padding: 1rem;
+        background: transparent;
+        border: 1px solid rgba(224, 224, 224, 0.5);
+        border-radius: var(--radius-md);
+        color: var(--text-gray);
+        font-size: 1rem;
+        font-weight: 300;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+    
+    .continue-shopping-btn:hover {
+        border-color: var(--primary-pastel);
+        color: var(--dark-gray);
+        background: rgba(255, 183, 197, 0.05);
+    }
+    
+    /* السلة الفارغة */
+    .empty-cart {
+        text-align: center;
+        padding: 4rem 0;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+    
+    .empty-icon {
+        width: 120px;
+        height: 120px;
+        background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 2rem;
+        color: var(--pure-white);
+        font-size: 3rem;
+    }
+    
+    .empty-title {
+        font-size: 1.8rem;
+        font-weight: 200;
+        color: var(--dark-gray);
+        margin-bottom: 1rem;
+    }
+    
+    .empty-message {
+        color: var(--text-gray);
+        font-size: 1rem;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+        font-weight: 300;
+    }
+    
+    /* تحسينات للاستجابة */
+    @media (max-width: 992px) {
+        .cart-item {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            text-align: center;
+        }
+        
+        .item-image {
+            margin: 0 auto;
+        }
+        
+        .item-actions {
+            justify-content: center;
+        }
+        
+        .item-price {
+            text-align: center;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .cart-section {
+            padding-top: 7rem;
+        }
+        
+        .cart-title {
+            font-size: 1.7rem;
+        }
+        
+        .item-image {
+            width: 100px;
+            height: 100px;
+        }
+        
+        .cart-summary {
+            padding: 1.5rem;
+        }
+        
+        .coupon-input-group {
+            flex-direction: column;
+        }
+        
+        .coupon-btn {
+            width: 100%;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .cart-title {
+            font-size: 1.5rem;
+        }
+        
+        .item-actions {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .quantity-selector {
+            justify-content: center;
+        }
+        
+        .remove-btn {
+            justify-content: center;
+        }
+        
+        .cart-actions {
+            gap: 0.75rem;
+        }
+        
+        .checkout-btn,
+        .continue-shopping-btn {
+            padding: 0.875rem;
+            font-size: 0.95rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="cart-section fade-in">
+    <div class="container">
+        <div class="cart-container">
+            <div class="cart-header">
+                <h1 class="cart-title">سلة التسوق</h1>
+                <p class="cart-subtitle">راجع مشترياتك وتابع للدفع</p>
+            </div>
+            
+            {% if cart_items %}
+            <div class="row">
+                <!-- عناصر السلة -->
+                <div class="col-lg-8">
+                    <div class="cart-items">
+                        {% for item in cart_items %}
+                        <div class="cart-item fade-in" id="cart-item-{{ item.id }}" style="animation-delay: {{ forloop.counter0|add:'0.1' }}s;">
+                            <!-- صورة المنتج -->
+                            <div class="item-image">
+                                {% if item.product.image %}
+                                <img src="{{ item.product.image.url }}" 
+                                     alt="{{ item.product.name }}"
+                                     loading="lazy">
+                                {% elif item.product.images.first %}
+                                <!-- عرض أول صورة من الصور المتعددة إذا لم توجد صورة رئيسية -->
+                                <img src="{{ item.product.images.first.image.url }}" 
+                                     alt="{{ item.product.name }}"
+                                     loading="lazy">
+                                {% else %}
+                                <!-- عرض أيقونة إذا لم توجد صور -->
+                                <div class="no-image">
+                                    <i class="fas fa-gem"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- تفاصيل المنتج -->
+                            <div class="item-details">
+                                <h3 class="item-title">
+                                    {% if item.product.slug %}
+                                    <a href="{% url 'product_detail' item.product.slug %}">
+                                        {{ item.product.name }}
+                                    </a>
+                                    {% else %}
+                                    <span class="no-link">{{ item.product.name }}</span>
+                                    {% endif %}
+                                </h3>
+                                
+                                {% if item.product.category and item.product.category.slug %}
+                                <a href="{% url 'category_detail' item.product.category.slug %}" 
+                                   class="item-category">
+                                    {{ item.product.category.name }}
+                                </a>
+                                {% elif item.product.category %}
+                                <span class="item-category">
+                                    {{ item.product.category.name }}
+                                </span>
+                                {% endif %}
+                                
+                                <!-- المادة والنوع -->
+                                <div class="item-meta mb-2">
+                                    <small class="text-muted">
+                                        <i class="fas fa-gem me-1"></i> {{ item.product.get_material_display }}
+                                        <span class="mx-2">|</span>
+                                        <i class="fas fa-user me-1"></i> {{ item.product.get_gender_display }}
+                                    </small>
+                                </div>
+                                
+                                <div class="item-actions">
+                                    <!-- اختيار الكمية -->
+                                    <div class="quantity-selector">
+                                        <button type="button" class="quantity-btn decrease" 
+                                                onclick="TIVE.updateCartItem({{ item.id }}, -1)"
+                                                {% if item.quantity <= 1 %}disabled{% endif %}>
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <input type="number" 
+                                               id="quantity-{{ item.id }}" 
+                                               value="{{ item.quantity }}" 
+                                               min="1" 
+                                               max="{{ item.product.stock }}" 
+                                               class="quantity-input"
+                                               readonly>
+                                        <button type="button" class="quantity-btn increase" 
+                                                onclick="TIVE.updateCartItem({{ item.id }}, 1)"
+                                                {% if item.quantity >= item.product.stock %}disabled{% endif %}>
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- إزالة المنتج -->
+                                    <button type="button" class="remove-btn" 
+                                            onclick="TIVE.removeCartItem({{ item.id }})">
+                                        <i class="fas fa-trash-alt"></i>
+                                        <span>إزالة</span>
+                                    </button>
+                                    
+                                    <!-- إضافة للمفضلة -->
+                                    <button type="button" class="remove-btn" 
+                                            onclick="toggleWishlist({{ item.product.id }})">
+                                        <i class="far fa-heart"></i>
+                                        <span>حفظ للمفضلة</span>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- السعر -->
+                            <div class="item-price">
+                                <div class="current-price" id="price-{{ item.id }}" data-unit-price="{{ item.product.price }}">
+                                    {{ item.total_price }} ر.س
+                                </div>
+                                <div class="unit-price">
+                                    {{ item.product.price }} ر.س للقطعة
+                                </div>
+                                {% if item.product.weight %}
+                                <div class="unit-weight small text-muted">
+                                    الوزن: {{ item.product.weight }} جرام
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- توصية المنتجات -->
+                    {% if recommended_products %}
+                    <div class="recommended-products mt-5">
+                        <h3 class="h4 mb-4" style="font-weight: 300; color: var(--dark-gray);">
+                            <i class="fas fa-gift me-2"></i>
+                            قد يعجبك أيضاً
+                        </h3>
+                        <div class="row">
+                            {% for product in recommended_products|slice:":4" %}
+                            <div class="col-6 col-md-3 mb-4">
+                                <div class="product-card" style="height: 100%;">
+                                    <div class="product-image">
+                                        <a href="{% url 'product_detail' product.slug %}">
+                                            {% if product.image %}
+                                            <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                                            {% elif product.images.first %}
+                                            <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}">
+                                            {% else %}
+                                            <div style="width: 100%; height: 200px; background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel)); display: flex; align-items: center; justify-content: center; color: white;">
+                                                <i class="fas fa-gem fa-2x"></i>
+                                            </div>
+                                            {% endif %}
+                                        </a>
+                                    </div>
+                                    <div class="product-info">
+                                        <div class="product-category">{{ product.category.name|truncatechars:20 }}</div>
+                                        <h4 class="product-name">
+                                            <a href="{% url 'product_detail' product.slug %}">
+                                                {{ product.name|truncatechars:30 }}
+                                            </a>
+                                        </h4>
+                                        <div class="product-price">{{ product.price }} ر.س</div>
+                                        <div class="product-actions">
+                                            <form action="{% url 'cart_add' product.id %}" method="post" class="mt-2">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="quantity" value="1">
+                                                <button type="submit" class="btn btn-sm" 
+                                                        style="background: var(--primary-pastel); color: var(--dark-gray); padding: 0.4rem 0.8rem;">
+                                                    <i class="fas fa-cart-plus"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- ملخص الطلب -->
+                <div class="col-lg-4">
+                    <div class="cart-summary fade-in" style="animation-delay: 0.3s;">
+                        <h3 class="summary-title">ملخص الطلب</h3>
+                        
+                        <!-- المجموع الفرعي -->
+                        <div class="summary-item">
+                            <span class="summary-label">المجموع الفرعي</span>
+                            <span class="summary-value" id="subtotal">{{ cart.get_total_price|floatformat:2 }} ر.س</span>
+                        </div>
+                        
+                        <!-- التوصيل -->
+                        <div class="summary-item">
+                            <span class="summary-label">التوصيل</span>
+                            <span class="summary-value" id="shipping">
+                                {% if cart.get_total_price >= 500 %}
+                                مجاناً
+                                {% else %}
+                                50 ر.س
+                                {% endif %}
+                            </span>
+                        </div>
+                        
+                        <!-- الضريبة -->
+                        <div class="summary-item">
+                            <span class="summary-label">الضريبة (15%)</span>
+                            <span class="summary-value" id="tax">
+                                {{ cart.get_tax|floatformat:2 }} ر.س
+                            </span>
+                        </div>
+                        
+                        {% if cart.coupon %}
+                        <!-- الخصم -->
+                        <div class="summary-item">
+                            <span class="summary-label">الخصم</span>
+                            <span class="summary-value text-success" id="discount">
+                                -{{ cart.coupon.discount }}%
+                            </span>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- الفاصل -->
+                        <div class="summary-divider"></div>
+                        
+                        <!-- المجموع الكلي -->
+                        <div class="summary-total">
+                            <span class="total-label">المجموع الكلي</span>
+                            <span class="total-value" id="grand-total">
+                                {{ cart.get_grand_total|floatformat:2 }} ر.س
+                            </span>
+                        </div>
+                        
+                        <!-- كود الخصم -->
+                        <div class="coupon-form">
+                            <form method="post" action="{% url 'apply_coupon' %}" id="couponForm">
+                                {% csrf_token %}
+                                <div class="coupon-input-group">
+                                    <input type="text" 
+                                           name="code" 
+                                           class="coupon-input" 
+                                           placeholder="أدخل كود الخصم"
+                                           maxlength="20">
+                                    <button type="submit" class="coupon-btn">تطبيق</button>
+                                </div>
+                                <div id="couponMessage" class="coupon-message" style="display: none;"></div>
+                            </form>
+                        </div>
+                        
+                        <!-- أزرار الإجراءات -->
+                        <div class="cart-actions">
+                            <a href="{% url 'checkout' %}" class="checkout-btn" id="checkoutBtn">
+                                <i class="fas fa-lock me-2"></i>
+                                متابعة للدفع
+                            </a>
+                            
+                            <a href="{% url 'product_list' %}" class="continue-shopping-btn">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                مواصلة التسوق
+                            </a>
+                            
+                            <a href="{% url 'wishlist' %}" class="continue-shopping-btn">
+                                <i class="far fa-heart me-2"></i>
+                                عرض المفضلة
+                            </a>
+                        </div>
+                        
+                        <!-- معلومات إضافية -->
+                        <div class="mt-4 pt-3 border-top">
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <div style="color: var(--text-light);">
+                                        <i class="fas fa-shipping-fast fa-lg mb-2"></i>
+                                        <p class="small mb-0">شحن سريع</p>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div style="color: var(--text-light);">
+                                        <i class="fas fa-undo-alt fa-lg mb-2"></i>
+                                        <p class="small mb-0">إرجاع مجاني</p>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div style="color: var(--text-light);">
+                                        <i class="fas fa-shield-alt fa-lg mb-2"></i>
+                                        <p class="small mb-0">دفع آمن</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <!-- حالة السلة الفارغة -->
+            <div class="empty-cart fade-in">
+                <div class="empty-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <h2 class="empty-title">سلة التسوق فارغة</h2>
+                <p class="empty-message">
+                    لم تقم بإضافة أي منتجات إلى سلة التسوق بعد. ابدأ بالتسوق الآن لاكتشاف مجموعتنا الفاخرة من المجوهرات.
+                </p>
+                <div class="cart-actions" style="max-width: 300px; margin: 0 auto;">
+                    <a href="{% url 'product_list' %}" class="checkout-btn">
+                        <i class="fas fa-gem me-2"></i>
+                        تصفح المنتجات
+                    </a>
+                    <a href="{% url 'category_list' %}" class="continue-shopping-btn">
+                        <i class="fas fa-th-large me-2"></i>
+                        تصفح الفئات
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // تفعيل نموذج كود الخصم
+    document.getElementById('couponForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const couponInput = this.querySelector('input[name="code"]');
+        const messageDiv = document.getElementById('couponMessage');
+        
+        fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                messageDiv.textContent = data.message;
+                messageDiv.className = 'coupon-message coupon-success';
+                messageDiv.style.display = 'block';
+                
+                // تحديث الأسعار
+                if (data.cart_total) {
+                    document.getElementById('subtotal').textContent = `${data.cart_total} ر.س`;
+                    updateGrandTotal();
+                }
+                
+                // إخفاء الرسالة بعد 5 ثواني
+                setTimeout(() => {
+                    messageDiv.style.display = 'none';
+                }, 5000);
+            } else {
+                messageDiv.textContent = data.message;
+                messageDiv.className = 'coupon-message coupon-error';
+                messageDiv.style.display = 'block';
+                
+                // إخفاء الرسالة بعد 3 ثواني
+                setTimeout(() => {
+                    messageDiv.style.display = 'none';
+                }, 3000);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            messageDiv.textContent = 'حدث خطأ أثناء تطبيق الكود';
+            messageDiv.className = 'coupon-message coupon-error';
+            messageDiv.style.display = 'block';
+        });
+    });
+    
+    // تحديث المجموع الكلي
+    function updateGrandTotal() {
+        const subtotal = parseFloat(document.getElementById('subtotal').textContent) || 0;
+        const shipping = document.getElementById('shipping').textContent === 'مجاناً' ? 0 : 50;
+        const tax = subtotal * 0.15;
+        
+        const grandTotal = subtotal + shipping + tax;
+        document.getElementById('grand-total').textContent = `${grandTotal.toFixed(2)} ر.س`;
+        
+        // تحديث الضريبة
+        document.getElementById('tax').textContent = `${tax.toFixed(2)} ر.س`;
+    }
+    
+    // تفعيل أزرار الكمية
+    document.querySelectorAll('.quantity-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const input = this.closest('.quantity-selector').querySelector('.quantity-input');
+            if (!input) return;
+            
+            let value = parseInt(input.value) || 0;
+            const min = parseInt(input.min) || 1;
+            const max = parseInt(input.max) || 99;
+            
+            if (this.classList.contains('decrease')) {
+                if (value > min) {
+                    input.value = value - 1;
+                    updateItemPrice(input);
+                }
+            } else if (this.classList.contains('increase')) {
+                if (value < max) {
+                    input.value = value + 1;
+                    updateItemPrice(input);
+                }
+            }
+            
+            // تفعيل/تعطيل الأزرار
+            updateQuantityButtons(input);
+        });
+    });
+    
+    // تحديث سعر العنصر
+    function updateItemPrice(input) {
+        const itemId = input.id.split('-')[1];
+        const unitPrice = parseFloat(document.querySelector(`#price-${itemId}`).dataset.unitPrice);
+        const quantity = parseInt(input.value);
+        const totalPrice = unitPrice * quantity;
+        
+        document.querySelector(`#price-${itemId}`).textContent = `${totalPrice.toFixed(2)} ر.س`;
+        updateCartTotals();
+    }
+    
+    // تحديث أزرار الكمية
+    function updateQuantityButtons(input) {
+        const value = parseInt(input.value) || 0;
+        const min = parseInt(input.min) || 1;
+        const max = parseInt(input.max) || 99;
+        const selector = input.closest('.quantity-selector');
+        
+        if (selector) {
+            const decreaseBtn = selector.querySelector('.decrease');
+            const increaseBtn = selector.querySelector('.increase');
+            
+            if (decreaseBtn) {
+                decreaseBtn.disabled = value <= min;
+            }
+            if (increaseBtn) {
+                increaseBtn.disabled = value >= max;
+            }
+        }
+    }
+    
+    // تحديث إجماليات السلة
+    function updateCartTotals() {
+        let subtotal = 0;
+        
+        document.querySelectorAll('.current-price').forEach(priceEl => {
+            const priceText = priceEl.textContent.replace(' ر.س', '').trim();
+            const price = parseFloat(priceText) || 0;
+            subtotal += price;
+        });
+        
+        document.getElementById('subtotal').textContent = `${subtotal.toFixed(2)} ر.س`;
+        updateGrandTotal();
+    }
+    
+    // إضافة/إزالة من المفضلة
+    function toggleWishlist(productId) {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+        
+        if (!csrfToken) {
+            TIVE.showMessage('يرجى تسجيل الدخول أولاً', 'warning');
+            return;
+        }
+        
+        fetch(`/wishlist/toggle/${productId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.added) {
+                TIVE.showMessage('تمت الإضافة إلى المفضلة', 'success');
+            } else {
+                TIVE.showMessage('تمت الإزالة من المفضلة', 'info');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            TIVE.showMessage('حدث خطأ', 'error');
+        });
+    }
+    
+    // تهيئة الأزرار عند التحميل
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.quantity-input').forEach(input => {
+            updateQuantityButtons(input);
+        });
+        
+        // إضافة بيانات سعر الوحدة
+        document.querySelectorAll('.current-price').forEach(priceEl => {
+            const priceText = priceEl.textContent.replace(' ر.س', '').trim();
+            const itemId = priceEl.id.split('-')[1];
+            const quantity = parseInt(document.getElementById(`quantity-${itemId}`)?.value || 1);
+            const unitPrice = parseFloat(priceText) / quantity;
+            priceEl.dataset.unitPrice = unitPrice.toFixed(2);
+        });
+    });
+</script>
+{% endblock %}

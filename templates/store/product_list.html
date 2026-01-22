@@ -1,0 +1,1231 @@
+<!-- dashboard/products.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}إدارة المنتجات - TIVE Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-section {
+        padding-top: 8rem;
+        padding-bottom: 6rem;
+        background-color: var(--off-white);
+        min-height: 100vh;
+    }
+    
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+    
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 2rem;
+    }
+    
+    .dashboard-sidebar {
+        background: var(--pure-white);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        border: 1px solid rgba(240, 240, 240, 0.8);
+        height: fit-content;
+        position: sticky;
+        top: 100px;
+    }
+    
+    .user-card {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid rgba(240, 240, 240, 0.8);
+    }
+    
+    .user-avatar {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        color: var(--pure-white);
+        font-size: 2rem;
+    }
+    
+    .user-name {
+        font-weight: 300;
+        margin-bottom: 0.25rem;
+    }
+    
+    .user-role {
+        color: var(--text-light);
+        font-size: 0.85rem;
+        padding: 0.25rem 0.75rem;
+        background: var(--off-white);
+        border-radius: var(--radius-round);
+        display: inline-block;
+    }
+    
+    .dashboard-menu {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .menu-item {
+        margin-bottom: 0.5rem;
+    }
+    
+    .menu-link {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.875rem 1rem;
+        color: var(--text-gray);
+        text-decoration: none;
+        border-radius: var(--radius-md);
+        transition: all 0.2s ease;
+        font-weight: 300;
+    }
+    
+    .menu-link:hover {
+        background: rgba(255, 183, 197, 0.1);
+        color: var(--dark-gray);
+    }
+    
+    .menu-link.active {
+        background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel));
+        color: var(--dark-gray);
+    }
+    
+    .menu-link i {
+        width: 20px;
+        text-align: center;
+    }
+    
+    .badge {
+        margin-right: auto;
+        background: var(--off-white);
+        color: var(--text-gray);
+        padding: 0.25rem 0.5rem;
+        border-radius: var(--radius-round);
+        font-size: 0.8rem;
+        font-weight: 300;
+    }
+    
+    .dashboard-content {
+        background: var(--pure-white);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        border: 1px solid rgba(240, 240, 240, 0.8);
+    }
+    
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid rgba(240, 240, 240, 0.8);
+    }
+    
+    .dashboard-title {
+        font-size: 1.8rem;
+        font-weight: 200;
+        color: var(--dark-gray);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .dashboard-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+    
+    .action-btn {
+        padding: 0.75rem 1.5rem;
+        border: 1px solid rgba(224, 224, 224, 0.5);
+        border-radius: var(--radius-md);
+        background: transparent;
+        color: var(--text-gray);
+        font-weight: 300;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .action-btn.primary {
+        background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel));
+        border-color: transparent;
+        color: var(--dark-gray);
+    }
+    
+    .action-btn:hover {
+        border-color: var(--primary-pastel);
+        color: var(--dark-gray);
+        transform: translateY(-1px);
+    }
+    
+    .action-btn.primary:hover {
+        box-shadow: 0 4px 12px rgba(255, 183, 197, 0.2);
+    }
+    
+    .filters-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: var(--off-white);
+        border-radius: var(--radius-lg);
+        border: 1px solid rgba(240, 240, 240, 0.8);
+    }
+    
+    .search-box {
+        flex: 1;
+        max-width: 400px;
+        position: relative;
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 3rem;
+        border: 1px solid rgba(224, 224, 224, 0.5);
+        border-radius: var(--radius-md);
+        background: var(--pure-white);
+        color: var(--dark-gray);
+        font-weight: 300;
+    }
+    
+    .search-icon {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-light);
+    }
+    
+    .filter-options {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+    
+    .filter-select {
+        padding: 0.75rem 1rem;
+        border: 1px solid rgba(224, 224, 224, 0.5);
+        border-radius: var(--radius-md);
+        background: var(--pure-white);
+        color: var(--text-gray);
+        font-weight: 300;
+        min-width: 150px;
+    }
+    
+    .products-table-container {
+        overflow-x: auto;
+        border-radius: var(--radius-md);
+        border: 1px solid rgba(240, 240, 240, 0.8);
+    }
+    
+    .products-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 1000px;
+    }
+    
+    .products-table thead {
+        background: var(--off-white);
+    }
+    
+    .products-table th {
+        padding: 1.25rem 1rem;
+        text-align: right;
+        font-weight: 300;
+        color: var(--text-gray);
+        border-bottom: 2px solid rgba(240, 240, 240, 0.8);
+        white-space: nowrap;
+    }
+    
+    .products-table td {
+        padding: 1.25rem 1rem;
+        border-bottom: 1px solid rgba(240, 240, 240, 0.8);
+        font-weight: 300;
+    }
+    
+    .product-cell {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .product-image {
+        width: 60px;
+        height: 60px;
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        background: var(--off-white);
+        flex-shrink: 0;
+    }
+    
+    .product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .product-info h4 {
+        font-weight: 300;
+        margin-bottom: 0.25rem;
+        font-size: 0.95rem;
+    }
+    
+    .product-info .category {
+        color: var(--text-light);
+        font-size: 0.85rem;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 0.4rem 0.8rem;
+        border-radius: var(--radius-round);
+        font-size: 0.85rem;
+        font-weight: 300;
+    }
+    
+    .status-active {
+        background: rgba(76, 175, 80, 0.1);
+        color: #4caf50;
+    }
+    
+    .status-inactive {
+        background: rgba(158, 158, 158, 0.1);
+        color: #9e9e9e;
+    }
+    
+    .status-low-stock {
+        background: rgba(255, 152, 0, 0.1);
+        color: #ff9800;
+    }
+    
+    .status-out-of-stock {
+        background: rgba(244, 67, 54, 0.1);
+        color: #f44336;
+    }
+    
+    .table-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .table-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: var(--radius-round);
+        border: 1px solid rgba(224, 224, 224, 0.5);
+        background: transparent;
+        color: var(--text-gray);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .table-btn:hover {
+        border-color: var(--primary-pastel);
+        color: var(--dark-gray);
+    }
+    
+    .table-btn.edit:hover {
+        background: rgba(33, 150, 243, 0.1);
+        border-color: #2196f3;
+        color: #2196f3;
+    }
+    
+    .table-btn.delete:hover {
+        background: rgba(244, 67, 54, 0.1);
+        border-color: #f44336;
+        color: #f44336;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(240, 240, 240, 0.8);
+    }
+    
+    .page-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: var(--radius-round);
+        border: 1px solid rgba(224, 224, 224, 0.5);
+        background: transparent;
+        color: var(--text-gray);
+        font-weight: 300;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .page-btn:hover,
+    .page-btn.active {
+        background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel));
+        border-color: transparent;
+        color: var(--dark-gray);
+    }
+    
+    .page-btn.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .stats-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: var(--off-white);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        border: 1px solid rgba(240, 240, 240, 0.8);
+        text-align: center;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 200;
+        color: var(--dark-gray);
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        color: var(--text-light);
+        font-size: 0.9rem;
+    }
+    
+    .bulk-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: var(--off-white);
+        border-radius: var(--radius-md);
+        border: 1px solid rgba(240, 240, 240, 0.8);
+    }
+    
+    .select-all {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-gray);
+        font-weight: 300;
+    }
+    
+    .bulk-select {
+        padding: 0.5rem 1rem;
+        border: 1px solid rgba(224, 224, 224, 0.5);
+        border-radius: var(--radius-md);
+        background: var(--pure-white);
+        color: var(--text-gray);
+        min-width: 150px;
+    }
+    
+    .bulk-apply-btn {
+        padding: 0.5rem 1rem;
+        background: transparent;
+        border: 1px solid rgba(224, 224, 224, 0.5);
+        border-radius: var(--radius-md);
+        color: var(--text-gray);
+        font-weight: 300;
+        cursor: pointer;
+    }
+    
+    .bulk-apply-btn:hover {
+        border-color: var(--primary-pastel);
+        color: var(--dark-gray);
+    }
+    
+    @media (max-width: 1200px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .dashboard-sidebar {
+            position: static;
+        }
+        
+        .filters-bar {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: stretch;
+        }
+        
+        .search-box {
+            max-width: 100%;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .dashboard-section {
+            padding-top: 7rem;
+        }
+        
+        .dashboard-content {
+            padding: 1.5rem;
+        }
+        
+        .dashboard-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: stretch;
+        }
+        
+        .dashboard-actions {
+            justify-content: center;
+        }
+        
+        .filter-options {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .stats-cards {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="dashboard-section fade-in">
+    <div class="container">
+        <div class="dashboard-container">
+            <div class="dashboard-grid">
+                <!-- الشريط الجانبي -->
+                <div class="dashboard-sidebar">
+                    <!-- معلومات المستخدم -->
+                    <div class="user-card">
+                        <div class="user-avatar">
+                            {{ user.get_full_name|default:user.username|slice:":1"|upper }}
+                        </div>
+                        <h3 class="user-name">{{ user.get_full_name|default:user.username }}</h3>
+                        <span class="user-role">
+                            <i class="fas fa-user-shield me-1"></i>
+                            {% if user.is_superuser %}مدير نظام{% else %}مسؤول المنتجات{% endif %}
+                        </span>
+                    </div>
+                    
+                    <!-- قائمة التنقل -->
+                    <ul class="dashboard-menu">
+                        <li class="menu-item">
+                            <a href="{% url 'dashboard' %}" class="menu-link">
+                                <i class="fas fa-tachometer-alt"></i>
+                                <span>لوحة التحكم</span>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{% url 'product_management' %}" class="menu-link active">
+                                <i class="fas fa-gem"></i>
+                                <span>المنتجات</span>
+                                <span class="badge">{{ products.paginator.count }}</span>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{% url 'order_management' %}" class="menu-link">
+                                <i class="fas fa-shopping-bag"></i>
+                                <span>الطلبات</span>
+                                <span class="badge">{{ stats.total_orders }}</span>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{% url 'user_management' %}" class="menu-link">
+                                <i class="fas fa-users"></i>
+                                <span>المستخدمين</span>
+                                <span class="badge">{{ stats.total_users }}</span>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{% url 'reports' %}" class="menu-link">
+                                <i class="fas fa-chart-bar"></i>
+                                <span>التقارير</span>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{% url 'category_management' %}" class="menu-link">
+                                <i class="fas fa-tags"></i>
+                                <span>الفئات</span>
+                                <span class="badge">{{ stats.total_categories }}</span>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{% url 'home' %}" class="menu-link">
+                                <i class="fas fa-store"></i>
+                                <span>العودة للمتجر</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- المحتوى الرئيسي -->
+                <div class="dashboard-content">
+                    <!-- رأس الصفحة -->
+                    <div class="dashboard-header">
+                        <h1 class="dashboard-title">
+                            <i class="fas fa-gem"></i>
+                            إدارة المنتجات
+                        </h1>
+                        
+                        <div class="dashboard-actions">
+                            <button class="action-btn" onclick="exportProducts()">
+                                <i class="fas fa-file-export"></i>
+                                تصدير
+                            </button>
+                            <button class="action-btn" onclick="importProducts()">
+                                <i class="fas fa-file-import"></i>
+                                استيراد
+                            </button>
+                            <a href="{% url 'product_add' %}" class="action-btn primary">
+                                <i class="fas fa-plus"></i>
+                                إضافة منتج جديد
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- الإحصائيات السريعة -->
+                    <div class="stats-cards">
+                        <div class="stat-card">
+                            <div class="stat-value">{{ stats.total_products }}</div>
+                            <div class="stat-label">إجمالي المنتجات</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">{{ stats.active_products }}</div>
+                            <div class="stat-label">منتجات نشطة</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">{{ stats.low_stock }}</div>
+                            <div class="stat-label">منخفضة المخزون</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">{{ stats.out_of_stock }}</div>
+                            <div class="stat-label">نفذت من المخزون</div>
+                        </div>
+                    </div>
+                    
+                    <!-- شريط الفلاتر -->
+                    <div class="filters-bar">
+                        <!-- البحث -->
+                        <div class="search-box">
+                            <input type="text" 
+                                   class="search-input" 
+                                   placeholder="بحث في المنتجات..."
+                                   id="productSearch"
+                                   onkeyup="searchProducts()">
+                            <i class="fas fa-search search-icon"></i>
+                        </div>
+                        
+                        <!-- خيارات التصفية -->
+                        <div class="filter-options">
+                            <select class="filter-select" id="categoryFilter" onchange="filterProducts()">
+                                <option value="">جميع الفئات</option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                            
+                            <select class="filter-select" id="statusFilter" onchange="filterProducts()">
+                                <option value="">جميع الحالات</option>
+                                <option value="active">نشط</option>
+                                <option value="inactive">غير نشط</option>
+                                <option value="low_stock">منخفض المخزون</option>
+                                <option value="out_of_stock">نفذ من المخزون</option>
+                            </select>
+                            
+                            <select class="filter-select" id="sortBy" onchange="sortProducts()">
+                                <option value="newest">الأحدث أولاً</option>
+                                <option value="oldest">الأقدم أولاً</option>
+                                <option value="price_high">السعر: من الأعلى</option>
+                                <option value="price_low">السعر: من الأقل</option>
+                                <option value="stock_low">المخزون: من الأقل</option>
+                                <option value="name_asc">الاسم: أ-ي</option>
+                                <option value="name_desc">الاسم: ي-أ</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- إجراءات جماعية -->
+                    <div class="bulk-actions">
+                        <label class="select-all">
+                            <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                            <span>تحديد الكل</span>
+                        </label>
+                        
+                        <select class="bulk-select" id="bulkAction">
+                            <option value="">إجراء جماعي...</option>
+                            <option value="activate">تفعيل</option>
+                            <option value="deactivate">تعطيل</option>
+                            <option value="low_stock">تعيين كمنخفض المخزون</option>
+                            <option value="delete">حذف</option>
+                            <option value="duplicate">تكرار</option>
+                        </select>
+                        
+                        <button class="bulk-apply-btn" onclick="applyBulkAction()">
+                            تطبيق
+                        </button>
+                    </div>
+                    
+                    <!-- جدول المنتجات -->
+                    <div class="products-table-container">
+                        <table class="products-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;">
+                                        <input type="checkbox" id="selectAllHeader" onchange="toggleHeaderSelectAll()">
+                                    </th>
+                                    <th>المنتج</th>
+                                    <th>الفئة</th>
+                                    <th>السعر</th>
+                                    <th>المخزون</th>
+                                    <th>الحالة</th>
+                                    <th>تاريخ الإضافة</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productsTableBody">
+                                {% for product in products %}
+                                <tr class="product-row" data-id="{{ product.id }}" 
+                                    data-category="{{ product.category.id }}"
+                                    data-status="{{ product.status }}"
+                                    data-stock="{{ product.stock }}">
+                                    <td>
+                                        <input type="checkbox" class="product-checkbox" value="{{ product.id }}">
+                                    </td>
+                                    <td>
+                                        <div class="product-cell">
+                                            <div class="product-image">
+                                                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                                            </div>
+                                            <div class="product-info">
+                                                <h4>{{ product.name|truncatechars:40 }}</h4>
+                                                <div class="category">{{ product.category.name }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ product.category.name }}</td>
+                                    <td>{{ product.price }} ر.س</td>
+                                    <td>
+                                        {% if product.stock <= 0 %}
+                                        <span style="color: #f44336;">0</span>
+                                        {% elif product.stock <= 10 %}
+                                        <span style="color: #ff9800;">{{ product.stock }}</span>
+                                        {% else %}
+                                        {{ product.stock }}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if product.stock <= 0 %}
+                                        <span class="status-badge status-out-of-stock">نفذ من المخزون</span>
+                                        {% elif product.stock <= 10 %}
+                                        <span class="status-badge status-low-stock">منخفض المخزون</span>
+                                        {% elif product.is_active %}
+                                        <span class="status-badge status-active">نشط</span>
+                                        {% else %}
+                                        <span class="status-badge status-inactive">غير نشط</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ product.created_at|date:"Y/m/d" }}</td>
+                                    <td>
+                                        <div class="table-actions">
+                                            <button class="table-btn edit" title="تعديل" 
+                                                    onclick="editProduct({{ product.id }})">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="table-btn" title="عرض"
+                                                    onclick="viewProduct({{ product.id }})">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="table-btn" title="تكرار"
+                                                    onclick="duplicateProduct({{ product.id }})">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                            <button class="table-btn delete" title="حذف"
+                                                    onclick="deleteProduct({{ product.id }})">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8" style="text-align: center; padding: 3rem; color: var(--text-light);">
+                                        <i class="fas fa-gem fa-2x mb-3"></i>
+                                        <p>لا توجد منتجات</p>
+                                        <a href="{% url 'product_add' %}" class="action-btn" 
+                                           style="display: inline-flex; margin-top: 1rem;">
+                                            <i class="fas fa-plus me-2"></i>
+                                            إضافة منتج جديد
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- الترقيم الصفحي -->
+                    {% if products.has_other_pages %}
+                    <div class="pagination">
+                        {% if products.has_previous %}
+                        <button class="page-btn" onclick="changePage({{ products.previous_page_number }})">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        {% else %}
+                        <button class="page-btn disabled">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        {% endif %}
+                        
+                        {% for num in products.paginator.page_range %}
+                            {% if products.number == num %}
+                            <button class="page-btn active">{{ num }}</button>
+                            {% elif num > products.number|add:-3 and num < products.number|add:3 %}
+                            <button class="page-btn" onclick="changePage({{ num }})">{{ num }}</button>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if products.has_next %}
+                        <button class="page-btn" onclick="changePage({{ products.next_page_number }})">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        {% else %}
+                        <button class="page-btn disabled">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal حذف المنتج -->
+<div id="deleteModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+     background: rgba(0, 0, 0, 0.5); z-index: 2000; align-items: center; justify-content: center;">
+    <div style="background: var(--pure-white); border-radius: var(--radius-lg); padding: 2rem; 
+                max-width: 400px; width: 90%;">
+        <h3 style="font-weight: 300; margin-bottom: 1rem; color: var(--dark-gray);">تأكيد الحذف</h3>
+        <p style="color: var(--text-gray); margin-bottom: 2rem;">هل أنت متأكد من حذف هذا المنتج؟ هذا الإجراء لا يمكن التراجع عنه.</p>
+        <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+            <button onclick="closeModal()" class="action-btn">إلغاء</button>
+            <button onclick="confirmDelete()" class="action-btn" style="background: #f44336; color: white; border-color: #f44336;">
+                حذف
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let selectedProductId = null;
+    let selectedProducts = new Set();
+    
+    // البحث في المنتجات
+    function searchProducts() {
+        const searchTerm = document.getElementById('productSearch').value.toLowerCase();
+        const rows = document.querySelectorAll('.product-row');
+        
+        rows.forEach(row => {
+            const productName = row.querySelector('.product-info h4').textContent.toLowerCase();
+            const productCategory = row.querySelector('.product-info .category').textContent.toLowerCase();
+            
+            if (productName.includes(searchTerm) || productCategory.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+    
+    // تصفية المنتجات
+    function filterProducts() {
+        const categoryFilter = document.getElementById('categoryFilter').value;
+        const statusFilter = document.getElementById('statusFilter').value;
+        const rows = document.querySelectorAll('.product-row');
+        
+        rows.forEach(row => {
+            const category = row.dataset.category;
+            const status = row.dataset.status;
+            const stock = parseInt(row.dataset.stock);
+            
+            let showRow = true;
+            
+            // تصفية حسب الفئة
+            if (categoryFilter && category !== categoryFilter) {
+                showRow = false;
+            }
+            
+            // تصفية حسب الحالة
+            if (statusFilter) {
+                if (statusFilter === 'active' && status !== 'active') {
+                    showRow = false;
+                } else if (statusFilter === 'inactive' && status === 'active') {
+                    showRow = false;
+                } else if (statusFilter === 'low_stock' && stock > 10) {
+                    showRow = false;
+                } else if (statusFilter === 'out_of_stock' && stock > 0) {
+                    showRow = false;
+                }
+            }
+            
+            row.style.display = showRow ? '' : 'none';
+        });
+    }
+    
+    // ترتيب المنتجات
+    function sortProducts() {
+        const sortBy = document.getElementById('sortBy').value;
+        const rows = Array.from(document.querySelectorAll('.product-row'));
+        const tbody = document.getElementById('productsTableBody');
+        
+        rows.sort((a, b) => {
+            switch (sortBy) {
+                case 'newest':
+                    return new Date(b.dataset.created) - new Date(a.dataset.created);
+                case 'oldest':
+                    return new Date(a.dataset.created) - new Date(b.dataset.created);
+                case 'price_high':
+                    return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
+                case 'price_low':
+                    return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+                case 'stock_low':
+                    return parseInt(a.dataset.stock) - parseInt(b.dataset.stock);
+                case 'name_asc':
+                    return a.querySelector('.product-info h4').textContent.localeCompare(
+                        b.querySelector('.product-info h4').textContent);
+                case 'name_desc':
+                    return b.querySelector('.product-info h4').textContent.localeCompare(
+                        a.querySelector('.product-info h4').textContent);
+                default:
+                    return 0;
+            }
+        });
+        
+        // إعادة ترتيب الصفوف
+        rows.forEach(row => tbody.appendChild(row));
+    }
+    
+    // تحديد الكل
+    function toggleSelectAll() {
+        const selectAll = document.getElementById('selectAll');
+        const checkboxes = document.querySelectorAll('.product-checkbox');
+        
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = selectAll.checked;
+            if (selectAll.checked) {
+                selectedProducts.add(checkbox.value);
+            } else {
+                selectedProducts.delete(checkbox.value);
+            }
+        });
+    }
+    
+    // تحديد الكل من الهيدر
+    function toggleHeaderSelectAll() {
+        const headerCheckbox = document.getElementById('selectAllHeader');
+        const mainCheckbox = document.getElementById('selectAll');
+        const checkboxes = document.querySelectorAll('.product-checkbox');
+        
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = headerCheckbox.checked;
+            if (headerCheckbox.checked) {
+                selectedProducts.add(checkbox.value);
+            } else {
+                selectedProducts.delete(checkbox.value);
+            }
+        });
+        
+        mainCheckbox.checked = headerCheckbox.checked;
+    }
+    
+    // تحديث مجموعة المنتجات المختارة
+    document.querySelectorAll('.product-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            if (this.checked) {
+                selectedProducts.add(this.value);
+            } else {
+                selectedProducts.delete(this.value);
+            }
+            
+            // تحديث حالة تحديد الكل
+            const allChecked = document.querySelectorAll('.product-checkbox').length === 
+                              document.querySelectorAll('.product-checkbox:checked').length;
+            document.getElementById('selectAll').checked = allChecked;
+            document.getElementById('selectAllHeader').checked = allChecked;
+        });
+    });
+    
+    // تطبيق الإجراء الجماعي
+    function applyBulkAction() {
+        const action = document.getElementById('bulkAction').value;
+        
+        if (!action) {
+            TIVE.showMessage('يرجى اختيار إجراء', 'warning');
+            return;
+        }
+        
+        if (selectedProducts.size === 0) {
+            TIVE.showMessage('يرجى اختيار منتج واحد على الأقل', 'warning');
+            return;
+        }
+        
+        const productIds = Array.from(selectedProducts);
+        
+        switch (action) {
+            case 'activate':
+                updateProductsStatus(productIds, 'active');
+                break;
+            case 'deactivate':
+                updateProductsStatus(productIds, 'inactive');
+                break;
+            case 'low_stock':
+                updateProductsStockStatus(productIds, 'low_stock');
+                break;
+            case 'delete':
+                bulkDeleteProducts(productIds);
+                break;
+            case 'duplicate':
+                duplicateProducts(productIds);
+                break;
+        }
+    }
+    
+    // تحديث حالة المنتجات
+    function updateProductsStatus(productIds, status) {
+        fetch('/api/products/bulk-update/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                product_ids: productIds,
+                action: 'update_status',
+                status: status
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                TIVE.showMessage(`تم تحديث ${data.updated} منتج`, 'success');
+                setTimeout(() => location.reload(), 1500);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            TIVE.showMessage('حدث خطأ أثناء التحديث', 'error');
+        });
+    }
+    
+    // حذف جماعي للمنتجات
+    function bulkDeleteProducts(productIds) {
+        if (!confirm(`هل أنت متأكد من حذف ${productIds.length} منتج؟`)) return;
+        
+        fetch('/api/products/bulk-delete/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ product_ids: productIds })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                TIVE.showMessage(`تم حذف ${data.deleted} منتج`, 'success');
+                setTimeout(() => location.reload(), 1500);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            TIVE.showMessage('حدث خطأ أثناء الحذف', 'error');
+        });
+    }
+    
+    // تكرار المنتجات
+    function duplicateProducts(productIds) {
+        fetch('/api/products/bulk-duplicate/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ product_ids: productIds })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                TIVE.showMessage(`تم تكرار ${data.duplicated} منتج`, 'success');
+                setTimeout(() => location.reload(), 1500);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            TIVE.showMessage('حدث خطأ أثناء التكرار', 'error');
+        });
+    }
+    
+    // تغيير الصفحة
+    function changePage(page) {
+        window.location.href = `?page=${page}`;
+    }
+    
+    // عرض المنتج
+    function viewProduct(id) {
+        window.open(`/products/${id}/`, '_blank');
+    }
+    
+    // تعديل المنتج
+    function editProduct(id) {
+        window.location.href = `/dashboard/products/${id}/edit/`;
+    }
+    
+    // تكرار منتج واحد
+    function duplicateProduct(id) {
+        fetch(`/api/products/${id}/duplicate/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                TIVE.showMessage('تم تكرار المنتج بنجاح', 'success');
+                setTimeout(() => location.reload(), 1500);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            TIVE.showMessage('حدث خطأ أثناء التكرار', 'error');
+        });
+    }
+    
+    // حذف منتج
+    function deleteProduct(id) {
+        selectedProductId = id;
+        document.getElementById('deleteModal').style.display = 'flex';
+    }
+    
+    // إغلاق Modal
+    function closeModal() {
+        document.getElementById('deleteModal').style.display = 'none';
+        selectedProductId = null;
+    }
+    
+    // تأكيد الحذف
+    function confirmDelete() {
+        fetch(`/api/products/${selectedProductId}/delete/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                TIVE.showMessage('تم حذف المنتج بنجاح', 'success');
+                setTimeout(() => location.reload(), 1500);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            TIVE.showMessage('حدث خطأ أثناء الحذف', 'error');
+        });
+        
+        closeModal();
+    }
+    
+    // تصدير المنتجات
+    function exportProducts() {
+        const format = prompt('اختر صيغة التصدير: (csv, excel, json)', 'excel');
+        
+        if (format) {
+            window.open(`/api/products/export/?format=${format}`, '_blank');
+        }
+    }
+    
+    // استيراد المنتجات
+    function importProducts() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.csv,.xlsx,.json';
+        
+        input.onchange = function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            fetch('/api/products/import/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    TIVE.showMessage(`تم استيراد ${data.imported} منتج بنجاح`, 'success');
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    TIVE.showMessage(data.message || 'حدث خطأ أثناء الاستيراد', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                TIVE.showMessage('حدث خطأ أثناء الاستيراد', 'error');
+            });
+        };
+        
+        input.click();
+    }
+    
+    // إغلاق Modal عند النقر خارجها
+    document.getElementById('deleteModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    });
+    
+    // تهيئة بيانات المنتجات للترتيب
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.product-row').forEach(row => {
+            const priceText = row.querySelector('td:nth-child(4)').textContent;
+            const price = parseFloat(priceText) || 0;
+            const createdText = row.querySelector('td:nth-child(7)').textContent;
+            
+            row.dataset.price = price;
+            row.dataset.created = createdText;
+        });
+    });
+</script>
+{% endblock %}
