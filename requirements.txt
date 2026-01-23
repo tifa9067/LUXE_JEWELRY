@@ -2,3 +2,5 @@ Django==5.1
 gunicorn
 whitenoise
 Pillow
+cloudinary
+django-cloudinary-storage
